@@ -61,9 +61,16 @@ class BitBoard {
     fun bitwiseOR(other:BitBoard){
         this.board = this.board or other.board
     }
+    fun bitwiseOR(other:ULong){
+        this.board = this.board or other
+    }
 
     fun bitwiseAnd(other:BitBoard){
         this.board = this.board and other.board
+    }
+
+    fun bitwiseAnd(other:ULong){
+        this.board = this.board and other
     }
 
 }
