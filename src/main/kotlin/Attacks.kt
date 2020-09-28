@@ -80,11 +80,14 @@ object Attacks {
      */
     val NOT_A_OR_B_FILE: BitBoard = BitBoard(18229723555195321596UL)
 
-    //pawns attack table[color][square]
+    /**pawns attack table [ color ] [ square ]*/
     var pawnAttacks : Array<Array<BitBoard>> = Array(2) { Array(64) { BitBoard(0UL)} }
 
-    //pawns attack table[color][square]
+    /**Knight attack table [ square ]*/
     var knightAttacks : Array<BitBoard> = Array(64) { BitBoard(0UL)}
+
+    /**King attack table [ square ]*/
+    var kingAttacks : Array<BitBoard> = Array(64) { BitBoard(0UL)}
 
 
     /**
@@ -160,6 +163,41 @@ object Attacks {
         return attacks
     }
 
+    fun maskKingAttacks(square: Square): BitBoard {
+        var board : BitBoard = BitBoard(0UL)
+
+        var attacks : BitBoard = BitBoard(0UL)
+        //putting pawn in square
+        board.setBitOn(square = square)
+
+        if ((board.board shr 8) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shr 8))
+        }
+        if (((board.board shr 9) and NOT_H_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shr 9))
+        }
+        if (((board.board shr 7) and NOT_A_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shr 7))
+        }
+        if (((board.board shr 1) and NOT_H_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shr 1))
+        }
+        if ((board.board shl 8) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shl 8))
+        }
+        if (((board.board shl 9) and NOT_A_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shl 9))
+        }
+        if (((board.board shl 7) and  NOT_H_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shl 7))
+        }
+        if (((board.board shl 1) and NOT_A_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shl 1))
+        }
+
+        return attacks
+    }
+
 
 
     fun initLeaperAttacks()  {
@@ -167,6 +205,7 @@ object Attacks {
             pawnAttacks[Color.WHITE.value][it.bit] = maskPawnAttacks(Color.WHITE,it)
             pawnAttacks[Color.BLACK.value][it.bit] = maskPawnAttacks(Color.BLACK,it)
             knightAttacks[it.bit] = maskKnightAttacks(it)
+            kingAttacks[it.bit] = maskKingAttacks(it)
         }
     }
 }

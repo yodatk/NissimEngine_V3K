@@ -10,7 +10,7 @@ fun bitManipulationsCheck(args: Array<String>) {
     temp.printBitboard()
 
 }
-
+@ExperimentalUnsignedTypes
 fun checkingPawnsAttacks(args: Array<String>) {
     println("Nissim: HALLAWA!\n===================================\n")
     println("\n\n")
@@ -22,4 +22,14 @@ fun checkingPawnsAttacks(args: Array<String>) {
 //        Attacks.pawnAttacks[Color.BLACK.value][it.bit]
 //    }
 
+}
+
+@ExperimentalUnsignedTypes
+fun checkingKnightsAttacks(args: Array<String>) {
+    println("Nissim: HALLAWA!\n===================================\n")
+    println("\n\n")
+    Attacks.initLeaperAttacks()
+    enumValues<Square>().forEach {
+        Attacks.knightAttacks[it.bit].printBitboard()
+    }
 }
