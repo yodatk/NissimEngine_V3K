@@ -1,0 +1,120 @@
+
+/**
+ * ================================================
+ *  Attacks
+ *  @author: Tomer Gonen
+ * ================================================
+ */
+
+@ExperimentalUnsignedTypes
+object Attacks {
+    /**
+     *================================================
+     * Attacks
+     * @author Tomer Gonen
+     *
+     *================================================
+     */
+
+
+    /**
+    NOT 'A' FILE
+    8  0 1 1 1 1 1 1 1
+    7  0 1 1 1 1 1 1 1
+    6  0 1 1 1 1 1 1 1
+    5  0 1 1 1 1 1 1 1
+    4  0 1 1 1 1 1 1 1
+    3  0 1 1 1 1 1 1 1
+    2  0 1 1 1 1 1 1 1
+    1  0 1 1 1 1 1 1 1
+
+    A B C D E F G H
+     */
+    val NOT_A_FILE: BitBoard = BitBoard(18374403900871474942UL)
+
+
+    /**
+    NOT 'H' FILE
+    8  1 1 1 1 1 1 1 0
+    7  1 1 1 1 1 1 1 0
+    6  1 1 1 1 1 1 1 0
+    5  1 1 1 1 1 1 1 0
+    4  1 1 1 1 1 1 1 0
+    3  1 1 1 1 1 1 1 0
+    2  1 1 1 1 1 1 1 0
+    1  1 1 1 1 1 1 1 0
+
+    A B C D E F G H
+     */
+    val NOT_H_FILE: BitBoard = BitBoard(9187201950435737471UL)
+
+
+    /**
+    NOT 'H' OR 'G' FILE
+    8  1 1 1 1 1 1 0 0
+    7  1 1 1 1 1 1 0 0
+    6  1 1 1 1 1 1 0 0
+    5  1 1 1 1 1 1 0 0
+    4  1 1 1 1 1 1 0 0
+    3  1 1 1 1 1 1 0 0
+    2  1 1 1 1 1 1 0 0
+    1  1 1 1 1 1 1 0 0
+
+    A B C D E F G H
+     */
+    val NOT_H_OR_G_FILE: BitBoard = BitBoard(4557430888798830399UL)
+
+
+    /**
+    NOT 'A' OR 'B' FILE
+    8  1 1 1 1 1 1 0 0
+    7  1 1 1 1 1 1 0 0
+    6  1 1 1 1 1 1 0 0
+    5  1 1 1 1 1 1 0 0
+    4  1 1 1 1 1 1 0 0
+    3  1 1 1 1 1 1 0 0
+    2  1 1 1 1 1 1 0 0
+    1  1 1 1 1 1 1 0 0
+
+    A B C D E F G H
+     */
+    val NOT_A_OR_B_FILE: BitBoard = BitBoard(18229723555195321596UL)
+
+    var pawnAttacks : Array<Array<BitBoard>> = Array(2) { Array(64) { BitBoard(0UL)} }
+
+    fun maskPawnAttacks(side: Color, square: Square): BitBoard{
+
+        var board : BitBoard = BitBoard(0UL)
+
+        var attacks : BitBoard = BitBoard(0UL)
+        //putting pawn in square
+        board.setBitOn(square = square)
+
+        if(side == Color.WHITE){
+            //if the pawn is white
+            if (((board.board shr 7) and NOT_A_FILE.board) != 0UL){
+                attacks.bitwiseOR(BitBoard(board.board shr 7))
+            }
+            if (((board.board shr 9) and NOT_H_FILE.board) != 0UL){
+                attacks.bitwiseOR(BitBoard(board.board shr 9))
+            }
+        }
+        else{
+            //if the pawn is black
+            if (((board.board shl 7) and NOT_H_FILE.board) != 0UL){
+                attacks.bitwiseOR(BitBoard(board.board shl 7))
+            }
+            if (((board.board shl 9) and NOT_A_FILE.board) != 0UL){
+                attacks.bitwiseOR(BitBoard(board.board shl 9))
+            }
+        }
+        return attacks
+    }
+
+    fun initLeaperAttacks()  {
+        enumValues<Square>().forEach {
+            pawnAttacks[Color.WHITE.value][it.bit] = maskPawnAttacks(Color.WHITE,it)
+            pawnAttacks[Color.BLACK.value][it.bit] = maskPawnAttacks(Color.BLACK,it)
+        }
+    }
+}
