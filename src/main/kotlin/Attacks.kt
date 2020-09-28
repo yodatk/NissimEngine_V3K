@@ -80,8 +80,17 @@ object Attacks {
      */
     val NOT_A_OR_B_FILE: BitBoard = BitBoard(18229723555195321596UL)
 
+    //pawns attack table[color][square]
     var pawnAttacks : Array<Array<BitBoard>> = Array(2) { Array(64) { BitBoard(0UL)} }
 
+    //pawns attack table[color][square]
+    var knightAttacks : Array<BitBoard> = Array(64) { BitBoard(0UL)}
+
+
+    /**
+     * generating pawn attack bitboard of a given color and a given square
+     * @return Bitboard of the available moves with the pawn of the given color on the given square
+     */
     fun maskPawnAttacks(side: Color, square: Square): BitBoard{
 
         var board : BitBoard = BitBoard(0UL)
@@ -111,10 +120,53 @@ object Attacks {
         return attacks
     }
 
+    /**
+     * generating knights movements bitboard from a given square
+     * @return Bitboard of the available moves with the Knight on the given square
+     */
+    fun maskKnightAttacks(square: Square): BitBoard {
+        var board : BitBoard = BitBoard(0UL)
+
+        var attacks : BitBoard = BitBoard(0UL)
+        //putting pawn in square
+        board.setBitOn(square = square)
+
+        if (((board.board shr 17) and NOT_H_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shr 17))
+        }
+        if (((board.board shr 15) and NOT_A_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shr 15))
+        }
+        if (((board.board shr 10) and NOT_H_OR_G_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shr 10))
+        }
+        if (((board.board shr 6) and NOT_A_OR_B_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shr 6))
+        }
+
+        if (((board.board shl 17) and NOT_A_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shl 17))
+        }
+        if (((board.board shl 15) and NOT_H_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shl 15))
+        }
+        if (((board.board shl 10) and NOT_A_OR_B_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shl 10))
+        }
+        if (((board.board shl 6) and NOT_H_OR_G_FILE.board) != 0UL){
+            attacks.bitwiseOR(BitBoard(board.board shl 6))
+        }
+
+        return attacks
+    }
+
+
+
     fun initLeaperAttacks()  {
         enumValues<Square>().forEach {
             pawnAttacks[Color.WHITE.value][it.bit] = maskPawnAttacks(Color.WHITE,it)
             pawnAttacks[Color.BLACK.value][it.bit] = maskPawnAttacks(Color.BLACK,it)
+            knightAttacks[it.bit] = maskKnightAttacks(it)
         }
     }
 }
