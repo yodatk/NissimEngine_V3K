@@ -117,3 +117,18 @@ fun checkingGetLSBMethod(args: Array<String>) {
     println("index: $curr square to coordinates ${Square.fromIntegerToSquare(curr)!!.name}")
 
 }
+
+@ExperimentalUnsignedTypes
+fun checkSetOccupency(args: Array<String>) {
+    println("Nissim: HALLAWA!\n===================================\n")
+    Attacks.initLeaperAttacks()
+    //val attackMask = Attacks.maskBishopAttacks(Square.d4)
+    val attackMask = Attacks.maskRookAttacks(Square.d4)
+
+    for (i in 0..100){
+        val occupancy = Attacks.setOccupancy(i,attackMask.countBits(),attackMask);
+        occupancy.printBitboard()
+        readLine()
+    }
+
+}
