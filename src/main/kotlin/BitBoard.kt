@@ -9,8 +9,16 @@ class BitBoard {
 
     var board : ULong = 0UL
 
+    constructor(){
+        this.board = 0UL;
+    }
+
     constructor(board: ULong){
         this.board = board
+    }
+
+    constructor(board: BitBoard){
+        this.board = board.board;
     }
 
     /***
@@ -75,9 +83,11 @@ class BitBoard {
 
     fun countBits(): Int {
         var counter = 0;
-        while(this.board!=0UL){
+        val copyBoard = BitBoard(this)
+        while(copyBoard.board!=0UL){
             counter++;
-            this.bitwiseAnd(BitBoard(this.board-1UL))
+            copyBoard.bitwiseAnd(BitBoard(copyBoard
+                .board-1UL))
         }
         return counter
 

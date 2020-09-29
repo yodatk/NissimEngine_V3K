@@ -381,6 +381,20 @@ object Attacks {
 
     }
 
+    fun setOccupancy(index: Int, numOfBits: Int, attackMask: BitBoard): BitBoard {
+        val occupancy = BitBoard()
+        val temp = BitBoard(attackMask);
+        for (count in 0 until numOfBits) {
+            val square = temp.getLSB()
+            temp.setBitOff(Square.fromIntegerToSquare(square)!!)
+            if (index and (1 shl count) != 0) {
+                occupancy.bitwiseOR((1UL shl square));
+            }
+
+        }
+        return occupancy
+    }
+
     fun initLeaperAttacks() {
         enumValues<Square>().forEach {
             pawnAttacks[Color.WHITE.value][it.bit] = maskPawnAttacks(Color.WHITE, it)
@@ -389,4 +403,6 @@ object Attacks {
             kingAttacks[it.bit] = maskKingAttacks(it)
         }
     }
+
+
 }
