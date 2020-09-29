@@ -25,6 +25,6 @@ fun main(args: Array<String>) {
     println("\n\n")
     Attacks.initLeaperAttacks()
     enumValues<Square>().forEach {
-        Attacks.maskBishopAttacks(it).printBitboard()
+        Attacks.maskRookAttacks(it).printBitboard()
     }
 }

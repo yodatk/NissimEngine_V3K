@@ -43,3 +43,14 @@ fun checkingKingAttacks(args: Array<String>) {
         Attacks.kingAttacks[it.bit].printBitboard()
     }
 }
+
+
+@ExperimentalUnsignedTypes
+fun checkBishopMovements(args: Array<String>) {
+    println("Nissim: HALLAWA!\n===================================\n")
+    println("\n\n")
+    Attacks.initLeaperAttacks()
+    enumValues<Square>().forEach {
+        Attacks.maskBishopAttacks(it).printBitboard()
+    }
+}

@@ -161,6 +161,10 @@ object Attacks {
         return attacks
     }
 
+    /**
+     * generating king movements bitboard from a given square
+     * @return Bitboard of the available moves with the king on the given square
+     */
     fun maskKingAttacks(square: Square): BitBoard {
         var board: BitBoard = BitBoard(0UL)
 
@@ -196,22 +200,26 @@ object Attacks {
         return attacks
     }
 
+    /**
+     * generating Bishop movements bitboard from a given square
+     * @return Bitboard of the available moves with the Bishop on the given square
+     */
     fun maskBishopAttacks(square: Square): BitBoard {
         var attacks: BitBoard = BitBoard(0UL)
-        var target_r = square.bit / 8
-        var target_f = square.bit % 8
+        var targetR = square.bit / 8
+        var targetF = square.bit % 8
 
         //up and right
-        var rank = target_r + 1
-        var file = target_f + 1
+        var rank = targetR + 1
+        var file = targetF + 1
         while (rank <= 7 && file <= 7) {
             attacks.bitwiseOR((1UL shl (rank * 8 + file)))
             rank++
             file++
         }
         //up and left
-        rank = target_r - 1
-        file = target_f + 1
+        rank = targetR - 1
+        file = targetF + 1
         while (rank >= 0 && file <= 7) {
             attacks.bitwiseOR((1UL shl (rank * 8 + file)))
             rank--
@@ -219,8 +227,8 @@ object Attacks {
         }
 
         //down and right
-        rank = target_r + 1
-        file = target_f - 1
+        rank = targetR + 1
+        file = targetF - 1
         while (rank <= 7 && file >= 0) {
             attacks.bitwiseOR((1UL shl (rank * 8 + file)))
             rank++
@@ -228,8 +236,8 @@ object Attacks {
         }
 
         //down and left
-        rank = target_r - 1
-        file = target_f - 1
+        rank = targetR - 1
+        file = targetF - 1
         while (rank >= 0 && file >= 0) {
             attacks.bitwiseOR((1UL shl (rank * 8 + file)))
             rank--
@@ -238,7 +246,31 @@ object Attacks {
         return attacks
 
     }
+    /**
+     * generating Rook movements bitboard from a given square
+     * @return Bitboard of the available moves with the Rook on the given square
+     */
+    fun maskRookAttacks(square: Square): BitBoard {
+        var attacks: BitBoard = BitBoard(0UL)
+        var targetR = square.bit / 8
+        var targetF = square.bit % 8
 
+
+        for(r in targetR+1..6){
+            attacks.bitwiseOR((1UL shl (r*8+targetF)))
+        }
+        for(r in targetR-1 downTo 1){
+            attacks.bitwiseOR((1UL shl (r*8+targetF)))
+        }
+        for(f in targetF+1..6){
+            attacks.bitwiseOR((1UL shl (targetR*8+f)))
+        }
+        for(f in targetF-1 downTo 1){
+            attacks.bitwiseOR((1UL shl (targetR*8+f)))
+        }
+        return attacks
+
+    }
 
     fun initLeaperAttacks() {
         enumValues<Square>().forEach {
