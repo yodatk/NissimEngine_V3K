@@ -95,9 +95,9 @@ object Attacks {
      */
     fun maskPawnAttacks(side: Color, square: Square): BitBoard {
 
-        var board: BitBoard = BitBoard(0UL)
+        val board: BitBoard = BitBoard(0UL)
 
-        var attacks: BitBoard = BitBoard(0UL)
+        val attacks: BitBoard = BitBoard(0UL)
         //putting pawn in square
         board.setBitOn(square = square)
 
@@ -126,9 +126,9 @@ object Attacks {
      * @return Bitboard of the available moves with the Knight on the given square
      */
     fun maskKnightAttacks(square: Square): BitBoard {
-        var board: BitBoard = BitBoard(0UL)
+        val board: BitBoard = BitBoard(0UL)
 
-        var attacks: BitBoard = BitBoard(0UL)
+        val attacks: BitBoard = BitBoard(0UL)
         //putting pawn in square
         board.setBitOn(square = square)
 
@@ -166,9 +166,9 @@ object Attacks {
      * @return Bitboard of the available moves with the king on the given square
      */
     fun maskKingAttacks(square: Square): BitBoard {
-        var board: BitBoard = BitBoard(0UL)
+        val board: BitBoard = BitBoard(0UL)
 
-        var attacks: BitBoard = BitBoard(0UL)
+        val attacks: BitBoard = BitBoard(0UL)
         //putting pawn in square
         board.setBitOn(square = square)
 
@@ -205,14 +205,14 @@ object Attacks {
      * @return Bitboard of the available moves with the Bishop on the given square
      */
     fun maskBishopAttacks(square: Square): BitBoard {
-        var attacks: BitBoard = BitBoard(0UL)
-        var targetR = square.bit / 8
-        var targetF = square.bit % 8
+        val attacks: BitBoard = BitBoard(0UL)
+        val targetR = square.bit / 8
+        val targetF = square.bit % 8
 
         //up and right
         var rank = targetR + 1
         var file = targetF + 1
-        while (rank <= 7 && file <= 7) {
+        while (rank <= 6 && file <= 6) {
             attacks.bitwiseOR((1UL shl (rank * 8 + file)))
             rank++
             file++
@@ -220,7 +220,7 @@ object Attacks {
         //up and left
         rank = targetR - 1
         file = targetF + 1
-        while (rank >= 0 && file <= 7) {
+        while (rank >= 1 && file <= 6) {
             attacks.bitwiseOR((1UL shl (rank * 8 + file)))
             rank--
             file++
@@ -229,7 +229,7 @@ object Attacks {
         //down and right
         rank = targetR + 1
         file = targetF - 1
-        while (rank <= 7 && file >= 0) {
+        while (rank <= 6 && file >= 1) {
             attacks.bitwiseOR((1UL shl (rank * 8 + file)))
             rank++
             file--
@@ -238,7 +238,7 @@ object Attacks {
         //down and left
         rank = targetR - 1
         file = targetF - 1
-        while (rank >= 0 && file >= 0) {
+        while (rank >= 1 && file >= 1) {
             attacks.bitwiseOR((1UL shl (rank * 8 + file)))
             rank--
             file--
@@ -246,27 +246,136 @@ object Attacks {
         return attacks
 
     }
+
+    /**
+     * generating Bishop movements bitboard from a given square *CONSIDERING* given block array
+     * @return Bitboard of the available moves with the Bishop on the given square
+     */
+    fun bishopAttacksOnTheFly(square: Square, block: BitBoard): BitBoard {
+        val attacks: BitBoard = BitBoard(0UL)
+        val targetR = square.bit / 8
+        val targetF = square.bit % 8
+
+        //up and right
+        var rank = targetR + 1
+        var file = targetF + 1
+        while (rank <= 7 && file <= 7) {
+            val current = (1UL shl (rank * 8 + file))
+            attacks.bitwiseOR(current)
+            if (current and block.board != 0UL) {
+                break
+            }
+            rank++
+            file++
+        }
+        //up and left
+        rank = targetR - 1
+        file = targetF + 1
+        while (rank >= 0 && file <= 7) {
+            val current = (1UL shl (rank * 8 + file))
+            attacks.bitwiseOR(current)
+            if (current and block.board != 0UL) {
+                break
+            }
+            rank--
+            file++
+        }
+
+        //down and right
+        rank = targetR + 1
+        file = targetF - 1
+        while (rank <= 7 && file >= 0) {
+            val current = (1UL shl (rank * 8 + file))
+            attacks.bitwiseOR(current)
+            if (current and block.board != 0UL) {
+                break
+            }
+
+            rank++
+            file--
+        }
+
+        //down and left
+        rank = targetR - 1
+        file = targetF - 1
+        while (rank >= 0 && file >= 0) {
+            val current = (1UL shl (rank * 8 + file))
+            attacks.bitwiseOR(current)
+            if (current and block.board != 0UL) {
+                break
+            }
+            rank--
+            file--
+        }
+        return attacks
+
+    }
+
+    /**
+     * generating Rook movements bitboard from a given square *CONSIDERING* given block array
+     * @return Bitboard of the available moves with the Rook on the given square
+     */
+    fun rookAttacksOnTheFly(square: Square, block: BitBoard): BitBoard {
+        val attacks: BitBoard = BitBoard(0UL)
+        val targetR = square.bit / 8
+        val targetF = square.bit % 8
+
+
+        for (r in targetR + 1..7) {
+            val current = (1UL shl (r * 8 + targetF))
+            attacks.bitwiseOR(current)
+            if (current and block.board != 0UL) {
+                break
+            }
+        }
+        for (r in targetR - 1 downTo 0) {
+            val current = (1UL shl (r * 8 + targetF))
+            attacks.bitwiseOR(current)
+            if (current and block.board != 0UL) {
+                break
+            }
+        }
+        for (f in targetF + 1..7) {
+            val current = (1UL shl (targetR * 8 + f))
+
+            attacks.bitwiseOR(current)
+            if (current and block.board != 0UL) {
+                break
+            }
+        }
+        for (f in targetF - 1 downTo 0) {
+            val current = (1UL shl (targetR * 8 + f))
+
+            attacks.bitwiseOR(current)
+            if (current and block.board != 0UL) {
+                break
+            }
+        }
+        return attacks
+
+    }
+
     /**
      * generating Rook movements bitboard from a given square
      * @return Bitboard of the available moves with the Rook on the given square
      */
     fun maskRookAttacks(square: Square): BitBoard {
-        var attacks: BitBoard = BitBoard(0UL)
-        var targetR = square.bit / 8
-        var targetF = square.bit % 8
+        val attacks: BitBoard = BitBoard(0UL)
+        val targetR = square.bit / 8
+        val targetF = square.bit % 8
 
 
-        for(r in targetR+1..6){
-            attacks.bitwiseOR((1UL shl (r*8+targetF)))
+        for (r in targetR + 1..6) {
+            attacks.bitwiseOR((1UL shl (r * 8 + targetF)))
         }
-        for(r in targetR-1 downTo 1){
-            attacks.bitwiseOR((1UL shl (r*8+targetF)))
+        for (r in targetR - 1 downTo 1) {
+            attacks.bitwiseOR((1UL shl (r * 8 + targetF)))
         }
-        for(f in targetF+1..6){
-            attacks.bitwiseOR((1UL shl (targetR*8+f)))
+        for (f in targetF + 1..6) {
+            attacks.bitwiseOR((1UL shl (targetR * 8 + f)))
         }
-        for(f in targetF-1 downTo 1){
-            attacks.bitwiseOR((1UL shl (targetR*8+f)))
+        for (f in targetF - 1 downTo 1) {
+            attacks.bitwiseOR((1UL shl (targetR * 8 + f)))
         }
         return attacks
 
