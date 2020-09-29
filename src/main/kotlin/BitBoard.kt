@@ -73,4 +73,14 @@ class BitBoard {
         this.board = this.board and other
     }
 
+    fun countBits(): Int {
+        var counter = 0;
+        while(this.board!=0UL){
+            counter++;
+            this.bitwiseAnd(BitBoard(this.board-1UL))
+        }
+        return counter
+
+    }
+
 }
