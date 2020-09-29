@@ -83,4 +83,30 @@ class BitBoard {
 
     }
 
+    fun getLSB(): Int {
+        return if(this.board!=0UL){
+            BitBoard.countBits((this.board and (0UL - this.board)) -1UL)
+        } else{
+            //empty board -> does not have lsb
+            -1;
+        }
+    }
+
+    companion object{
+        fun countBits(board : BitBoard): Int {
+            var counter = 0;
+            while(board.board!=0UL){
+                counter++;
+                board.bitwiseAnd(BitBoard(board.board-1UL))
+            }
+            return counter
+
+        }
+        fun countBits(board : ULong): Int {
+            val bitBoard = BitBoard(board);
+            return BitBoard.countBits(bitBoard);
+
+        }
+    }
+
 }
