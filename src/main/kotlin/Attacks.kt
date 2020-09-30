@@ -118,10 +118,7 @@ object Attacks {
     /**King attack table [ square ]*/
     var kingAttacks: Array<BitBoard> = Array(64) { BitBoard(0UL) }
 
-    /**
-     * Initial Uint number for random 32 bit numbers
-     */
-    var uIntRandomState: UInt = 1804289383.toUInt()
+
 
 
     /**
@@ -438,17 +435,4 @@ object Attacks {
             kingAttacks[it.bit] = maskKingAttacks(it)
         }
     }
-
-
-    fun getRandomUIntNumber(): UInt {
-        var current: UInt = uIntRandomState
-        current = current xor (current shl 13)
-        current = current xor (current shr 17)
-        current = current xor (current shl 5)
-        uIntRandomState = current
-        return uIntRandomState
-
-    }
-
-
 }
