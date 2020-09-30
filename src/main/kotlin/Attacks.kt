@@ -83,7 +83,7 @@ object Attacks {
     /**
      * bishop relevant occupancy bit count for every square on board
      */
-    var bishopRelavantBits : Array<Int> = arrayOf(
+    var bishopRelavantBits: Array<Int> = arrayOf(
         6, 5, 5, 5, 5, 5, 5, 6,
         5, 5, 5, 5, 5, 5, 5, 5,
         5, 5, 7, 7, 7, 7, 5, 5,
@@ -95,11 +95,10 @@ object Attacks {
     )
 
 
-
     /**
      * rook relevant occupancy bit count for every square on board
      */
-    var rookRelavantBits : Array<Int> = arrayOf(
+    var rookRelavantBits: Array<Int> = arrayOf(
         12, 11, 11, 11, 11, 11, 11, 12,
         11, 10, 10, 10, 10, 10, 10, 11,
         11, 10, 10, 10, 10, 10, 10, 11,
@@ -118,6 +117,11 @@ object Attacks {
 
     /**King attack table [ square ]*/
     var kingAttacks: Array<BitBoard> = Array(64) { BitBoard(0UL) }
+
+    /**
+     * Initial Uint number for random 32 bit numbers
+     */
+    var uIntRandomState: UInt = 1804289383.toUInt()
 
 
     /**
@@ -433,6 +437,17 @@ object Attacks {
             knightAttacks[it.bit] = maskKnightAttacks(it)
             kingAttacks[it.bit] = maskKingAttacks(it)
         }
+    }
+
+
+    fun getRandomUIntNumber(): UInt {
+        var current: UInt = uIntRandomState
+        current = current xor (current shl 13)
+        current = current xor (current shr 17)
+        current = current xor (current shl 5)
+        uIntRandomState = current
+        return uIntRandomState
+
     }
 
 
