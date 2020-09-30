@@ -79,6 +79,37 @@ object Attacks {
      */
     val NOT_A_OR_B_FILE: BitBoard = BitBoard(18229723555195321596UL)
 
+
+    /**
+     * bishop relevant occupancy bit count for every square on board
+     */
+    var bishopRelavantBits : Array<Int> = arrayOf(
+        6, 5, 5, 5, 5, 5, 5, 6,
+        5, 5, 5, 5, 5, 5, 5, 5,
+        5, 5, 7, 7, 7, 7, 5, 5,
+        5, 5, 7, 9, 9, 7, 5, 5,
+        5, 5, 7, 9, 9, 7, 5, 5,
+        5, 5, 7, 7, 7, 7, 5, 5,
+        5, 5, 5, 5, 5, 5, 5, 5,
+        6, 5, 5, 5, 5, 5, 5, 6
+    )
+
+
+
+    /**
+     * rook relevant occupancy bit count for every square on board
+     */
+    var rookRelavantBits : Array<Int> = arrayOf(
+        12, 11, 11, 11, 11, 11, 11, 12,
+        11, 10, 10, 10, 10, 10, 10, 11,
+        11, 10, 10, 10, 10, 10, 10, 11,
+        11, 10, 10, 10, 10, 10, 10, 11,
+        11, 10, 10, 10, 10, 10, 10, 11,
+        11, 10, 10, 10, 10, 10, 10, 11,
+        11, 10, 10, 10, 10, 10, 10, 11,
+        12, 11, 11, 11, 11, 11, 11, 12
+    )
+
     /**pawns attack table [ color ] [ square ]*/
     var pawnAttacks: Array<Array<BitBoard>> = Array(2) { Array(64) { BitBoard(0UL) } }
 
