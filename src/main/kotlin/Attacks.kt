@@ -284,7 +284,7 @@ object Attacks {
      * @return Bitboard of the available moves with the Bishop on the given square
      */
     fun bishopAttacksOnTheFly(square: Square, block: BitBoard): BitBoard {
-        val attacks: BitBoard = BitBoard(0UL)
+        val attacks = BitBoard(0UL)
         val targetR = square.bit / 8
         val targetF = square.bit % 8
 

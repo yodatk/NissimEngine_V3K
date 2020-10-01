@@ -1,4 +1,3 @@
-import RandomNumbers.FFFF
 
 /**
  * ================================================
@@ -25,10 +24,5 @@ Main
 fun main(args: Array<String>) {
     println("Nissim: HALLAWA!\n===================================\n")
     Attacks.initLeaperAttacks()
-    BitBoard(RandomNumbers.getRandomUIntNumber().toULong()).printBitboard()
-    BitBoard(RandomNumbers.getRandomUIntNumber().toULong() and FFFF.toULong()).printBitboard()
-    BitBoard(RandomNumbers.getRandomULongNumber()).printBitboard()
-    BitBoard(RandomNumbers.generateMagicNumber()).printBitboard()
-
 
 }

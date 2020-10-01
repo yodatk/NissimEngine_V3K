@@ -1,12 +1,9 @@
 object RandomNumbers {
-    /**equal to 0xFFFF*/
-    const val FFFF = 65535
-
     /**
      * Initial Uint number for random 32 bit numbers
      */
     @ExperimentalUnsignedTypes
-    var uIntRandomState: UInt = 1804289383.toUInt()
+    var uIntRandomState: UInt = 1804289383U
 
     @ExperimentalUnsignedTypes
     fun getRandomUIntNumber(): UInt {
@@ -21,18 +18,12 @@ object RandomNumbers {
 
     @ExperimentalUnsignedTypes
     fun getRandomULongNumber(): ULong {
-        val n1 = (getRandomUIntNumber() and FFFF.toUInt()).toULong()
-        val n2 = (getRandomUIntNumber() and FFFF.toUInt()).toULong()
-        val n3 = (getRandomUIntNumber() and FFFF.toUInt()).toULong()
-        val n4 = (getRandomUIntNumber() and FFFF.toUInt()).toULong()
+        val n1: ULong = (getRandomUIntNumber().toULong()) and 65535U
+        val n2: ULong = (getRandomUIntNumber().toULong()) and 65535U
+        val n3: ULong = (getRandomUIntNumber().toULong()) and 65535U
+        val n4: ULong = (getRandomUIntNumber().toULong()) and 65535U
 
-        return (n1 or (n2 shl 16) or (n3 shl 32) or (n4 shl 48))
+        val output : ULong= n1 or (n2 shl 16) or (n3 shl 32) or (n4 shl 48)
+        return output
     }
-
-    @ExperimentalUnsignedTypes
-    fun generateMagicNumber(): ULong {
-        return (getRandomULongNumber() and getRandomULongNumber() and getRandomULongNumber())
-    }
-
-
 }
