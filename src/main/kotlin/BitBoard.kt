@@ -103,7 +103,8 @@ class BitBoard {
     }
 
     companion object{
-        fun countBits(board : BitBoard): Int {
+        fun countBits(_board : BitBoard): Int {
+            var board = BitBoard(_board)
             var counter = 0;
             while(board.board!=0UL){
                 counter++;
