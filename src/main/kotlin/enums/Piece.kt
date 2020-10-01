@@ -16,6 +16,27 @@ enum class Piece {
     b,
     r,
     q,
-    k
+    k;
+
+    companion object {
+        fun convertIndexToPiece(i:Int) : Piece?{
+            return when(i){
+                0 -> P
+                1 -> N
+                2 -> B
+                3 -> R
+                4 -> Q
+                5 -> K
+                6 -> p
+                7 -> n
+                8 -> b
+                9 -> r
+                10 -> q
+                11 -> k
+                else -> null
+
+            }
+        }
+    }
 
 }

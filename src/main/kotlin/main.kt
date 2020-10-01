@@ -1,3 +1,4 @@
+import enums.Color
 import enums.Piece
 import enums.Square
 
@@ -27,11 +28,16 @@ fun main() {
     println("Nissim: HALLAWA!\n===================================\n")
 
     Attacks.initAll()
-    val board = Board()
-    board.pieceBitboards[Piece.P.ordinal]
-    board.pieceBitboards[Piece.P.ordinal].setBitOn(Square.e2)
-    board.pieceBitboards[Piece.P.ordinal].printBitboard()
-    println("piece: ${Piece.P.name}")
+    val board = Board.createStartBoard()
+    //board.enpassant = Square.e3
+    //board.side = Color.BLACK
+    board.castle =0
+    //board.castle = 1
+    board.castle = board.castle or 2
+    board.castle = board.castle or 4
+    //board.castle = board.castle or 8
+
+    board.printBoard()
 
 
 

@@ -445,8 +445,8 @@ object Attacks {
     fun initLeaperAttacks() {
         enumValues<Square>().forEach {
             if (it != Square.NO_SQUARE) {
-                pawnAttacks[Color.WHITE.value][it.ordinal] = maskPawnAttacks(Color.WHITE, it)
-                pawnAttacks[Color.BLACK.value][it.ordinal] = maskPawnAttacks(Color.BLACK, it)
+                pawnAttacks[Color.WHITE.ordinal][it.ordinal] = maskPawnAttacks(Color.WHITE, it)
+                pawnAttacks[Color.BLACK.ordinal][it.ordinal] = maskPawnAttacks(Color.BLACK, it)
                 knightAttacks[it.ordinal] = maskKnightAttacks(it)
                 kingAttacks[it.ordinal] = maskKingAttacks(it)
             }
