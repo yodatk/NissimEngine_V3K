@@ -1,3 +1,6 @@
+import enums.Color
+import enums.Square
+
 @ExperimentalUnsignedTypes
 fun bitManipulationsCheck(args: Array<String>) {
     println("Nissim: HALLAWA!\n===================================\n")
@@ -10,17 +13,18 @@ fun bitManipulationsCheck(args: Array<String>) {
     temp.printBitboard()
 
 }
+
 @ExperimentalUnsignedTypes
 fun checkingPawnsAttacks(args: Array<String>) {
     println("Nissim: HALLAWA!\n===================================\n")
     println("\n\n")
     Attacks.initLeaperAttacks()
     enumValues<Square>().forEach {
-        Attacks.pawnAttacks[Color.WHITE.value][it.bit].printBitboard()
+        if (it != Square.NO_SQUARE) {
+
+            Attacks.pawnAttacks[Color.WHITE.value][it.ordinal].printBitboard()
+        }
     }
-//    enumValues<Square>().forEach {
-//        Attacks.pawnAttacks[Color.BLACK.value][it.bit]
-//    }
 
 }
 
@@ -30,7 +34,10 @@ fun checkingKnightsAttacks(args: Array<String>) {
     println("\n\n")
     Attacks.initLeaperAttacks()
     enumValues<Square>().forEach {
-        Attacks.knightAttacks[it.bit].printBitboard()
+        if (it != Square.NO_SQUARE) {
+
+            Attacks.knightAttacks[it.ordinal].printBitboard()
+        }
     }
 }
 
@@ -40,7 +47,10 @@ fun checkingKingAttacks(args: Array<String>) {
     println("\n\n")
     Attacks.initLeaperAttacks()
     enumValues<Square>().forEach {
-        Attacks.kingAttacks[it.bit].printBitboard()
+        if (it != Square.NO_SQUARE) {
+
+            Attacks.kingAttacks[it.ordinal].printBitboard()
+        }
     }
 }
 
@@ -51,7 +61,10 @@ fun checkBishopMovements(args: Array<String>) {
     println("\n\n")
     Attacks.initLeaperAttacks()
     enumValues<Square>().forEach {
-        Attacks.maskBishopAttacks(it).printBitboard()
+        if (it != Square.NO_SQUARE) {
+
+            Attacks.maskBishopAttacks(it).printBitboard()
+        }
     }
 }
 
@@ -62,7 +75,10 @@ fun checkRookMovement(args: Array<String>) {
     println("\n\n")
     Attacks.initLeaperAttacks()
     enumValues<Square>().forEach {
-        Attacks.maskRookAttacks(it).printBitboard()
+        if (it!=Square.NO_SQUARE) {
+
+            Attacks.maskRookAttacks(it).printBitboard()
+        }
     }
 }
 
@@ -76,13 +92,13 @@ fun checkingBishopAndRookOnTheFly(args: Array<String>) {
     block.setBitOn(Square.c2)
     block.setBitOn(Square.g2)
     block.setBitOn(Square.g6)
-    Attacks.bishopAttacksOnTheFly(Square.e4,block).printBitboard()
+    Attacks.bishopAttacksOnTheFly(Square.e4, block).printBitboard()
     block = BitBoard(0UL)
     block.setBitOn(Square.e7)
     block.setBitOn(Square.e2)
     block.setBitOn(Square.b4)
     block.setBitOn(Square.g4)
-    Attacks.rookAttacksOnTheFly(Square.e4,block).printBitboard()
+    Attacks.rookAttacksOnTheFly(Square.e4, block).printBitboard()
 }
 
 @ExperimentalUnsignedTypes
@@ -122,11 +138,11 @@ fun checkingGetLSBMethod(args: Array<String>) {
 fun checkSetOccupency(args: Array<String>) {
     println("Nissim: HALLAWA!\n===================================\n")
     Attacks.initLeaperAttacks()
-    //val attackMask = Attacks.maskBishopAttacks(Square.d4)
+    //val attackMask = Attacks.maskBishopAttacks(enums.Square.d4)
     val attackMask = Attacks.maskRookAttacks(Square.d4)
 
-    for (i in 0..100){
-        val occupancy = Attacks.setOccupancy(i,attackMask.countBits(),attackMask);
+    for (i in 0..100) {
+        val occupancy = Attacks.setOccupancy(i, attackMask.countBits(), attackMask);
         occupancy.printBitboard()
         readLine()
     }
@@ -148,6 +164,6 @@ fun testingRookAndBishopMovement(args: Array<String>) {
     occupancy.setBitOn(Square.b2)
     occupancy.setBitOn(Square.h8)
     occupancy.printBitboard()
-    Attacks.getBishopAttacks(Square.d4,occupancy).printBitboard()
-    Attacks.getRookAttacks(Square.e5,occupancy).printBitboard()
+    Attacks.getBishopAttacks(Square.d4, occupancy).printBitboard()
+    Attacks.getRookAttacks(Square.e5, occupancy).printBitboard()
 }

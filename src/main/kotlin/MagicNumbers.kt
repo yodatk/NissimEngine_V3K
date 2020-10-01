@@ -1,4 +1,5 @@
 import RandomNumbers.getRandomULongNumber
+import enums.Square
 
 object MagicNumbers {
 
@@ -152,10 +153,10 @@ object MagicNumbers {
     @ExperimentalUnsignedTypes
     fun findMagicNumber(square: Int, relevantBits: Int, isBishop: Boolean): ULong {
         // init occupencies
-        var occupancies = Array(4096) { 0UL }
+        val occupancies = Array(4096) { 0UL }
 
         // init attacks table
-        var attacks = Array(4096) { 0UL }
+        val attacks = Array(4096) { 0UL }
 
         // init used attacks table
         var usedAttacks = Array(4096) { 0UL }
@@ -164,7 +165,7 @@ object MagicNumbers {
         val attackMask = if (isBishop) Attacks.maskBishopAttacks(Square.fromIntegerToSquare(square)!!)
         else Attacks.maskRookAttacks(Square.fromIntegerToSquare(square)!!)
         // init occupency indicies
-        var occupancyIndices: Int = (1 shl relevantBits)
+        val occupancyIndices: Int = (1 shl relevantBits)
 
         // loop over occupancy indicies
         for (index in 0 until occupancyIndices) {
@@ -198,7 +199,7 @@ object MagicNumbers {
 
                 if (usedAttacks[magicIndex] == 0UL) {
                     //if magic index works --> init used attacks
-                    usedAttacks[magicIndex] = attacks[index];
+                    usedAttacks[magicIndex] = attacks[index]
 
                 } else if (usedAttacks[magicIndex] != attacks[index]) {
                     fail = true
@@ -223,13 +224,13 @@ object MagicNumbers {
         var temp: ULong
         println("ROOK MAGIC NUMBERS\n========")
         for (square in 0..63) {
-            temp = findMagicNumber(square, Attacks.rookRelavantBits[square], false)
+            temp = findMagicNumber(square, Attacks.rookRelevantBits[square], false)
             println("${temp}UL,")
             //rookMagicNumbers[square] = temp
         }
         println("\n========\nBISHOP MAGIC NUMBERS\n========")
         for (square in 0..63) {
-            temp = findMagicNumber(square, Attacks.bishopRelavantBits[square], true)
+            temp = findMagicNumber(square, Attacks.bishopRelevantBits[square], true)
             println("${temp}UL,")
             //bishopMagicNumbers[square] = temp
         }

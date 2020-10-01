@@ -1,3 +1,6 @@
+import enums.Color
+import enums.Square
+
 /**
  * ================================================
  *  Attacks
@@ -29,7 +32,7 @@ object Attacks {
 
     A B C D E F G H
      */
-    val NOT_A_FILE: BitBoard = BitBoard(18374403900871474942UL)
+    private val NOT_A_FILE: BitBoard = BitBoard(18374403900871474942UL)
 
 
     /**
@@ -45,7 +48,7 @@ object Attacks {
 
     A B C D E F G H
      */
-    val NOT_H_FILE: BitBoard = BitBoard(9187201950435737471UL)
+    private val NOT_H_FILE: BitBoard = BitBoard(9187201950435737471UL)
 
 
     /**
@@ -61,7 +64,7 @@ object Attacks {
 
     A B C D E F G H
      */
-    val NOT_H_OR_G_FILE: BitBoard = BitBoard(4557430888798830399UL)
+    private val NOT_H_OR_G_FILE: BitBoard = BitBoard(4557430888798830399UL)
 
 
     /**
@@ -77,13 +80,13 @@ object Attacks {
 
     A B C D E F G H
      */
-    val NOT_A_OR_B_FILE: BitBoard = BitBoard(18229723555195321596UL)
+    private val NOT_A_OR_B_FILE: BitBoard = BitBoard(18229723555195321596UL)
 
 
     /**
      * bishop relevant occupancy bit count for every square on board
      */
-    var bishopRelavantBits: Array<Int> = arrayOf(
+    var bishopRelevantBits: Array<Int> = arrayOf(
         6, 5, 5, 5, 5, 5, 5, 6,
         5, 5, 5, 5, 5, 5, 5, 5,
         5, 5, 7, 7, 7, 7, 5, 5,
@@ -98,7 +101,7 @@ object Attacks {
     /**
      * rook relevant occupancy bit count for every square on board
      */
-    var rookRelavantBits: Array<Int> = arrayOf(
+    var rookRelevantBits: Array<Int> = arrayOf(
         12, 11, 11, 11, 11, 11, 11, 12,
         11, 10, 10, 10, 10, 10, 10, 11,
         11, 10, 10, 10, 10, 10, 10, 11,
@@ -127,10 +130,10 @@ object Attacks {
 
 
     /**bishop attack table[ square ][ occupencies ]*/
-    var bishopAttacks: Array<Array<BitBoard>> = Array(64) {Array (512) {BitBoard()} }
+    var bishopAttacks: Array<Array<BitBoard>> = Array(64) { Array(512) { BitBoard() } }
 
     /**rook attack table[ square ][ occupencies ]*/
-    var rookAttacks : Array<Array<BitBoard>> = Array(64) {Array (4096) {BitBoard()} }
+    var rookAttacks: Array<Array<BitBoard>> = Array(64) { Array(4096) { BitBoard() } }
 
 
     /**
@@ -139,9 +142,9 @@ object Attacks {
      */
     fun maskPawnAttacks(side: Color, square: Square): BitBoard {
 
-        val board: BitBoard = BitBoard(0UL)
+        val board = BitBoard(0UL)
 
-        val attacks: BitBoard = BitBoard(0UL)
+        val attacks = BitBoard(0UL)
         //putting pawn in square
         board.setBitOn(square = square)
 
@@ -170,9 +173,9 @@ object Attacks {
      * @return Bitboard of the available moves with the Knight on the given square
      */
     fun maskKnightAttacks(square: Square): BitBoard {
-        val board: BitBoard = BitBoard(0UL)
+        val board = BitBoard(0UL)
 
-        val attacks: BitBoard = BitBoard(0UL)
+        val attacks = BitBoard(0UL)
         //putting pawn in square
         board.setBitOn(square = square)
 
@@ -210,9 +213,9 @@ object Attacks {
      * @return Bitboard of the available moves with the king on the given square
      */
     fun maskKingAttacks(square: Square): BitBoard {
-        val board: BitBoard = BitBoard(0UL)
+        val board = BitBoard(0UL)
 
-        val attacks: BitBoard = BitBoard(0UL)
+        val attacks = BitBoard(0UL)
         //putting pawn in square
         board.setBitOn(square = square)
 
@@ -249,9 +252,9 @@ object Attacks {
      * @return Bitboard of the available moves with the Bishop on the given square
      */
     fun maskBishopAttacks(square: Square): BitBoard {
-        val attacks: BitBoard = BitBoard(0UL)
-        val targetR = square.bit / 8
-        val targetF = square.bit % 8
+        val attacks = BitBoard(0UL)
+        val targetR = square.ordinal / 8
+        val targetF = square.ordinal % 8
 
         //up and right
         var rank = targetR + 1
@@ -297,8 +300,8 @@ object Attacks {
      */
     fun bishopAttacksOnTheFly(square: Square, block: BitBoard): BitBoard {
         val attacks = BitBoard(0UL)
-        val targetR = square.bit / 8
-        val targetF = square.bit % 8
+        val targetR = square.ordinal / 8
+        val targetF = square.ordinal % 8
 
         //up and right
         var rank = targetR + 1
@@ -360,9 +363,9 @@ object Attacks {
      * @return Bitboard of the available moves with the Rook on the given square
      */
     fun rookAttacksOnTheFly(square: Square, block: BitBoard): BitBoard {
-        val attacks: BitBoard = BitBoard(0UL)
-        val targetR = square.bit / 8
-        val targetF = square.bit % 8
+        val attacks = BitBoard(0UL)
+        val targetR = square.ordinal / 8
+        val targetF = square.ordinal % 8
 
 
         for (r in targetR + 1..7) {
@@ -404,9 +407,9 @@ object Attacks {
      * @return Bitboard of the available moves with the Rook on the given square
      */
     fun maskRookAttacks(square: Square): BitBoard {
-        val attacks: BitBoard = BitBoard(0UL)
-        val targetR = square.bit / 8
-        val targetF = square.bit % 8
+        val attacks = BitBoard(0UL)
+        val targetR = square.ordinal / 8
+        val targetF = square.ordinal % 8
 
 
         for (r in targetR + 1..6) {
@@ -427,12 +430,12 @@ object Attacks {
 
     fun setOccupancy(index: Int, numOfBits: Int, attackMask: BitBoard): BitBoard {
         val occupancy = BitBoard()
-        val temp = BitBoard(attackMask);
+        val temp = BitBoard(attackMask)
         for (count in 0 until numOfBits) {
             val square = temp.getLSB()
             temp.setBitOff(Square.fromIntegerToSquare(square)!!)
             if (index and (1 shl count) != 0) {
-                occupancy.bitwiseOR((1UL shl square));
+                occupancy.bitwiseOR((1UL shl square))
             }
 
         }
@@ -441,32 +444,38 @@ object Attacks {
 
     fun initLeaperAttacks() {
         enumValues<Square>().forEach {
-            pawnAttacks[Color.WHITE.value][it.bit] = maskPawnAttacks(Color.WHITE, it)
-            pawnAttacks[Color.BLACK.value][it.bit] = maskPawnAttacks(Color.BLACK, it)
-            knightAttacks[it.bit] = maskKnightAttacks(it)
-            kingAttacks[it.bit] = maskKingAttacks(it)
+            if (it != Square.NO_SQUARE) {
+                pawnAttacks[Color.WHITE.value][it.ordinal] = maskPawnAttacks(Color.WHITE, it)
+                pawnAttacks[Color.BLACK.value][it.ordinal] = maskPawnAttacks(Color.BLACK, it)
+                knightAttacks[it.ordinal] = maskKnightAttacks(it)
+                kingAttacks[it.ordinal] = maskKingAttacks(it)
+            }
         }
     }
 
-    fun initSliderAttacksForPiece(isBishop: Boolean){
+    fun initSliderAttacksForPiece(isBishop: Boolean) {
         //initialize mask
         enumValues<Square>().forEach {
-            bishopMasks[it.bit] = maskBishopAttacks(it)
-            rookMasks[it.bit] = maskRookAttacks(it)
-            val attackMask = if(isBishop) bishopMasks[it.bit] else rookMasks[it.bit]
-            val relevantBits = BitBoard.countBits(attackMask)
-            val occupancyIndices = (1 shl relevantBits)
-            for(index in 0 until occupancyIndices){
-                val occupancy : BitBoard = setOccupancy(index,relevantBits,attackMask)
+            if (it != Square.NO_SQUARE) {
 
-                if (isBishop){
-                    val magicIndex = ((occupancy.board * MagicNumbers.bishopMagicNumbers[it.bit]) shr (64 - bishopRelavantBits[it.bit])).toInt()
-                    bishopAttacks[it.bit][magicIndex] = bishopAttacksOnTheFly(it,occupancy)
-                }
-                else{
+                bishopMasks[it.ordinal] = maskBishopAttacks(it)
+                rookMasks[it.ordinal] = maskRookAttacks(it)
+                val attackMask = if (isBishop) bishopMasks[it.ordinal] else rookMasks[it.ordinal]
+                val relevantBits = BitBoard.countBits(attackMask)
+                val occupancyIndices = (1 shl relevantBits)
+                for (index in 0 until occupancyIndices) {
+                    val occupancy: BitBoard = setOccupancy(index, relevantBits, attackMask)
 
-                    val magicIndex = ((occupancy.board * MagicNumbers.rookMagicNumbers[it.bit]) shr (64 - rookRelavantBits[it.bit])).toInt()
-                    rookAttacks[it.bit][magicIndex] = rookAttacksOnTheFly(it,occupancy)
+                    if (isBishop) {
+                        val magicIndex =
+                            ((occupancy.board * MagicNumbers.bishopMagicNumbers[it.ordinal]) shr (64 - bishopRelevantBits[it.ordinal])).toInt()
+                        bishopAttacks[it.ordinal][magicIndex] = bishopAttacksOnTheFly(it, occupancy)
+                    } else {
+
+                        val magicIndex =
+                            ((occupancy.board * MagicNumbers.rookMagicNumbers[it.ordinal]) shr (64 - rookRelevantBits[it.ordinal])).toInt()
+                        rookAttacks[it.ordinal][magicIndex] = rookAttacksOnTheFly(it, occupancy)
+                    }
                 }
             }
         }
@@ -475,29 +484,29 @@ object Attacks {
     /**
      * get bishop attacks for a given square and occupancy
      */
-    fun getBishopAttacks(_square:Square, _occupancy:BitBoard) : BitBoard{
-        val square = _square.bit
+    fun getBishopAttacks(_square: Square, _occupancy: BitBoard): BitBoard {
+        val square = _square.ordinal
         val occupancy = BitBoard(_occupancy)
         occupancy.bitwiseAnd(bishopMasks[square])
         occupancy.board *= MagicNumbers.bishopMagicNumbers[square]
-        occupancy.board = occupancy.board shr (64 - bishopRelavantBits[square])
+        occupancy.board = occupancy.board shr (64 - bishopRelevantBits[square])
         return bishopAttacks[square][occupancy.board.toInt()]
     }
 
     /**
      * get rook attacks for a given square and occupancy
      */
-    fun getRookAttacks(_square:Square, _occupancy:BitBoard) : BitBoard{
-        val square = _square.bit
+    fun getRookAttacks(_square: Square, _occupancy: BitBoard): BitBoard {
+        val square = _square.ordinal
         val occupancy = BitBoard(_occupancy)
         occupancy.bitwiseAnd(rookMasks[square])
         occupancy.board *= MagicNumbers.rookMagicNumbers[square]
-        occupancy.board = occupancy.board shr (64- rookRelavantBits[square])
+        occupancy.board = occupancy.board shr (64 - rookRelevantBits[square])
         return rookAttacks[square][occupancy.board.toInt()]
 
     }
 
-    fun initAll(): Unit {
+    fun initAll() {
         initLeaperAttacks()
         initSliderAttacksForPiece(isBishop = true)
         initSliderAttacksForPiece(isBishop = false)
