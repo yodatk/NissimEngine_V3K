@@ -506,6 +506,16 @@ object Attacks {
 
     }
 
+    /***
+     * get queen attack for a given square and occupancy
+     */
+    /**
+     * get rook attacks for a given square and occupancy
+     */
+    fun getQueenAttacks(_square: Square, _occupancy: BitBoard): BitBoard {
+        return BitBoard(getRookAttacks(_square,_occupancy).board or getBishopAttacks(_square,_occupancy).board)
+    }
+
     fun initAll() {
         initLeaperAttacks()
         initSliderAttacksForPiece(isBishop = true)
