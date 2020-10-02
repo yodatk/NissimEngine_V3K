@@ -9,12 +9,12 @@ class Board {
      * array of bitboards to represents the board - 6 for each color.
      *
      */
-    val pieceBitboards: Array<BitBoard>
+    var pieceBitboards: Array<BitBoard>
 
     /**
      * array of 3 bit boards - white pieces, black pieces, and both
      */
-    val occupenciesBitboards: Array<BitBoard>
+    var occupenciesBitboards: Array<BitBoard>
 
     /**
      * int to represent which side is now playing
@@ -38,7 +38,116 @@ class Board {
         this.occupenciesBitboards = Array(3) { BitBoard() }
         this.side = Color.WHITE
         this.enpassant = Square.NO_SQUARE
-        this.castle = -1
+        this.castle = 0
+    }
+
+    fun emptyBoard() {
+        this.pieceBitboards = Array(12) { BitBoard() }
+        this.occupenciesBitboards = Array(3) { BitBoard() }
+        this.side = Color.WHITE
+        this.enpassant = Square.NO_SQUARE
+        this.castle = 0
+    }
+
+    fun parseFEN(fen: String) {
+        if (fen.isEmpty()) {
+            throw FENException("empty string fen")
+        }
+        var index = 0
+        var rank = 0
+        var file = 0
+        this.emptyBoard()
+        while (rank < 8) {
+            //for each rank
+            file = 0
+            while (file < 8) {
+                //for each file
+                val square: Square = Square.fromIntegerToSquare(rank * 8 + file)!!
+                if ((fen[index] in 'a'..'z') || (fen[index] in 'A'..'Z')) {
+                    // putting piece on board. if invalid piece character -> throws error
+                    val piece: Piece =
+                        Piece.convertCharToPiece(fen[index]) ?: throw FENException("invalid piece: '${fen[index]}'")
+                    this.pieceBitboards[piece.ordinal].setBitOn(square)
+                    index++
+                }
+                if (fen[index] in '0'..'9') {
+                    // skipping empty squares
+                    val offset = fen[index] - '0'
+                    var piece: Piece? = null
+                    for (p in Piece.allPieces) {
+                        if (this.pieceBitboards[p.ordinal].getBit(square) != 0UL) {
+                            piece = p
+                            break
+                        }
+                    }
+                    if (piece == null) {
+                        //if current square has no piece-> don't advance to match
+                        file--
+                    }
+                    file += offset
+                    index++
+
+                }
+                if (fen[index] == '/') {
+                    // rank separator
+                    index++
+                }
+                file++
+            }
+            rank++
+        }
+        index++
+        //parsing side to move
+        side = if (fen[index] == 'w' || fen[index] == 'W') {
+            Color.WHITE
+        } else {
+            Color.BLACK
+        }
+        index += 2
+        //parsing castling rights
+        while (fen[index] != ' ') {
+            when (fen[index]) {
+                'K' -> {
+                    castle = castle or CastlingRights.WK.value
+                }
+                'Q' -> {
+                    castle = castle or CastlingRights.WQ.value
+                }
+                'k' -> {
+                    castle = castle or CastlingRights.BK.value
+                }
+                'q' -> {
+                    castle = castle or CastlingRights.BQ.value
+                }
+            }
+            index++
+        }
+        index++
+        if(fen[index]!='-'){
+            //en-Passant square available
+            file = fen[index] - 'a'
+            rank = fen[index+1] - '0'
+            enpassant = Square.fromIntegerToSquare(rank*8+file)?: throw FENException("invalid en-passant chars '${fen[index]}${fen[++index]}'")
+        }
+        else{
+            //en-Passant square not available
+            enpassant = Square.NO_SQUARE
+        }
+        //initializing Occupancies
+        matchOccupanciesToPiecesBitBoards()
+
+
+    }
+
+    private fun matchOccupanciesToPiecesBitBoards() {
+        for (p in Piece.whitePieces) {
+            occupenciesBitboards[Color.WHITE.ordinal].bitwiseOR(pieceBitboards[p.ordinal])
+        }
+        for (p in Piece.blackPieces) {
+            occupenciesBitboards[Color.BLACK.ordinal].bitwiseOR(pieceBitboards[p.ordinal])
+        }
+        occupenciesBitboards[Color.BOTH.ordinal].bitwiseOR(occupenciesBitboards[Color.WHITE.ordinal])
+        occupenciesBitboards[Color.BOTH.ordinal].bitwiseOR(occupenciesBitboards[Color.BLACK.ordinal])
     }
 
 
@@ -116,4 +225,6 @@ class Board {
             return output
         }
     }
+
+    class FENException(message: String) : Exception(message)
 }
