@@ -14,7 +14,7 @@ class Board {
     /**
      * array of 3 bit boards - white pieces, black pieces, and both
      */
-    var occupenciesBitboards: Array<BitBoard>
+    var occupanciesBitboards: Array<BitBoard>
 
     /**
      * int to represent which side is now playing
@@ -35,15 +35,19 @@ class Board {
     constructor() {
         //temp constructor
         this.pieceBitboards = Array(12) { BitBoard() }
-        this.occupenciesBitboards = Array(3) { BitBoard() }
+        this.occupanciesBitboards = Array(3) { BitBoard() }
         this.side = Color.WHITE
         this.enpassant = Square.NO_SQUARE
         this.castle = 0
     }
 
-    fun emptyBoard() {
+    constructor(fen: String) : this() {
+        this.parseFEN(fen)
+    }
+
+    private fun emptyBoard() {
         this.pieceBitboards = Array(12) { BitBoard() }
-        this.occupenciesBitboards = Array(3) { BitBoard() }
+        this.occupanciesBitboards = Array(3) { BitBoard() }
         this.side = Color.WHITE
         this.enpassant = Square.NO_SQUARE
         this.castle = 0
@@ -141,13 +145,13 @@ class Board {
 
     private fun matchOccupanciesToPiecesBitBoards() {
         for (p in Piece.whitePieces) {
-            occupenciesBitboards[Color.WHITE.ordinal].bitwiseOR(pieceBitboards[p.ordinal])
+            occupanciesBitboards[Color.WHITE.ordinal].bitwiseOR(pieceBitboards[p.ordinal])
         }
         for (p in Piece.blackPieces) {
-            occupenciesBitboards[Color.BLACK.ordinal].bitwiseOR(pieceBitboards[p.ordinal])
+            occupanciesBitboards[Color.BLACK.ordinal].bitwiseOR(pieceBitboards[p.ordinal])
         }
-        occupenciesBitboards[Color.BOTH.ordinal].bitwiseOR(occupenciesBitboards[Color.WHITE.ordinal])
-        occupenciesBitboards[Color.BOTH.ordinal].bitwiseOR(occupenciesBitboards[Color.BLACK.ordinal])
+        occupanciesBitboards[Color.BOTH.ordinal].bitwiseOR(occupanciesBitboards[Color.WHITE.ordinal])
+        occupanciesBitboards[Color.BOTH.ordinal].bitwiseOR(occupanciesBitboards[Color.BLACK.ordinal])
     }
 
 
@@ -177,6 +181,60 @@ class Board {
         println("    Side:               ${side.name}")
         println("    En-Passant:         ${this.enpassant.name}")
         println("    Castling Rights:    ${if ((castle and CastlingRights.WK.value) != 0) 'K' else '-'}${if ((castle and CastlingRights.WQ.value) != 0) 'Q' else '-'}${if ((castle and CastlingRights.BK.value) != 0) 'k' else '-'}${if ((castle and CastlingRights.BQ.value) != 0) 'q' else '-'}\n")
+
+    }
+    fun isSquareAttacked(square: Square, side: Color): Boolean {
+        // attacked by white pawns
+        if((side== Color.WHITE) && ((Attacks.pawnAttacks[Color.BLACK.ordinal][square.ordinal].board and this.pieceBitboards[Piece.P.ordinal].board) != 0UL )){
+            return true
+        }
+        // attacked by black pawns
+        if((side== Color.BLACK) && ((Attacks.pawnAttacks[Color.WHITE.ordinal][square.ordinal].board and this.pieceBitboards[Piece.p.ordinal].board) != 0UL )){
+            return true
+        }
+
+        // attacked by knights
+        if((Attacks.knightAttacks[square.ordinal].board and (if(side == Color.WHITE) this.pieceBitboards[Piece.N.ordinal].board else this.pieceBitboards[Piece.n.ordinal].board)) != 0UL ){
+            return true
+        }
+
+        // attacked by king
+        if((Attacks.kingAttacks[square.ordinal].board and (if(side == Color.WHITE) this.pieceBitboards[Piece.K.ordinal].board else this.pieceBitboards[Piece.k.ordinal].board)) != 0UL ){
+            return true
+        }
+        //attacked by bishop
+        val bAttacks = Attacks.getBishopAttacks(square,this.occupanciesBitboards[Color.BOTH.ordinal])
+        if((bAttacks.board and (if(side == Color.WHITE) this.pieceBitboards[Piece.B.ordinal].board else this.pieceBitboards[Piece.b.ordinal].board))!=0UL){
+            return true
+        }
+        //attacked by rook
+        val rAttacks = Attacks.getRookAttacks(square,this.occupanciesBitboards[Color.BOTH.ordinal])
+        if((rAttacks.board and (if(side == Color.WHITE) this.pieceBitboards[Piece.R.ordinal].board else this.pieceBitboards[Piece.r.ordinal].board))!=0UL){
+            return true
+        }
+
+        //attacked by queen
+        val qAttacks = Attacks.getQueenAttacks(square,this.occupanciesBitboards[Color.BOTH.ordinal])
+        if((qAttacks.board and (if(side == Color.WHITE) this.pieceBitboards[Piece.Q.ordinal].board else this.pieceBitboards[Piece.q.ordinal].board))!=0UL){
+            return true
+        }
+        //default - return 0
+        return false
+    }
+
+    fun printAttackedSquares(side: Color) {
+        println()
+        for(rank in 0..7){
+            for(file in 0..7){
+                val square  = Square.fromIntegerToSquare(rank*8+file)!!
+                if(file==0){
+                    print("  ${8-rank} ")
+                }
+                print(" ${if (isSquareAttacked(square, side)) 1 else 0}")
+            }
+            println()
+        }
+        println("\n     A B C D E F G H\n")
 
     }
 

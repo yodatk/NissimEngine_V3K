@@ -484,7 +484,7 @@ object Attacks {
     /**
      * get bishop attacks for a given square and occupancy
      */
-    fun getBishopAttacks(_square: Square, _occupancy: BitBoard): BitBoard {
+    fun  getBishopAttacks(_square: Square, _occupancy: BitBoard): BitBoard {
         val square = _square.ordinal
         val occupancy = BitBoard(_occupancy)
         occupancy.bitwiseAnd(bishopMasks[square])

@@ -1,4 +1,5 @@
 import enums.Color
+import enums.FENDebugConstants
 import enums.Square
 
 @ExperimentalUnsignedTypes
@@ -131,7 +132,6 @@ fun checkingGetLSBMethod(args: Array<String>) {
     test.setBitOn(Square.d7);
     curr = test.getLSB();
     println("index: $curr square to coordinates ${Square.fromIntegerToSquare(curr)!!.name}")
-
 }
 
 @ExperimentalUnsignedTypes
@@ -203,9 +203,9 @@ fun checkingFENParser() {
     println("==========\nstartPosition\n==========\n")
     b.parseFEN(startPosition)
     b.printBoard()
-    b.occupenciesBitboards[0].printBitboard()
-    b.occupenciesBitboards[1].printBitboard()
-    b.occupenciesBitboards[2].printBitboard()
+    b.occupanciesBitboards[0].printBitboard()
+    b.occupanciesBitboards[1].printBitboard()
+    b.occupanciesBitboards[2].printBitboard()
     println("==========\ntrickyPosition\n==========\n")
     b.parseFEN(trickyPosition)
     b.printBoard()
@@ -231,4 +231,26 @@ fun checkQueenAttack() {
     occ.setBitOn(Square.d3)
     occ.setBitOn(Square.e3)
     Attacks.getQueenAttacks(Square.d4,occ).printBitboard()
+}
+
+@ExperimentalUnsignedTypes
+fun checkIsSquaredAttacked() {
+    Attacks.initAll()
+    val board = Board(FENDebugConstants.TRICKY_POSITION.fen)
+    board.printBoard()
+    board.printAttackedSquares(Color.WHITE)
+    /*
+    SUPPOSED TO BE
+  8  0 0 0 0 0 0 0 0
+  7  0 0 0 1 0 1 0 0
+  6  1 0 1 0 1 1 1 1
+  5  0 1 0 1 0 1 1 1
+  4  1 0 1 0 1 1 1 0
+  3  1 1 1 1 1 1 1 1
+  2  1 0 0 1 1 1 1 1
+  1  0 1 1 1 1 1 1 0
+
+     A B C D E F G H
+   */
+
 }
