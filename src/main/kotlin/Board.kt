@@ -222,6 +222,36 @@ class Board {
         return false
     }
 
+    fun generateMoves()  {
+        var sourceSquare :Int
+        var targetSquare :Int
+        var bitboardCopy:BitBoard
+        var attacks:BitBoard
+
+        for(piece in Piece.allPieces){
+            bitboardCopy = BitBoard(this.pieceBitboards[piece.ordinal].board)
+
+            if(side == Color.WHITE){
+                // generate white pawns & white king castle
+            }
+            else{
+                //generate black pawns & black king castle
+
+            }
+
+            //generate knight moves
+
+            //generate bishop moves
+
+            //generate queen moves
+
+            //generate king moves
+        }
+
+
+
+    }
+
     fun printAttackedSquares(side: Color) {
         println()
         for(rank in 0..7){
