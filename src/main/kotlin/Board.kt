@@ -224,10 +224,7 @@ class Board {
     }
 
     fun generateMoves() {
-        var sourceSquare: Square
-        var targetSquare: Square
         var bitboardCopy: BitBoard
-        var attacks: BitBoard = BitBoard()
         val isWhite = side == Color.WHITE
 
         for (piece in if (isWhite) Piece.whitePieces else Piece.blackPieces) {
@@ -235,17 +232,54 @@ class Board {
             if (piece == Piece.P || piece == Piece.p) {
                 generateMovesForPawns(bitboardCopy, isWhite)
             }
-            if (piece == Piece.k || piece == Piece.K) {
-                generateCastlingMoves(isWhite)
+            else{
+                if (piece == Piece.k || piece == Piece.K) {
+                    generateCastlingMoves(isWhite)
+                }
+
+                //generate knight / bishop / queen / king moves
+                generateMovesForPiece(piece, bitboardCopy, isWhite)
+            }
+        }
+    }
+
+    fun generateMovesForPiece(piece: Piece,bitboardCopy: BitBoard,isWhite:Boolean) {
+        var sourceSquare: Square
+        var targetSquare:Square
+        var attacks : BitBoard
+        while(bitboardCopy.board != 0UL){
+            sourceSquare = Square.fromIntegerToSquare(bitboardCopy.getLSB())!!
+            val attacksSource = when(piece){
+                Piece.N,Piece.n -> Attacks.knightAttacks[sourceSquare.ordinal]
+                Piece.B,Piece.b -> Attacks.getBishopAttacks(sourceSquare,occupanciesBitboards[Color.BOTH.ordinal])
+                Piece.R,Piece.r -> Attacks.getRookAttacks(sourceSquare,occupanciesBitboards[Color.BOTH.ordinal])
+                Piece.Q,Piece.q -> Attacks.getQueenAttacks(sourceSquare,occupanciesBitboards[Color.BOTH.ordinal])
+                Piece.K,Piece.k -> Attacks.kingAttacks[sourceSquare.ordinal]
+                else -> return
+            }
+            val occ = if(isWhite) occupanciesBitboards[Color.WHITE.ordinal].board.inv() else occupanciesBitboards[Color.BLACK.ordinal].board.inv()
+            attacks = BitBoard(attacksSource.board and occ )
+            while(attacks.board!=0UL){
+                targetSquare = Square.fromIntegerToSquare(attacks.getLSB())!!
+
+                val occ2 = if(isWhite) BitBoard(occupanciesBitboards[Color.BLACK.ordinal].board) else BitBoard(occupanciesBitboards[Color.WHITE.ordinal].board)
+
+
+                if(occ2.getBit(targetSquare)==0UL){
+                    // quiet moves
+                    println("$piece ${sourceSquare}${targetSquare} piece move")
+
+                }
+                else{
+                    // capture moves
+                    println("$piece ${sourceSquare}${targetSquare} piece capture")
+                }
+
+                attacks.setBitOff(targetSquare)
             }
 
-            //generate knight moves
+            bitboardCopy.setBitOff(sourceSquare)
 
-            //generate bishop moves
-
-            //generate queen moves
-
-            //generate king moves
         }
 
 

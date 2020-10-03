@@ -40,9 +40,7 @@ class BitBoard {
      * setting off bit in given square if possible
      */
     fun setBitOff(square: Square) {
-         if (getBit(square) != 0UL) {
-            board = board xor (1UL shl square.ordinal)
-        }
+         this.board = this.board and (1UL shl square.ordinal).inv()
     }
 
 
