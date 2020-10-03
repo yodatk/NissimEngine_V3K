@@ -25,61 +25,7 @@ enum class Move(val flag: Int, val shift: Int) {
     CASTLING(flag = 0x800000, shift = 23);
 
 
-    companion object {
-        fun encodeMove(
-            source: Int, target: Int, piece: Int,
-            promoted: Int, capture: Int, double: Int,
-            enpassant: Int, castling: Int
-        ): Int {
-            return (source) or
-                    (target shl TARGET.shift) or
-                    (piece shl PIECE.shift) or
-                    (promoted shl PROMOTED.shift) or
-                    (capture shl CAPTURE.shift) or
-                    (double shl DOUBLE.shift) or
-                    (enpassant shl EN_PASSANT.shift) or
-                    (castling shl CASTLING.shift)
 
-        }
-
-        fun encodeMove(
-            source: Square, target: Square, piece: Piece,
-            promoted: Piece?, capture: Boolean, double: Boolean,
-            enpassant: Boolean, castling: Boolean
-        ): Int {
-            return encodeMove(
-                source = source.ordinal,
-                target = target.ordinal,
-                piece = piece.ordinal,
-                promoted = promoted?.ordinal ?: 12,
-                capture = if (capture) 1 else 0,
-                double = if (double) 1 else 0,
-                enpassant = if (enpassant) 1 else 0,
-                castling = if (castling) 1 else 0,
-            )
-
-        }
-
-        fun getSourceFromMoveAsInt(move: Int): Int = (move and SOURCE.flag)
-        fun getSourceFromMove(move: Int): Square = Square.fromIntegerToSquare(move and SOURCE.flag)!!
-        fun getTargetFromMoveAsInt(move: Int): Int = (move and TARGET.flag) shr TARGET.shift
-        fun getTargetFromMove(move: Int): Square = Square.fromIntegerToSquare((move and TARGET.flag) shr TARGET.shift)!!
-        fun getPieceFromMoveAsInt(move: Int): Int = (move and PIECE.flag) shr PIECE.shift
-        fun getPieceFromMove(move: Int): Piece = Piece.convertIndexToPiece((move and PIECE.flag) shr PIECE.shift)!!
-        fun getPromotedFromMoveAsInt(move: Int): Int = (move and PROMOTED.flag) shr PROMOTED.shift
-        fun getPromotedFromMove(move: Int): Piece? =
-            Piece.convertIndexToPiece((move and PROMOTED.flag) shr PROMOTED.shift)
-
-        fun getCaptureFromMoveAsInt(move: Int): Int = (move and CAPTURE.flag) shr CAPTURE.shift
-        fun getCaptureFromMove(move: Int): Boolean = ((move and CAPTURE.flag) shr CAPTURE.shift) != 0
-        fun getDoubleFromMoveAsInt(move: Int): Int = (move and DOUBLE.flag) shr DOUBLE.shift
-        fun getDoubleFromMove(move: Int): Boolean = ((move and DOUBLE.flag) shr DOUBLE.shift) != 0
-        fun getEnPassantFromMoveAsInt(move: Int): Int = (move and EN_PASSANT.flag) shr EN_PASSANT.shift
-        fun getEnPassantFromMove(move: Int): Boolean = ((move and EN_PASSANT.flag) shr EN_PASSANT.shift) != 0
-        fun getCastlingFromMoveAsInt(move: Int): Int = (move and CASTLING.flag) shr CASTLING.shift
-        fun getCastlingFromMove(move: Int): Boolean = ((move and CASTLING.flag) shr CASTLING.shift) != 0
-
-    }
 
 
 }

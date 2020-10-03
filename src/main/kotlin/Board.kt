@@ -1,5 +1,6 @@
 import enums.*
 
+
 @ExperimentalUnsignedTypes
 class Board {
 
@@ -509,6 +510,8 @@ class Board {
         fun createStartBoard(): Board {
             return Board(FENDebugConstants.START_POSITION.fen)
         }
+
+
     }
 
     class FENException(message: String) : Exception(message)
