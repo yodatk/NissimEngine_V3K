@@ -226,7 +226,7 @@ class Board {
         var sourceSquare :Square
         var targetSquare :Square
         var bitboardCopy:BitBoard
-        var attacks:BitBoard
+        var attacks:BitBoard = BitBoard()
 
         for(piece in Piece.allPieces){
             bitboardCopy = BitBoard(this.pieceBitboards[piece.ordinal].board)
@@ -234,66 +234,68 @@ class Board {
             if(side == Color.WHITE){
                 // generate white pawns & white king castle
                 if (piece == Piece.P){
-                    while (bitboardCopy.board != 0UL){
-                        sourceSquare = Square.fromIntegerToSquare(bitboardCopy.getLSB())!!
-                        targetSquare = Square.fromIntegerToSquare(sourceSquare.ordinal - 8)!!
-                        val isTargetOccupied : Boolean =occupanciesBitboards[Color.BOTH.ordinal].getBit(targetSquare) != 0UL
-                        if(targetSquare.ordinal >= Square.a8.ordinal && !isTargetOccupied  ){
-                            // only if target square is in range and not occupies
-                            if(sourceSquare.ordinal in Square.a7.ordinal..Square.h7.ordinal){
-                                //pawn promotion available
-                                println("pawn promotion ${sourceSquare}${targetSquare}q")
-                                println("pawn promotion ${sourceSquare}${targetSquare}r")
-                                println("pawn promotion ${sourceSquare}${targetSquare}b")
-                                println("pawn promotion ${sourceSquare}${targetSquare}n")
-                            }
-                            else{
-                                //one square push
-                                println("pawn push ${sourceSquare}${targetSquare}")
-                                val doubleTarget = Square.fromIntegerToSquare(targetSquare.ordinal-8)!!
-
-                                val isDoubleTargetOccupied : Boolean = occupanciesBitboards[Color.BOTH.ordinal].getBit(doubleTarget) != 0UL
-
-                                if((sourceSquare.ordinal in Square.a2.ordinal..Square.h2.ordinal) && !isDoubleTargetOccupied ){
-                                    //2 square push
-                                    println("double pawn push ${sourceSquare}${doubleTarget}")
-                                }
-                            }
-                        }
-                        bitboardCopy.setBitOff(sourceSquare)
-                    }
+                    generateMovesForPawns(bitboardCopy,attacks)
+//                    while (bitboardCopy.board != 0UL){
+//                        sourceSquare = Square.fromIntegerToSquare(bitboardCopy.getLSB())!!
+//                        targetSquare = Square.fromIntegerToSquare(sourceSquare.ordinal - 8)!!
+//                        val isTargetOccupied : Boolean =occupanciesBitboards[Color.BOTH.ordinal].getBit(targetSquare) != 0UL
+//                        if(targetSquare.ordinal >= Square.a8.ordinal && !isTargetOccupied  ){
+//                            // only if target square is in range and not occupies
+//                            if(sourceSquare.ordinal in Square.a7.ordinal..Square.h7.ordinal){
+//                                //pawn promotion available
+//                                println("pawn promotion ${sourceSquare}${targetSquare}q")
+//                                println("pawn promotion ${sourceSquare}${targetSquare}r")
+//                                println("pawn promotion ${sourceSquare}${targetSquare}b")
+//                                println("pawn promotion ${sourceSquare}${targetSquare}n")
+//                            }
+//                            else{
+//                                //one square push
+//                                println("pawn push ${sourceSquare}${targetSquare}")
+//                                val doubleTarget = Square.fromIntegerToSquare(targetSquare.ordinal-8)!!
+//
+//                                val isDoubleTargetOccupied : Boolean = occupanciesBitboards[Color.BOTH.ordinal].getBit(doubleTarget) != 0UL
+//
+//                                if((sourceSquare.ordinal in Square.a2.ordinal..Square.h2.ordinal) && !isDoubleTargetOccupied ){
+//                                    //2 square push
+//                                    println("double pawn push ${sourceSquare}${doubleTarget}")
+//                                }
+//                            }
+//                        }
+//                        bitboardCopy.setBitOff(sourceSquare)
+//                    }
                 }
             }
             else{
                 //generate black pawns & black king castle
                 if (piece == Piece.p){
-                    while (bitboardCopy.board != 0UL){
-                        sourceSquare = Square.fromIntegerToSquare(bitboardCopy.getLSB())!!
-                        targetSquare = Square.fromIntegerToSquare(sourceSquare.ordinal + 8)!!
-                        val isTargetOccupied : Boolean =occupanciesBitboards[Color.BOTH.ordinal].getBit(targetSquare) != 0UL
-                        if(targetSquare.ordinal <= Square.h1.ordinal && !isTargetOccupied  ){
-                            // only if target square is in range and not occupies
-                            if(sourceSquare.ordinal in Square.a2.ordinal..Square.h2.ordinal){
-                                //pawn promotion available
-                                println("pawn promotion ${sourceSquare}${targetSquare}q")
-                                println("pawn promotion ${sourceSquare}${targetSquare}r")
-                                println("pawn promotion ${sourceSquare}${targetSquare}b")
-                                println("pawn promotion ${sourceSquare}${targetSquare}n")
-                            }
-                            else{
-                                //one square push
-                                println("pawn push ${sourceSquare}${targetSquare}")
-                                val doubleTarget = Square.fromIntegerToSquare(targetSquare.ordinal+8)!!
-                                val isDoubleTargetOccupied : Boolean =occupanciesBitboards[Color.BOTH.ordinal].getBit(doubleTarget) != 0UL
-
-                                if((sourceSquare.ordinal in Square.a7.ordinal..Square.h7.ordinal) && !isDoubleTargetOccupied){
-                                    //2 square push
-                                    println("double pawn push ${sourceSquare}${doubleTarget}")
-                                }
-                            }
-                        }
-                        bitboardCopy.setBitOff(sourceSquare)
-                    }
+                    generateMovesForPawns(bitboardCopy,attacks)
+//                    while (bitboardCopy.board != 0UL){
+//                        sourceSquare = Square.fromIntegerToSquare(bitboardCopy.getLSB())!!
+//                        targetSquare = Square.fromIntegerToSquare(sourceSquare.ordinal + 8)!!
+//                        val isTargetOccupied : Boolean =occupanciesBitboards[Color.BOTH.ordinal].getBit(targetSquare) != 0UL
+//                        if(targetSquare.ordinal <= Square.h1.ordinal && !isTargetOccupied  ){
+//                            // only if target square is in range and not occupies
+//                            if(sourceSquare.ordinal in Square.a2.ordinal..Square.h2.ordinal){
+//                                //pawn promotion available
+//                                println("pawn promotion ${sourceSquare}${targetSquare}q")
+//                                println("pawn promotion ${sourceSquare}${targetSquare}r")
+//                                println("pawn promotion ${sourceSquare}${targetSquare}b")
+//                                println("pawn promotion ${sourceSquare}${targetSquare}n")
+//                            }
+//                            else{
+//                                //one square push
+//                                println("pawn push ${sourceSquare}${targetSquare}")
+//                                val doubleTarget = Square.fromIntegerToSquare(targetSquare.ordinal+8)!!
+//                                val isDoubleTargetOccupied : Boolean =occupanciesBitboards[Color.BOTH.ordinal].getBit(doubleTarget) != 0UL
+//
+//                                if((sourceSquare.ordinal in Square.a7.ordinal..Square.h7.ordinal) && !isDoubleTargetOccupied){
+//                                    //2 square push
+//                                    println("double pawn push ${sourceSquare}${doubleTarget}")
+//                                }
+//                            }
+//                        }
+//                        bitboardCopy.setBitOff(sourceSquare)
+//                    }
                 }
             }
 
@@ -307,6 +309,42 @@ class Board {
         }
 
 
+
+    }
+
+
+    fun generateMovesForPawns(bitboardCopy: BitBoard,attacks:BitBoard){
+        val isWhite = side == Color.WHITE
+        while (bitboardCopy.board != 0UL){
+            val sourceSquare = Square.fromIntegerToSquare(bitboardCopy.getLSB())!!
+            val targetSquare = if(side == Color.WHITE) Square.fromIntegerToSquare(sourceSquare.ordinal - 8)!! else Square.fromIntegerToSquare(sourceSquare.ordinal + 8)!!
+            val isTargetOccupied : Boolean =occupanciesBitboards[Color.BOTH.ordinal].getBit(targetSquare) != 0UL
+            var isInRange = if(isWhite) targetSquare.ordinal >= Square.a8.ordinal else targetSquare.ordinal <= Square.h1.ordinal
+            if(isInRange  && !isTargetOccupied){
+                //check promotion
+                val isPromotionPossible = if (isWhite) sourceSquare.ordinal in Square.a7.ordinal..Square.h7.ordinal else sourceSquare.ordinal in Square.a2.ordinal..Square.h2.ordinal
+                if(isPromotionPossible){
+                    println("pawn promotion ${sourceSquare}${targetSquare}q")
+                    println("pawn promotion ${sourceSquare}${targetSquare}r")
+                    println("pawn promotion ${sourceSquare}${targetSquare}b")
+                    println("pawn promotion ${sourceSquare}${targetSquare}n")
+                }
+                else{
+                    //adding single push
+                    println("pawn push ${sourceSquare}${targetSquare}")
+
+                    //checking double push
+
+                    val doubleTarget =  if(isWhite) Square.fromIntegerToSquare(targetSquare.ordinal-8)!! else Square.fromIntegerToSquare(targetSquare.ordinal+8)!!
+                    val isDoubleTargetOccupied : Boolean =occupanciesBitboards[Color.BOTH.ordinal].getBit(doubleTarget) != 0UL
+                    isInRange = if (isWhite) sourceSquare.ordinal in Square.a2.ordinal..Square.h2.ordinal else sourceSquare.ordinal in Square.a7.ordinal..Square.h7.ordinal
+                    if(isInRange && !isDoubleTargetOccupied){
+                        println("double pawn push ${sourceSquare}${doubleTarget}")
+                    }
+                }
+            }
+            bitboardCopy.setBitOff(sourceSquare)
+        }
 
     }
 
