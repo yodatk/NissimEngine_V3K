@@ -236,7 +236,7 @@ class Board {
                 generateMovesForPawns(bitboardCopy, isWhite)
             }
             if (piece == Piece.k || piece == Piece.K) {
-                generateCastlingMoves(bitboardCopy, isWhite)
+                generateCastlingMoves(isWhite)
             }
 
             //generate knight moves
@@ -251,7 +251,7 @@ class Board {
 
     }
 
-    fun generateCastlingMoves(bitboardCopy: BitBoard, isWhite: Boolean) {
+    fun generateCastlingMoves(isWhite: Boolean) {
         if (isKingSide(isWhite)) {
             println("castling king side ${if (isWhite) "e1g1" else "e8g8"}")
         }
