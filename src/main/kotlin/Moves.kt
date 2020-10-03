@@ -57,16 +57,16 @@ object Moves {
         fun getCastlingFromMove(move: Int):Boolean = ((move and Move.CASTLING.flag) shr Move.CASTLING.shift) !=0
         fun getCastlingFromMoveAsInt(move: Int): Int = (move and Move.CASTLING.flag) shr Move.CASTLING.shift
 
-        fun moveUCI(move: Int): String = "${getSourceFromMove(move)}${getTargetFromMove(move)}${getPromotedFromMove(move)?.name?.toLowerCase() ?: ""}"
+        fun moveUCI(move: Int): String = "${getSourceFromMove(move)}${getTargetFromMove(move)}${getPromotedFromMove(move)?.name?.toLowerCase() ?: " "}"
 
         fun printMoveUCI(move:Int) = println(moveUCI(move))
 
         fun printMove(move:Int){
-            println("   ${moveUCI(move)}       ${getPieceFromMove(move)}      ${getCaptureFromMove(move)}     ${getDoubleFromMove(move)}    ${getEnPassantFromMove(move)}       ${getCastlingFromMove(move)}\n")
+            println("  ${moveUCI(move)}     ${getPieceFromMove(move)}       ${getCaptureFromMove(move)}     ${getDoubleFromMove(move)}    ${getEnPassantFromMove(move)}       ${getCastlingFromMove(move)}\n")
 
         }
         fun printMoveList(list: List<Int>){
-            println("\n   move      piece   capture   double   enpassant   castling\n")
+            println("\n  Move      Piece   Capture   Double   Enpassant   Castling\n")
             for(move in list){
                 printMove(move)
             }
