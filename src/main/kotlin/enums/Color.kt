@@ -1,5 +1,5 @@
 package enums
 
-enum class Color() {
+enum class Color {
     WHITE, BLACK, BOTH
 }
