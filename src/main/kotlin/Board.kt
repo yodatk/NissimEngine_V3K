@@ -2,6 +2,7 @@ import enums.*
 
 @ExperimentalUnsignedTypes
 class Board {
+
     /**
      * array of bitboards to represents the board - 6 for each color.
      *
@@ -42,6 +43,9 @@ class Board {
         this.parseFEN(fen, toReset = false)
     }
 
+    /**
+     * reset the board to an empty one
+     */
     private fun emptyBoard() {
         this.pieceBitboards = Array(12) { BitBoard() }
         this.occupanciesBitboards = Array(3) { BitBoard() }
@@ -50,6 +54,13 @@ class Board {
         this.castle = 0
     }
 
+    /**
+     * change the state of the board according to the given FEN
+     *
+     * @param fen: String with FEN format for the current board situation
+     * @param toReset: boolean to determine if the board needs to be reset before parsing
+     * @throws FENException if the given FEN is not valid
+     */
     fun parseFEN(fen: String, toReset: Boolean = true) {
         if (fen.isEmpty()) {
             throw FENException("empty string fen")
@@ -143,6 +154,9 @@ class Board {
 
     }
 
+    /**
+     * build the current occupancies of the board according to the 12 bitboards of the pieces
+     */
     private fun matchOccupanciesToPiecesBitBoards() {
         for (p in Piece.whitePieces) {
             occupanciesBitboards[Color.WHITE.ordinal].bitwiseOR(pieceBitboards[p.ordinal])
@@ -155,6 +169,16 @@ class Board {
     }
 
 
+    /**
+     * print the current situation in the board:
+     * '.' -> empty square
+     * P -> white pawn         p -> black pawn
+     * N -> white knight       n -> black knight
+     * B -> white bishop       b -> black bishop
+     * R -> white rook         r -> black rook
+     * Q -> white queen        q -> black queen
+     * K -> white king         k -> black king
+     */
     fun printBoard() {
         println()
         for (rank in 0..7) {
@@ -184,6 +208,12 @@ class Board {
 
     }
 
+    /**
+     * determining if the given square is attacked by any of the pieces of the given color
+     * @param square: the given square to check
+     * @param side: the color which is attcking
+     * @return: true if square is attacked, false other wise
+     */
     fun isSquareAttacked(square: Square, side: Color): Boolean {
         // attacked by white pawns
         if ((side == Color.WHITE) && ((Attacks.pawnAttacks[Color.BLACK.ordinal][square.ordinal].board and this.pieceBitboards[Piece.P.ordinal].board) != 0UL)) {
@@ -223,6 +253,9 @@ class Board {
         return false
     }
 
+    /**
+     * generate all possible moves for the current side in the current board situation
+     */
     fun generateMoves() {
         var bitboardCopy: BitBoard
         val isWhite = side == Color.WHITE
@@ -231,8 +264,7 @@ class Board {
             bitboardCopy = BitBoard(this.pieceBitboards[piece.ordinal].board)
             if (piece == Piece.P || piece == Piece.p) {
                 generateMovesForPawns(bitboardCopy, isWhite)
-            }
-            else{
+            } else {
                 if (piece == Piece.k || piece == Piece.K) {
                     generateCastlingMoves(isWhite)
                 }
@@ -243,34 +275,42 @@ class Board {
         }
     }
 
-    fun generateMovesForPiece(piece: Piece,bitboardCopy: BitBoard,isWhite:Boolean) {
+    /**
+     * generate all possible moves for the given piece type, in the given board, for the given color
+     * @param piece: determining the piece type
+     * @param bitboardCopy: copy of the bitboard of that piece
+     * @param isWhite: true-> generate for white. false -> generate for black
+     */
+    fun generateMovesForPiece(piece: Piece, bitboardCopy: BitBoard, isWhite: Boolean) {
         var sourceSquare: Square
-        var targetSquare:Square
-        var attacks : BitBoard
-        while(bitboardCopy.board != 0UL){
+        var targetSquare: Square
+        var attacks: BitBoard
+        while (bitboardCopy.board != 0UL) {
             sourceSquare = Square.fromIntegerToSquare(bitboardCopy.getLSB())!!
-            val attacksSource = when(piece){
-                Piece.N,Piece.n -> Attacks.knightAttacks[sourceSquare.ordinal]
-                Piece.B,Piece.b -> Attacks.getBishopAttacks(sourceSquare,occupanciesBitboards[Color.BOTH.ordinal])
-                Piece.R,Piece.r -> Attacks.getRookAttacks(sourceSquare,occupanciesBitboards[Color.BOTH.ordinal])
-                Piece.Q,Piece.q -> Attacks.getQueenAttacks(sourceSquare,occupanciesBitboards[Color.BOTH.ordinal])
-                Piece.K,Piece.k -> Attacks.kingAttacks[sourceSquare.ordinal]
+            val attacksSource = when (piece) {
+                Piece.N, Piece.n -> Attacks.knightAttacks[sourceSquare.ordinal]
+                Piece.B, Piece.b -> Attacks.getBishopAttacks(sourceSquare, occupanciesBitboards[Color.BOTH.ordinal])
+                Piece.R, Piece.r -> Attacks.getRookAttacks(sourceSquare, occupanciesBitboards[Color.BOTH.ordinal])
+                Piece.Q, Piece.q -> Attacks.getQueenAttacks(sourceSquare, occupanciesBitboards[Color.BOTH.ordinal])
+                Piece.K, Piece.k -> Attacks.kingAttacks[sourceSquare.ordinal]
                 else -> return
             }
-            val occ = if(isWhite) occupanciesBitboards[Color.WHITE.ordinal].board.inv() else occupanciesBitboards[Color.BLACK.ordinal].board.inv()
-            attacks = BitBoard(attacksSource.board and occ )
-            while(attacks.board!=0UL){
+            val occ =
+                if (isWhite) occupanciesBitboards[Color.WHITE.ordinal].board.inv() else occupanciesBitboards[Color.BLACK.ordinal].board.inv()
+            attacks = BitBoard(attacksSource.board and occ)
+            while (attacks.board != 0UL) {
                 targetSquare = Square.fromIntegerToSquare(attacks.getLSB())!!
 
-                val occ2 = if(isWhite) BitBoard(occupanciesBitboards[Color.BLACK.ordinal].board) else BitBoard(occupanciesBitboards[Color.WHITE.ordinal].board)
+                val occ2 = if (isWhite) BitBoard(occupanciesBitboards[Color.BLACK.ordinal].board) else BitBoard(
+                    occupanciesBitboards[Color.WHITE.ordinal].board
+                )
 
 
-                if(occ2.getBit(targetSquare)==0UL){
+                if (occ2.getBit(targetSquare) == 0UL) {
                     // quiet moves
                     println("$piece ${sourceSquare}${targetSquare} piece move")
 
-                }
-                else{
+                } else {
                     // capture moves
                     println("$piece ${sourceSquare}${targetSquare} piece capture")
                 }
@@ -285,6 +325,10 @@ class Board {
 
     }
 
+    /**
+     * generate castling move for the given color
+     * @param isWhite: true -> generate for White, false-> check for black
+     */
     fun generateCastlingMoves(isWhite: Boolean) {
         if (isKingSide(isWhite)) {
             println("castling king side ${if (isWhite) "e1g1" else "e8g8"}")
@@ -295,6 +339,11 @@ class Board {
 
     }
 
+    /**
+     * determining for the given color if it's possible to castle queen side
+     * @param isWhite Boolean  true->check for white, false -> check for black
+     * @return: true if castling is possible, false otherwise
+     */
     private fun isQueenSide(isWhite: Boolean): Boolean {
 
         /// white player have castling rights
@@ -325,6 +374,11 @@ class Board {
         return isHavingCastleRight && isClear && !isThreatened
     }
 
+    /**
+     * determining for the given color if it's possible to castle king side
+     * @param isWhite Boolean  true->check for white, false -> check for black
+     * @return: true if castling is possible, false otherwise
+     */
     private fun isKingSide(isWhite: Boolean): Boolean {
         /// white player have castling rights
         val isHavingCastleRight =
@@ -351,6 +405,11 @@ class Board {
     }
 
 
+    /***
+     * find all the possible moves for pawns for the given board and color
+     * @param bitboardCopy: BItboard represent the bitboard of the pawns
+     * @param isWhite: Boolean to say the color of the pawn: true-> White, false->Black
+     */
     fun generateMovesForPawns(bitboardCopy: BitBoard, isWhite: Boolean) {
 
         while (bitboardCopy.board != 0UL) {
@@ -424,6 +483,10 @@ class Board {
 
     }
 
+    /**
+     * print all squared that are under attacked by the given color in board
+     * @param side: color that is attacking in the board
+     */
     fun printAttackedSquares(side: Color) {
         println()
         for (rank in 0..7) {
@@ -439,6 +502,8 @@ class Board {
         println("\n     A B C D E F G H\n")
 
     }
+
+
 
     companion object {
         fun createStartBoard(): Board {
