@@ -62,7 +62,7 @@ object Moves {
         fun printMoveUCI(move:Int) = println(moveUCI(move))
 
         fun printMove(move:Int){
-            println("  ${moveUCI(move)}     ${getPieceFromMove(move)}       ${getCaptureFromMove(move)}     ${getDoubleFromMove(move)}    ${getEnPassantFromMove(move)}       ${getCastlingFromMove(move)}")
+            println("  ${moveUCI(move)}      ${getPieceFromMove(move)}       ${if(getCaptureFromMove(move)) 1 else 0}         ${if(getDoubleFromMove(move)) 1 else 0}        ${if(getEnPassantFromMove(move)) 1 else 0}           ${if(getCastlingFromMove(move)) 1 else 0}")
 
         }
         fun printMoveList(list: List<Int>){
