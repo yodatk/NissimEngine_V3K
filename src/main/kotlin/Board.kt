@@ -44,12 +44,29 @@ class Board {
         this.parseFEN(fen, toReset = false)
     }
 
-    constructor(other:Board){
+    constructor(other: Board) {
         this.castle = other.castle
         this.side = other.side
         this.enpassant = other.enpassant
-        this.pieceBitboards = other.pieceBitboards.clone()
-        this.occupanciesBitboards = other.occupanciesBitboards.clone()
+        this.pieceBitboards = arrayOf(
+            BitBoard(other.pieceBitboards[0]),
+            BitBoard(other.pieceBitboards[1]),
+            BitBoard(other.pieceBitboards[2]),
+            BitBoard(other.pieceBitboards[3]),
+            BitBoard(other.pieceBitboards[4]),
+            BitBoard(other.pieceBitboards[5]),
+            BitBoard(other.pieceBitboards[6]),
+            BitBoard(other.pieceBitboards[7]),
+            BitBoard(other.pieceBitboards[8]),
+            BitBoard(other.pieceBitboards[9]),
+            BitBoard(other.pieceBitboards[10]),
+            BitBoard(other.pieceBitboards[11])
+        )
+        this.occupanciesBitboards = arrayOf(
+            BitBoard(other.occupanciesBitboards[0]),
+            BitBoard(other.occupanciesBitboards[1]),
+            BitBoard(other.occupanciesBitboards[2]),
+        )
     }
 
     /**
@@ -61,6 +78,15 @@ class Board {
         this.side = Color.WHITE
         this.enpassant = Square.NO_SQUARE
         this.castle = 0
+    }
+
+    fun copyOtherBoard(other: Board) {
+        this.castle = other.castle
+        this.side = other.side
+        this.enpassant = other.enpassant
+        this.pieceBitboards = other.pieceBitboards
+        this.occupanciesBitboards = other.occupanciesBitboards
+
     }
 
     /**
@@ -266,22 +292,22 @@ class Board {
      * generate all possible moves for the current side in the current board situation
      * @return List of integers that represents all the possible moves on the board
      */
-    fun generateMoves() : MutableList<Int> {
+    fun generateMoves(): MutableList<Int> {
         var bitboardCopy: BitBoard
         val isWhite = side == Color.WHITE
-        var moveList : MutableList<Int> = mutableListOf()
+        var moveList: MutableList<Int> = mutableListOf()
 
         for (piece in if (isWhite) Piece.whitePieces else Piece.blackPieces) {
             bitboardCopy = BitBoard(this.pieceBitboards[piece.ordinal].board)
             if (piece == Piece.P || piece == Piece.p) {
-                generateMovesForPawns(bitboardCopy, isWhite,moveList)
+                generateMovesForPawns(bitboardCopy, isWhite, moveList)
             } else {
                 if (piece == Piece.k || piece == Piece.K) {
-                    generateCastlingMoves(isWhite,moveList)
+                    generateCastlingMoves(isWhite, moveList)
                 }
 
                 //generate knight / bishop / queen / king moves
-                generateMovesForPiece(piece, bitboardCopy, isWhite,moveList)
+                generateMovesForPiece(piece, bitboardCopy, isWhite, moveList)
             }
         }
         return moveList
@@ -294,7 +320,7 @@ class Board {
      * @param isWhite: true-> generate for white. false -> generate for black
      * @param moveList: list of integers that collects all the moves available so far to edit
      */
-    fun generateMovesForPiece(piece: Piece, bitboardCopy: BitBoard, isWhite: Boolean,moveList: MutableList<Int>) {
+    fun generateMovesForPiece(piece: Piece, bitboardCopy: BitBoard, isWhite: Boolean, moveList: MutableList<Int>) {
         var sourceSquare: Square
         var targetSquare: Square
         var attacks: BitBoard
@@ -321,17 +347,25 @@ class Board {
 
                 if (occ2.getBit(targetSquare) == 0UL) {
                     // quiet moves
-                    moveList.add(Moves.encodeMove(source =  sourceSquare,target = targetSquare,piece,null,
-                        capture = false,
-                        double = false,
-                        enpassant = false,castling = false))
+                    moveList.add(
+                        Moves.encodeMove(
+                            source = sourceSquare, target = targetSquare, piece, null,
+                            capture = false,
+                            double = false,
+                            enpassant = false, castling = false
+                        )
+                    )
 
                 } else {
                     // capture moves
-                    moveList.add(Moves.encodeMove(source =  sourceSquare,target = targetSquare,piece,null,
-                        capture = true,
-                        double = false,
-                        enpassant = false,castling = false))
+                    moveList.add(
+                        Moves.encodeMove(
+                            source = sourceSquare, target = targetSquare, piece, null,
+                            capture = true,
+                            double = false,
+                            enpassant = false, castling = false
+                        )
+                    )
                 }
 
                 attacks.setBitOff(targetSquare)
@@ -349,18 +383,34 @@ class Board {
      * @param isWhite: true -> generate for White, false-> check for black
      * @param moveList: list of all the moves so far that are available on the board to edit
      */
-    fun generateCastlingMoves(isWhite: Boolean,moveList: MutableList<Int>) {
+    fun generateCastlingMoves(isWhite: Boolean, moveList: MutableList<Int>) {
         if (isKingSide(isWhite)) {
-            moveList.add(Moves.encodeMove(source =  if (isWhite) Square.e1 else Square.e8,target = if (isWhite) Square.g1 else Square.g8,if(isWhite) Piece.K else Piece.k,null,
-                capture = false,
-                double = false,
-                enpassant = false,castling = true))
+            moveList.add(
+                Moves.encodeMove(
+                    source = if (isWhite) Square.e1 else Square.e8,
+                    target = if (isWhite) Square.g1 else Square.g8,
+                    if (isWhite) Piece.K else Piece.k,
+                    null,
+                    capture = false,
+                    double = false,
+                    enpassant = false,
+                    castling = true
+                )
+            )
         }
         if (isQueenSide(isWhite)) {
-            moveList.add(Moves.encodeMove(source =  if (isWhite) Square.e1 else Square.e8,target = if (isWhite) Square.c1 else Square.c8,if(isWhite) Piece.K else Piece.k,null,
-                capture = false,
-                double = false,
-                enpassant = false,castling = true))
+            moveList.add(
+                Moves.encodeMove(
+                    source = if (isWhite) Square.e1 else Square.e8,
+                    target = if (isWhite) Square.c1 else Square.c8,
+                    if (isWhite) Piece.K else Piece.k,
+                    null,
+                    capture = false,
+                    double = false,
+                    enpassant = false,
+                    castling = true
+                )
+            )
         }
 
     }
@@ -437,7 +487,7 @@ class Board {
      * @param isWhite: Boolean to say the color of the pawn: true-> White, false->Black
      * @param moveList: Mutable list of integers represent all the possible moves so far
      */
-    fun generateMovesForPawns(bitboardCopy: BitBoard, isWhite: Boolean,moveList: MutableList<Int>) {
+    fun generateMovesForPawns(bitboardCopy: BitBoard, isWhite: Boolean, moveList: MutableList<Int>) {
 
         while (bitboardCopy.board != 0UL) {
             val sourceSquare = Square.fromIntegerToSquare(bitboardCopy.getLSB())!!
@@ -453,29 +503,18 @@ class Board {
             if (isInRange && !isTargetOccupied) {
                 //check promotion
                 if (isPromotionPossible) {
-                    moveList.add(Moves.encodeMove(source = sourceSquare,target = targetSquare,if(isWhite) Piece.P else Piece.p,Piece.Q,
-                        capture = false,
-                        double = false,
-                        enpassant = false,castling = false))
-                    moveList.add(Moves.encodeMove(source = sourceSquare,target = targetSquare,if(isWhite) Piece.P else Piece.p,Piece.R,
-                        capture = false,
-                        double = false,
-                        enpassant = false,castling = false))
-                    moveList.add(Moves.encodeMove(source = sourceSquare,target = targetSquare,if(isWhite) Piece.P else Piece.p,Piece.B,
-                        capture = false,
-                        double = false,
-                        enpassant = false,castling = false))
-                    moveList.add(Moves.encodeMove(source = sourceSquare,target = targetSquare,if(isWhite) Piece.P else Piece.p,Piece.N,
-                        capture = false,
-                        double = false,
-                        enpassant = false,castling = false))
+                    addPromotionMoves(moveList,sourceSquare,targetSquare, isWhite)
                 } else {
                     //adding single push
 
-                    moveList.add(Moves.encodeMove(source = sourceSquare,target = targetSquare,if(isWhite) Piece.P else Piece.p,null,
-                        capture = false,
-                        double = false,
-                        enpassant = false,castling = false))
+                    moveList.add(
+                        Moves.encodeMove(
+                            source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p, promoted = null,
+                            capture = false,
+                            double = false,
+                            enpassant = false, castling = false
+                        )
+                    )
                     //checking double push
 
                     targetSquare =
@@ -487,10 +526,14 @@ class Board {
                     isInRange =
                         if (isWhite) sourceSquare.ordinal in Square.a2.ordinal..Square.h2.ordinal else sourceSquare.ordinal in Square.a7.ordinal..Square.h7.ordinal
                     if (isInRange && !isDoubleTargetOccupied) {
-                        moveList.add(Moves.encodeMove(source = sourceSquare,target = targetSquare,if(isWhite) Piece.P else Piece.p,null,
-                            capture = false,
-                            double = true,
-                            enpassant = false,castling = false))
+                        moveList.add(
+                            Moves.encodeMove(
+                                source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p, promoted = null,
+                                capture = false,
+                                double = true,
+                                enpassant = false, castling = false
+                            )
+                        )
                     }
                 }
             }
@@ -501,27 +544,16 @@ class Board {
                 targetSquare = Square.fromIntegerToSquare(attacks.getLSB())!!
                 if (isPromotionPossible) {
                     //capture promotion
-                    moveList.add(Moves.encodeMove(source = sourceSquare,target = targetSquare,if(isWhite) Piece.P else Piece.p,Piece.Q,
-                        capture = true,
-                        double = false,
-                        enpassant = false,castling = false))
-                    moveList.add(Moves.encodeMove(source = sourceSquare,target = targetSquare,if(isWhite) Piece.P else Piece.p,Piece.R,
-                        capture = true,
-                        double = false,
-                        enpassant = false,castling = false))
-                    moveList.add(Moves.encodeMove(source = sourceSquare,target = targetSquare,if(isWhite) Piece.P else Piece.p,Piece.B,
-                        capture = true,
-                        double = false,
-                        enpassant = false,castling = false))
-                    moveList.add(Moves.encodeMove(source = sourceSquare,target = targetSquare,if(isWhite) Piece.P else Piece.p,Piece.N,
-                        capture = true,
-                        double = false,
-                        enpassant = false,castling = false))
+                    addPromotionMoves(moveList,sourceSquare,targetSquare, isWhite,isCapture = true)
                 } else {
-                    moveList.add(Moves.encodeMove(source = sourceSquare,target = targetSquare,if(isWhite) Piece.P else Piece.p,null,
-                        capture = true,
-                        double = false,
-                        enpassant = false,castling = false))
+                    moveList.add(
+                        Moves.encodeMove(
+                            source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p, promoted = null,
+                            capture = true,
+                            double = false,
+                            enpassant = false, castling = false
+                        )
+                    )
                 }
 
                 attacks.setBitOff(targetSquare)
@@ -534,16 +566,59 @@ class Board {
                     BitBoard((Attacks.pawnAttacks[side.ordinal][sourceSquare.ordinal].board and enpassantBit))
                 if (enpassantAtK.board != 0UL) {
                     targetSquare = Square.fromIntegerToSquare(enpassantAtK.getLSB())!!
-                    moveList.add(Moves.encodeMove(source = sourceSquare,target = targetSquare,if(isWhite) Piece.P else Piece.p,null,
-                        capture = true,
-                        double = false,
-                        enpassant = true,castling = false))
+                    moveList.add(
+                        Moves.encodeMove(
+                            source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p, promoted = null,
+                            capture = true,
+                            double = false,
+                            enpassant = true, castling = false
+                        )
+                    )
                 }
             }
             // moving to the next bit
             bitboardCopy.setBitOff(sourceSquare)
         }
 
+    }
+
+    private fun addPromotionMoves(moveList: MutableList<Int>,sourceSquare:Square,targetSquare:Square,isWhite: Boolean,isCapture : Boolean = false){
+        moveList.add(
+            Moves.encodeMove(
+                source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p,
+                promoted = if (isWhite) Piece.Q else Piece.q,
+                capture = isCapture,
+                double = false,
+                enpassant = false, castling = false
+            )
+        )
+        moveList.add(
+            Moves.encodeMove(
+                source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p,
+                promoted = if (isWhite) Piece.R else Piece.r,
+                capture = isCapture,
+                double = false,
+                enpassant = false, castling = false
+            )
+        )
+        moveList.add(
+            Moves.encodeMove(
+                source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p,
+                promoted = if (isWhite) Piece.B else Piece.b,
+                capture = isCapture,
+                double = false,
+                enpassant = false, castling = false
+            )
+        )
+        moveList.add(
+            Moves.encodeMove(
+                source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p,
+                promoted = if (isWhite) Piece.N else Piece.n,
+                capture = isCapture,
+                double = false,
+                enpassant = false, castling = false
+            )
+        )
     }
 
     /**
@@ -566,6 +641,50 @@ class Board {
 
     }
 
+    fun makeMove(move: Int, isCapturesOnly: Boolean = false): Int {
+        if (isCapturesOnly) {
+            if (Moves.getCaptureFromMove(move)) {
+                makeMove(move, isCapturesOnly = false)
+            } else {
+                // not a real capture -> return 0;
+                return 0
+            }
+        } else {
+            //all moves -> get all information from move
+            val boardCopy = Board(this)
+            val source = Moves.getSourceFromMove(move)
+            val target = Moves.getTargetFromMove(move)
+            val piece = Moves.getPieceFromMove(move)
+            val isPromoted = Moves.getPromotedFromMove(move)
+            val isCapture = Moves.getCaptureFromMove(move)
+            val isDouble = Moves.getDoubleFromMove(move)
+            val isEnPassant = Moves.getEnPassantFromMove(move)
+            val isCastle = Moves.getCastlingFromMove(move)
+
+            // move piece
+            this.pieceBitboards[piece.ordinal].setBitOff(source)
+            this.pieceBitboards[piece.ordinal].setBitOn(target)
+
+            if (isCapture) {
+                // remove other piece
+                for (p in (if (side == Color.WHITE) Piece.blackPieces else Piece.whitePieces)) {
+                    if (this.pieceBitboards[p.ordinal].getBit(target) != 0UL) {
+                        // if the current piece is the one to remove: remove it and stop search
+                        this.pieceBitboards[p.ordinal].setBitOff(target)
+                        break
+                    }
+                }
+            }
+            if (isPromoted != null) {
+                this.pieceBitboards[piece.ordinal].setBitOff(target) // removing pawn
+                this.pieceBitboards[isPromoted.ordinal].setBitOn(target) // putting new piece
+                if ( isCapture) printBoard()
+            }
+
+
+        }
+        return 1
+    }
 
 
     companion object {

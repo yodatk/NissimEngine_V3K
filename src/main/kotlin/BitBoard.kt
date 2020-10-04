@@ -19,8 +19,8 @@ class BitBoard {
         this.board = board
     }
 
-    constructor(board: BitBoard){
-        this.board = board.board
+    constructor(other: BitBoard){
+        this.board = other.board
     }
 
     /***
