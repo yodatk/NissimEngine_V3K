@@ -44,6 +44,14 @@ class Board {
         this.parseFEN(fen, toReset = false)
     }
 
+    constructor(other:Board){
+        this.castle = other.castle
+        this.side = other.side
+        this.enpassant = other.enpassant
+        this.pieceBitboards = other.pieceBitboards.clone()
+        this.occupanciesBitboards = other.occupanciesBitboards.clone()
+    }
+
     /**
      * reset the board to an empty one
      */

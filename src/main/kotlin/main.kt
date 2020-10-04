@@ -25,16 +25,24 @@ Main
 fun main() {
     Attacks.initAll()
     var b = Board(FENDebugConstants.TRICKY_POSITION.fen)
-    val movesList = b.generateMoves()
+    b.printBoard()
+    val backup = Board(b)
+    b.parseFEN(FENDebugConstants.EMPTY.fen)
+    b.printBoard()
+    b = backup
     b.printBoard()
 
-    Moves.printMoveList(movesList)
 
-
-    /*
-
-
-
-    */
+//    val movesList = b.generateMoves()
+//    b.printBoard()
+//
+//    Moves.printMoveList(movesList)
+//
+//
+//    /*
+//
+//
+//
+//    */
 
 }
