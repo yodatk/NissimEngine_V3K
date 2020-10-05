@@ -708,7 +708,6 @@ class Board {
             if (isPromoted != null) {
                 this.pieceBitboards[piece.ordinal].setBitOff(target) // removing pawn
                 this.pieceBitboards[isPromoted.ordinal].setBitOn(target) // putting new piece
-                if (isCapture) printBoard()
             }
 
             if (isEnPassant) {
