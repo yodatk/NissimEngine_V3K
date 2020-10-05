@@ -170,14 +170,14 @@ object MagicNumbers {
         // loop over occupancy indicies
         for (index in 0 until occupancyIndices) {
             //init occupancies
-            occupancies[index] = Attacks.setOccupancy(index, relevantBits, attackMask).board
+            occupancies[index] = Attacks.setOccupancy(index, relevantBits, attackMask)
 
             //init attacks
             attacks[index] = if (isBishop) Attacks.bishopAttacksOnTheFly(
                 Square.fromIntegerToSquare(square)!!,
-                BitBoard(occupancies[index])
-            ).board
-            else Attacks.rookAttacksOnTheFly(Square.fromIntegerToSquare(square)!!, BitBoard(occupancies[index])).board
+                (occupancies[index])
+            )
+            else Attacks.rookAttacksOnTheFly(Square.fromIntegerToSquare(square)!!, (occupancies[index]))
         }
 
         //test magic numbers loop
@@ -185,7 +185,7 @@ object MagicNumbers {
             //generate current magic number
             val currentMagicNumber: ULong = generateMagicNumber()
 
-            if (BitBoard.countBits((attackMask.board * currentMagicNumber) and 0xFF00000000000000U) < 6) {
+            if (BitBoard.countBits((attackMask * currentMagicNumber) and 0xFF00000000000000U) < 6) {
                 // skip invalid values
                 continue
             }

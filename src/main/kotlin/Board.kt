@@ -8,12 +8,12 @@ class Board {
      * array of bitboards to represents the board - 6 for each color.
      *
      */
-    var pieceBitboards: Array<BitBoard>
+    var pieceBitboards: Array<ULong>
 
     /**
      * array of 3 bit boards - white pieces, black pieces, and both
      */
-    var occupanciesBitboards: Array<BitBoard>
+    var occupanciesBitboards: Array<ULong>
 
     /**
      * int to represent which side is now playing
@@ -32,8 +32,8 @@ class Board {
 
 
     constructor() {
-        this.pieceBitboards = Array(12) { BitBoard() }
-        this.occupanciesBitboards = Array(3) { BitBoard() }
+        this.pieceBitboards = Array(12) { 0UL }
+        this.occupanciesBitboards = Array(3) { 0UL }
         this.side = Color.WHITE
         this.enpassant = Square.NO_SQUARE
         this.castle = 0
@@ -49,23 +49,23 @@ class Board {
         this.side = other.side
         this.enpassant = other.enpassant
         this.pieceBitboards = arrayOf(
-            BitBoard(other.pieceBitboards[0]),
-            BitBoard(other.pieceBitboards[1]),
-            BitBoard(other.pieceBitboards[2]),
-            BitBoard(other.pieceBitboards[3]),
-            BitBoard(other.pieceBitboards[4]),
-            BitBoard(other.pieceBitboards[5]),
-            BitBoard(other.pieceBitboards[6]),
-            BitBoard(other.pieceBitboards[7]),
-            BitBoard(other.pieceBitboards[8]),
-            BitBoard(other.pieceBitboards[9]),
-            BitBoard(other.pieceBitboards[10]),
-            BitBoard(other.pieceBitboards[11])
+            other.pieceBitboards[0],
+            other.pieceBitboards[1], other.pieceBitboards[2],
+            other.pieceBitboards[3],
+            other.pieceBitboards[4],
+            other.pieceBitboards[5],
+            other.pieceBitboards[6],
+            other.pieceBitboards[7],
+            other.pieceBitboards[8],
+            other.pieceBitboards[9],
+            other.pieceBitboards[10],
+            other.pieceBitboards[11]
         )
+
         this.occupanciesBitboards = arrayOf(
-            BitBoard(other.occupanciesBitboards[0]),
-            BitBoard(other.occupanciesBitboards[1]),
-            BitBoard(other.occupanciesBitboards[2]),
+            other.occupanciesBitboards[0],
+            other.occupanciesBitboards[1],
+            other.occupanciesBitboards[2],
         )
     }
 
@@ -73,8 +73,8 @@ class Board {
      * reset the board to an empty one
      */
     private fun emptyBoard() {
-        this.pieceBitboards = Array(12) { BitBoard() }
-        this.occupanciesBitboards = Array(3) { BitBoard() }
+        this.pieceBitboards = Array(12) { 0UL }
+        this.occupanciesBitboards = Array(3) { 0UL }
         this.side = Color.WHITE
         this.enpassant = Square.NO_SQUARE
         this.castle = 0
@@ -117,7 +117,7 @@ class Board {
                     // putting piece on board. if invalid piece character -> throws error
                     val piece: Piece =
                         Piece.convertCharToPiece(fen[index]) ?: throw FENException("invalid piece: '${fen[index]}'")
-                    this.pieceBitboards[piece.ordinal].setBitOn(square)
+                    this.pieceBitboards[piece.ordinal] = BitBoard.setBitOn(this.pieceBitboards[piece.ordinal],square)
                     index++
                 }
                 if (fen[index] in '0'..'9') {
@@ -125,7 +125,7 @@ class Board {
                     val offset = fen[index] - '0'
                     var piece: Piece? = null
                     for (p in Piece.allPieces) {
-                        if (this.pieceBitboards[p.ordinal].getBit(square) != 0UL) {
+                        if (BitBoard.getBit(this.pieceBitboards[p.ordinal],square) != 0UL) {
                             piece = p
                             break
                         }
@@ -194,16 +194,16 @@ class Board {
      */
     private fun matchOccupanciesToPiecesBitBoards(reset: Boolean = true) {
         if (reset) {
-            this.occupanciesBitboards = Array(3) { BitBoard() }
+            this.occupanciesBitboards = Array(3) { 0UL }
         }
         for (p in Piece.whitePieces) {
-            occupanciesBitboards[Color.WHITE.ordinal].bitwiseOR(pieceBitboards[p.ordinal])
+            occupanciesBitboards[Color.WHITE.ordinal] = occupanciesBitboards[Color.WHITE.ordinal] or pieceBitboards[p.ordinal]
         }
         for (p in Piece.blackPieces) {
-            occupanciesBitboards[Color.BLACK.ordinal].bitwiseOR(pieceBitboards[p.ordinal])
+            occupanciesBitboards[Color.BLACK.ordinal] =  occupanciesBitboards[Color.BLACK.ordinal] or (pieceBitboards[p.ordinal])
         }
-        occupanciesBitboards[Color.BOTH.ordinal].bitwiseOR(occupanciesBitboards[Color.WHITE.ordinal])
-        occupanciesBitboards[Color.BOTH.ordinal].bitwiseOR(occupanciesBitboards[Color.BLACK.ordinal])
+        occupanciesBitboards[Color.BOTH.ordinal] = occupanciesBitboards[Color.BOTH.ordinal] or (occupanciesBitboards[Color.WHITE.ordinal])
+        occupanciesBitboards[Color.BOTH.ordinal] = occupanciesBitboards[Color.BOTH.ordinal] or (occupanciesBitboards[Color.BLACK.ordinal])
     }
 
 
@@ -221,13 +221,13 @@ class Board {
         println()
         for (rank in 0..7) {
             for (file in 0..7) {
-                val square = Square.fromIntegerToSquare(rank * 8 + file)
+                val square = Square.fromIntegerToSquare(rank * 8 + file)!!
                 if (file == 0) {
                     print(" ${8 - rank} ")
                 }
                 var piece = -1
                 for (p in 0..11) {
-                    if (this.pieceBitboards[p].getBit(square!!) != 0UL) {
+                    if (BitBoard.getBit(this.pieceBitboards[p],square) != 0UL) {
 
                         piece = p
                         break
@@ -254,37 +254,37 @@ class Board {
      */
     fun isSquareAttacked(square: Square, side: Color): Boolean {
         // attacked by white pawns
-        if ((side == Color.WHITE) && ((Attacks.pawnAttacks[Color.BLACK.ordinal][square.ordinal].board and this.pieceBitboards[Piece.P.ordinal].board) != 0UL)) {
+        if ((side == Color.WHITE) && ((Attacks.pawnAttacks[Color.BLACK.ordinal][square.ordinal] and this.pieceBitboards[Piece.P.ordinal]) != 0UL)) {
             return true
         }
         // attacked by black pawns
-        if ((side == Color.BLACK) && ((Attacks.pawnAttacks[Color.WHITE.ordinal][square.ordinal].board and this.pieceBitboards[Piece.p.ordinal].board) != 0UL)) {
+        if ((side == Color.BLACK) && ((Attacks.pawnAttacks[Color.WHITE.ordinal][square.ordinal] and this.pieceBitboards[Piece.p.ordinal]) != 0UL)) {
             return true
         }
 
         // attacked by knights
-        if ((Attacks.knightAttacks[square.ordinal].board and (if (side == Color.WHITE) this.pieceBitboards[Piece.N.ordinal].board else this.pieceBitboards[Piece.n.ordinal].board)) != 0UL) {
+        if ((Attacks.knightAttacks[square.ordinal] and (if (side == Color.WHITE) this.pieceBitboards[Piece.N.ordinal] else this.pieceBitboards[Piece.n.ordinal])) != 0UL) {
             return true
         }
 
         // attacked by king
-        if ((Attacks.kingAttacks[square.ordinal].board and (if (side == Color.WHITE) this.pieceBitboards[Piece.K.ordinal].board else this.pieceBitboards[Piece.k.ordinal].board)) != 0UL) {
+        if ((Attacks.kingAttacks[square.ordinal] and (if (side == Color.WHITE) this.pieceBitboards[Piece.K.ordinal] else this.pieceBitboards[Piece.k.ordinal])) != 0UL) {
             return true
         }
         //attacked by bishop
         val bAttacks = Attacks.getBishopAttacks(square, this.occupanciesBitboards[Color.BOTH.ordinal])
-        if ((bAttacks.board and (if (side == Color.WHITE) this.pieceBitboards[Piece.B.ordinal].board else this.pieceBitboards[Piece.b.ordinal].board)) != 0UL) {
+        if ((bAttacks and (if (side == Color.WHITE) this.pieceBitboards[Piece.B.ordinal] else this.pieceBitboards[Piece.b.ordinal])) != 0UL) {
             return true
         }
         //attacked by rook
         val rAttacks = Attacks.getRookAttacks(square, this.occupanciesBitboards[Color.BOTH.ordinal])
-        if ((rAttacks.board and (if (side == Color.WHITE) this.pieceBitboards[Piece.R.ordinal].board else this.pieceBitboards[Piece.r.ordinal].board)) != 0UL) {
+        if ((rAttacks and (if (side == Color.WHITE) this.pieceBitboards[Piece.R.ordinal] else this.pieceBitboards[Piece.r.ordinal])) != 0UL) {
             return true
         }
 
         //attacked by queen
         val qAttacks = Attacks.getQueenAttacks(square, this.occupanciesBitboards[Color.BOTH.ordinal])
-        if ((qAttacks.board and (if (side == Color.WHITE) this.pieceBitboards[Piece.Q.ordinal].board else this.pieceBitboards[Piece.q.ordinal].board)) != 0UL) {
+        if ((qAttacks and (if (side == Color.WHITE) this.pieceBitboards[Piece.Q.ordinal] else this.pieceBitboards[Piece.q.ordinal])) != 0UL) {
             return true
         }
         //default - return 0
@@ -296,12 +296,12 @@ class Board {
      * @return List of integers that represents all the possible moves on the board
      */
     fun generateMoves(): MutableList<Int> {
-        var bitboardCopy: BitBoard
+        var bitboardCopy: ULong
         val isWhite = side == Color.WHITE
         var moveList: MutableList<Int> = mutableListOf()
 
         for (piece in if (isWhite) Piece.whitePieces else Piece.blackPieces) {
-            bitboardCopy = BitBoard(this.pieceBitboards[piece.ordinal].board)
+            bitboardCopy = (this.pieceBitboards[piece.ordinal])
             if (piece == Piece.P || piece == Piece.p) {
                 generateMovesForPawns(bitboardCopy, isWhite, moveList)
             } else {
@@ -323,12 +323,13 @@ class Board {
      * @param isWhite: true-> generate for white. false -> generate for black
      * @param moveList: list of integers that collects all the moves available so far to edit
      */
-    fun generateMovesForPiece(piece: Piece, bitboardCopy: BitBoard, isWhite: Boolean, moveList: MutableList<Int>) {
+    fun generateMovesForPiece(piece: Piece, _bitboardCopy: ULong, isWhite: Boolean, moveList: MutableList<Int>) {
+        var bitboardCopy = _bitboardCopy
         var sourceSquare: Square
         var targetSquare: Square
-        var attacks: BitBoard
-        while (bitboardCopy.board != 0UL) {
-            sourceSquare = Square.fromIntegerToSquare(bitboardCopy.getLSB())!!
+        var attacks: ULong
+        while (bitboardCopy != 0UL) {
+            sourceSquare = Square.fromIntegerToSquare(BitBoard.getLSB(bitboardCopy))!!
             val attacksSource = when (piece) {
                 Piece.N, Piece.n -> Attacks.knightAttacks[sourceSquare.ordinal]
                 Piece.B, Piece.b -> Attacks.getBishopAttacks(sourceSquare, occupanciesBitboards[Color.BOTH.ordinal])
@@ -338,17 +339,15 @@ class Board {
                 else -> return
             }
             val occ =
-                if (isWhite) occupanciesBitboards[Color.WHITE.ordinal].board.inv() else occupanciesBitboards[Color.BLACK.ordinal].board.inv()
-            attacks = BitBoard(attacksSource.board and occ)
-            while (attacks.board != 0UL) {
-                targetSquare = Square.fromIntegerToSquare(attacks.getLSB())!!
+                if (isWhite) occupanciesBitboards[Color.WHITE.ordinal].inv() else occupanciesBitboards[Color.BLACK.ordinal].inv()
+            attacks = (attacksSource and occ)
+            while (attacks != 0UL) {
+                targetSquare = Square.fromIntegerToSquare(BitBoard.getLSB(attacks))!!
 
-                val occ2 = if (isWhite) BitBoard(occupanciesBitboards[Color.BLACK.ordinal].board) else BitBoard(
-                    occupanciesBitboards[Color.WHITE.ordinal].board
-                )
+                val occ2 = if (isWhite) (occupanciesBitboards[Color.BLACK.ordinal]) else ( occupanciesBitboards[Color.WHITE.ordinal])
 
 
-                if (occ2.getBit(targetSquare) == 0UL) {
+                if (BitBoard.getBit(occ2,targetSquare) == 0UL) {
                     // quiet moves
                     moveList.add(
                         Moves.encodeMove(
@@ -371,10 +370,10 @@ class Board {
                     )
                 }
 
-                attacks.setBitOff(targetSquare)
+                attacks = BitBoard.setBitOff(attacks,targetSquare)
             }
 
-            bitboardCopy.setBitOff(sourceSquare)
+            bitboardCopy = BitBoard.setBitOff(bitboardCopy,sourceSquare)
 
         }
 
@@ -433,9 +432,9 @@ class Board {
         // no obstacles in the way of king side castling
         val isClear =
 
-            this.occupanciesBitboards[Color.BOTH.ordinal].getBit(if (isWhite) Square.c1 else Square.c8) == 0UL
-                    && this.occupanciesBitboards[Color.BOTH.ordinal].getBit(if (isWhite) Square.b1 else Square.b8) == 0UL
-                    && this.occupanciesBitboards[Color.BOTH.ordinal].getBit(if (isWhite) Square.d1 else Square.d8) == 0UL
+            BitBoard.getBit(this.occupanciesBitboards[Color.BOTH.ordinal], (if (isWhite) Square.c1 else Square.c8)) == 0UL
+                    &&  BitBoard.getBit(this.occupanciesBitboards[Color.BOTH.ordinal],(if (isWhite) Square.b1 else Square.b8) )== 0UL
+                    && BitBoard.getBit(this.occupanciesBitboards[Color.BOTH.ordinal], (if (isWhite) Square.d1 else Square.d8) )== 0UL
 
         // no threat on castling squares
         val isThreatened =
@@ -465,8 +464,8 @@ class Board {
 
         // no obstacles in the way of king side castling
         val isClear =
-            (this.occupanciesBitboards[Color.BOTH.ordinal].getBit(if (isWhite) Square.g1 else Square.g8) == 0UL
-                    && this.occupanciesBitboards[Color.BOTH.ordinal].getBit(if (isWhite) Square.f1 else Square.f8) == 0UL)
+            (BitBoard.getBit(this.occupanciesBitboards[Color.BOTH.ordinal],(if (isWhite) Square.g1 else Square.g8)) == 0UL
+                    && BitBoard.getBit(this.occupanciesBitboards[Color.BOTH.ordinal],(if (isWhite) Square.f1 else Square.f8) )== 0UL)
         // no threat on castling squares
         val isThreatened =
             ((if (isWhite) this.isSquareAttacked(
@@ -490,17 +489,17 @@ class Board {
      * @param isWhite: Boolean to say the color of the pawn: true-> White, false->Black
      * @param moveList: Mutable list of integers represent all the possible moves so far
      */
-    fun generateMovesForPawns(bitboardCopy: BitBoard, isWhite: Boolean, moveList: MutableList<Int>) {
-
-        while (bitboardCopy.board != 0UL) {
-            val sourceSquare = Square.fromIntegerToSquare(bitboardCopy.getLSB())!!
+    fun generateMovesForPawns(_bitboardCopy: ULong, isWhite: Boolean, moveList: MutableList<Int>) {
+        var bitboardCopy = _bitboardCopy
+        while (bitboardCopy != 0UL) {
+            val sourceSquare = Square.fromIntegerToSquare(BitBoard.getLSB(bitboardCopy))!!
             var targetSquare =
                 if (side == Color.WHITE) Square.fromIntegerToSquare(sourceSquare.ordinal - 8)!! else Square.fromIntegerToSquare(
                     sourceSquare.ordinal + 8
                 )!!
             val isPromotionPossible =
                 if (isWhite) sourceSquare.ordinal in Square.a7.ordinal..Square.h7.ordinal else sourceSquare.ordinal in Square.a2.ordinal..Square.h2.ordinal
-            val isTargetOccupied: Boolean = occupanciesBitboards[Color.BOTH.ordinal].getBit(targetSquare) != 0UL
+            val isTargetOccupied: Boolean = BitBoard.getBit(occupanciesBitboards[Color.BOTH.ordinal],targetSquare) != 0UL
             var isInRange =
                 if (isWhite) targetSquare.ordinal >= Square.a8.ordinal else targetSquare.ordinal <= Square.h1.ordinal
             if (isInRange && !isTargetOccupied) {
@@ -529,7 +528,7 @@ class Board {
                             targetSquare.ordinal + 8
                         )!!
                     val isDoubleTargetOccupied: Boolean =
-                        occupanciesBitboards[Color.BOTH.ordinal].getBit(targetSquare) != 0UL
+                        BitBoard.getBit(occupanciesBitboards[Color.BOTH.ordinal],(targetSquare)) != 0UL
                     isInRange =
                         if (isWhite) sourceSquare.ordinal in Square.a2.ordinal..Square.h2.ordinal else sourceSquare.ordinal in Square.a7.ordinal..Square.h7.ordinal
                     if (isInRange && !isDoubleTargetOccupied) {
@@ -549,10 +548,10 @@ class Board {
                 }
             }
             //handeling capture moves
-            val attacks =
-                BitBoard(Attacks.pawnAttacks[side.ordinal][sourceSquare.ordinal].board and occupanciesBitboards[(if (isWhite) Color.BLACK else Color.WHITE).ordinal].board)
-            while (attacks.board != 0UL) {
-                targetSquare = Square.fromIntegerToSquare(attacks.getLSB())!!
+            var attacks =
+                (Attacks.pawnAttacks[side.ordinal][sourceSquare.ordinal] and occupanciesBitboards[(if (isWhite) Color.BLACK else Color.WHITE).ordinal])
+            while (attacks != 0UL) {
+                targetSquare = Square.fromIntegerToSquare(BitBoard.getLSB(attacks))!!
                 if (isPromotionPossible) {
                     //capture promotion
                     addPromotionMoves(moveList, sourceSquare, targetSquare, isWhite, isCapture = true)
@@ -571,16 +570,16 @@ class Board {
                     )
                 }
 
-                attacks.setBitOff(targetSquare)
+                attacks = BitBoard.setBitOff(attacks,targetSquare)
             }
 
             if (enpassant != Square.NO_SQUARE) {
                 //checking enpassant move
                 val enpassantBit: ULong = (1UL shl enpassant.ordinal)
                 val enpassantAtK =
-                    BitBoard((Attacks.pawnAttacks[side.ordinal][sourceSquare.ordinal].board and enpassantBit))
-                if (enpassantAtK.board != 0UL) {
-                    targetSquare = Square.fromIntegerToSquare(enpassantAtK.getLSB())!!
+                    ((Attacks.pawnAttacks[side.ordinal][sourceSquare.ordinal] and enpassantBit))
+                if (enpassantAtK != 0UL) {
+                    targetSquare = Square.fromIntegerToSquare(BitBoard.getLSB(enpassantAtK))!!
                     moveList.add(
                         Moves.encodeMove(
                             source = sourceSquare,
@@ -596,7 +595,7 @@ class Board {
                 }
             }
             // moving to the next bit
-            bitboardCopy.setBitOff(sourceSquare)
+            bitboardCopy = BitBoard.setBitOff(bitboardCopy,sourceSquare)
         }
 
     }
@@ -692,29 +691,30 @@ class Board {
             val isCastle = Moves.getCastlingFromMove(move)
 
             // move piece
-            this.pieceBitboards[piece.ordinal].setBitOff(source)
-            this.pieceBitboards[piece.ordinal].setBitOn(target)
+            this.pieceBitboards[piece.ordinal] = BitBoard.setBitOff(this.pieceBitboards[piece.ordinal],source)
+            this.pieceBitboards[piece.ordinal] = BitBoard.setBitOn(this.pieceBitboards[piece.ordinal],target)
+
 
             if (isCapture) {
                 // remove other piece
                 for (p in (if (side == Color.WHITE) Piece.blackPieces else Piece.whitePieces)) {
-                    if (this.pieceBitboards[p.ordinal].getBit(target) != 0UL) {
+                    if (BitBoard.getBit(this.pieceBitboards[p.ordinal],target) != 0UL) {
                         // if the current piece is the one to remove: remove it and stop search
-                        this.pieceBitboards[p.ordinal].setBitOff(target)
+                        this.pieceBitboards[p.ordinal] = BitBoard.setBitOff(this.pieceBitboards[p.ordinal],target)
                         break
                     }
                 }
             }
             if (isPromoted != null) {
-                this.pieceBitboards[piece.ordinal].setBitOff(target) // removing pawn
-                this.pieceBitboards[isPromoted.ordinal].setBitOn(target) // putting new piece
+                this.pieceBitboards[piece.ordinal] =  BitBoard.setBitOff(this.pieceBitboards[piece.ordinal],target) // removing pawn
+                this.pieceBitboards[isPromoted.ordinal] = BitBoard.setBitOn(this.pieceBitboards[isPromoted.ordinal],target) // putting new piece
             }
 
             if (isEnPassant) {
                 if (side == Color.WHITE) {
-                    this.pieceBitboards[Piece.p.ordinal].setBitOff(Square.fromIntegerToSquare(target.ordinal + 8)!!)
+                    this.pieceBitboards[Piece.p.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.p.ordinal],Square.fromIntegerToSquare(target.ordinal + 8)!!)
                 } else {
-                    this.pieceBitboards[Piece.P.ordinal].setBitOff(Square.fromIntegerToSquare(target.ordinal - 8)!!)
+                    this.pieceBitboards[Piece.P.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.P.ordinal],Square.fromIntegerToSquare(target.ordinal - 8)!!)
                 }
             }
 
@@ -730,28 +730,28 @@ class Board {
                 when (target) {
                     //white king side
                     Square.g1 -> {
-                        this.pieceBitboards[Piece.R.ordinal].setBitOff(Square.h1)
-                        this.pieceBitboards[Piece.R.ordinal].setBitOn(Square.f1)
+                        this.pieceBitboards[Piece.R.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.R.ordinal],Square.h1)
+                        this.pieceBitboards[Piece.R.ordinal] = BitBoard.setBitOn(this.pieceBitboards[Piece.R.ordinal],Square.f1)
                     }
 
                     //white queen side
                     Square.c1 -> {
-                        this.pieceBitboards[Piece.R.ordinal].setBitOff(Square.a1)
-                        this.pieceBitboards[Piece.R.ordinal].setBitOn(Square.d1)
+                        this.pieceBitboards[Piece.R.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.R.ordinal],Square.a1)
+                        this.pieceBitboards[Piece.R.ordinal] = BitBoard.setBitOn(this.pieceBitboards[Piece.R.ordinal],Square.d1)
 
                     }
 
                     //black king side
                     Square.g8 -> {
-                        this.pieceBitboards[Piece.r.ordinal].setBitOff(Square.h8)
-                        this.pieceBitboards[Piece.r.ordinal].setBitOn(Square.f8)
+                        this.pieceBitboards[Piece.r.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.r.ordinal],Square.h8)
+                        this.pieceBitboards[Piece.r.ordinal]= BitBoard.setBitOn(this.pieceBitboards[Piece.r.ordinal],Square.f8)
 
                     }
 
                     //white queen side
                     Square.c8 -> {
-                        this.pieceBitboards[Piece.r.ordinal].setBitOff(Square.a8)
-                        this.pieceBitboards[Piece.r.ordinal].setBitOn(Square.d8)
+                        this.pieceBitboards[Piece.r.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.r.ordinal],Square.a8)
+                        this.pieceBitboards[Piece.r.ordinal] = BitBoard.setBitOn(this.pieceBitboards[Piece.r.ordinal],Square.d8)
                     }
 
                     else -> return false
@@ -769,8 +769,8 @@ class Board {
             //change side
             this.side = if (side == Color.WHITE) Color.BLACK else Color.WHITE
             val kingSquare =
-                if (side == Color.WHITE) Square.fromIntegerToSquare(this.pieceBitboards[Piece.k.ordinal].getLSB())!!
-                else Square.fromIntegerToSquare(this.pieceBitboards[Piece.K.ordinal].getLSB())!!
+                if (side == Color.WHITE) Square.fromIntegerToSquare(BitBoard.getLSB(this.pieceBitboards[Piece.k.ordinal]))!!
+                else Square.fromIntegerToSquare(BitBoard.getLSB(this.pieceBitboards[Piece.K.ordinal]))!!
             return if (isSquareAttacked(kingSquare, side)) {
                 //move is invalid. restore and return false
                 this.copyOtherBoard(boardCopy)

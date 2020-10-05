@@ -1,3 +1,4 @@
+
 import enums.Square
 
 /**
@@ -7,44 +8,41 @@ import enums.Square
  * ================================================
  */
 @ExperimentalUnsignedTypes
-class BitBoard {
+object BitBoard {
 
-    var board : ULong = 0UL
-
-    constructor(){
-        this.board = 0UL
-    }
-
-    constructor(board: ULong){
-        this.board = board
-    }
-
-    constructor(other: BitBoard){
-        this.board = other.board
-    }
+//    var board : ULong = 0UL
+//
+//    constructor(){
+//        this.board = 0UL
+//    }
+//
+//    constructor(board: ULong){
+//        this.board = board
+//    }
+//
+//    constructor(other: BitBoard){
+//        this.board = other.board
+//    }
 
     /***
      * get the chosen bit of the wanted square from the given BitBoard
      * @return ULong of the given bit
      */
-    fun getBit(square: Square): ULong = (board and (1UL shl square.ordinal))
+    fun getBit(board: ULong,square: Square): ULong = (board and (1UL shl square.ordinal))
 
     /***
      * setting on bit in the given square
      */
-    fun setBitOn(square: Square) {
-        board =  (board or (1UL shl square.ordinal))
-    }
+    fun setBitOn(board: ULong, square: Square) = (board or (1UL shl square.ordinal))
 
     /**
      * setting off bit in given square if possible
      */
-    fun setBitOff(square: Square) {
-         this.board = this.board and (1UL shl square.ordinal).inv()
-    }
+    fun setBitOff(board:ULong ,square: Square) = board and (1UL shl square.ordinal).inv()
 
 
-    fun printBitboard() {
+
+    fun printBitboard(board: ULong) {
         println()
         for (rank in 0..7) {
             //for each rank
@@ -56,7 +54,8 @@ class BitBoard {
                     print(" ${8 - rank} ")
                 }
                 //printing '1' or '0' bit
-                print(" ${if (getBit(Square.fromIntegerToSquare(square)!!) != 0UL) 1 else 0}")
+
+                print(" ${if (getBit(board,Square.fromIntegerToSquare(square)!!) != 0UL) 1 else 0}")
             }
             println()
 
@@ -64,60 +63,25 @@ class BitBoard {
         }
         //printing files
         println("\n    A B C D E F G H\n")
-        println("    Bitboard: ${board}")
-    }
-    fun bitwiseOR(other:BitBoard){
-        this.board = this.board or other.board
-    }
-    fun bitwiseOR(other:ULong){
-        this.board = this.board or other
+        println("    Bitboard: $board")
     }
 
-    fun bitwiseAnd(other:BitBoard){
-        this.board = this.board and other.board
-    }
-
-    fun bitwiseAnd(other:ULong){
-        this.board = this.board and other
-    }
-
-    fun countBits(): Int {
+    fun countBits(board:ULong): Int {
         var counter = 0
-        val copyBoard = BitBoard(this)
-        while(copyBoard.board!=0UL){
+        var copyBoard = board
+        while(copyBoard !=0UL){
             counter++
-            copyBoard.bitwiseAnd(BitBoard(copyBoard
-                .board-1UL))
+            copyBoard = copyBoard and (copyBoard-1UL)
         }
         return counter
-
     }
 
-    fun getLSB(): Int {
-        return if(this.board!=0UL){
-            BitBoard.countBits((this.board and (0UL - this.board)) -1UL)
+    fun getLSB(board:ULong): Int {
+        return if(board!=0UL){
+            countBits((board and (0UL-board)) -1UL)
         } else{
             //empty board -> does not have lsb
             -1
         }
     }
-
-    companion object{
-        fun countBits(_board : BitBoard): Int {
-            val board = BitBoard(_board)
-            var counter = 0
-            while(board.board!=0UL){
-                counter++
-                board.bitwiseAnd(BitBoard(board.board-1UL))
-            }
-            return counter
-
-        }
-        fun countBits(board : ULong): Int {
-            val bitBoard = BitBoard(board)
-            return BitBoard.countBits(bitBoard)
-
-        }
-    }
-
 }

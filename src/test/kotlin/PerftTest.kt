@@ -39,5 +39,5 @@ fun runPerftTestOnGivenFEN(fen:String,initialDepth:Int): ULong {
 }
 @ExperimentalUnsignedTypes
 fun main() {
-    runPerftTestOnGivenFEN(FENDebugConstants.START_POSITION.fen,6)
+    runPerftTestOnGivenFEN(FENDebugConstants.TRICKY_POSITION.fen,5)
 }
