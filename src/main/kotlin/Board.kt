@@ -1,4 +1,5 @@
 import enums.*
+import kotlin.text.StringBuilder
 
 
 @ExperimentalUnsignedTypes
@@ -207,6 +208,36 @@ class Board {
     }
 
 
+    override fun toString(): String {
+        val builder = StringBuilder("\n")
+        for (rank in 0..7) {
+            for (file in 0..7) {
+                val square = Square.fromIntegerToSquare(rank * 8 + file)!!
+                if (file == 0) {
+                    builder.append(" ${8 - rank} ")
+                }
+                var piece = -1
+                for (p in 0..11) {
+                    if (BitBoard.getBit(this.pieceBitboards[p],square) != 0UL) {
+
+                        piece = p
+                        break
+                    }
+                }
+                builder.append(if (piece == -1) ". " else "${Piece.convertIndexToPiece(piece)} ")
+
+            }
+            builder.append("\n")
+
+        }
+        builder.append("\n   A B C D E F G H\n\n")
+        builder.append("    Side:               ${side.name}\n")
+        builder.append("    En-Passant:         ${this.enpassant.name}\n")
+        builder.append("    Castling Rights:    ${if ((castle and CastlingRights.WK.value) != 0) 'K' else '-'}${if ((castle and CastlingRights.WQ.value) != 0) 'Q' else '-'}${if ((castle and CastlingRights.BK.value) != 0) 'k' else '-'}${if ((castle and CastlingRights.BQ.value) != 0) 'q' else '-'}\n")
+        return builder.toString()
+    }
+
+
     /**
      * print the current situation in the board:
      * '.' -> empty square
@@ -218,32 +249,7 @@ class Board {
      * K -> white king         k -> black king
      */
     fun printBoard() {
-        println()
-        for (rank in 0..7) {
-            for (file in 0..7) {
-                val square = Square.fromIntegerToSquare(rank * 8 + file)!!
-                if (file == 0) {
-                    print(" ${8 - rank} ")
-                }
-                var piece = -1
-                for (p in 0..11) {
-                    if (BitBoard.getBit(this.pieceBitboards[p],square) != 0UL) {
-
-                        piece = p
-                        break
-                    }
-                }
-                print(if (piece == -1) ". " else "${Piece.convertIndexToPiece(piece)} ")
-
-            }
-            println()
-
-        }
-        println("\n   A B C D E F G H\n")
-        println("    Side:               ${side.name}")
-        println("    En-Passant:         ${this.enpassant.name}")
-        println("    Castling Rights:    ${if ((castle and CastlingRights.WK.value) != 0) 'K' else '-'}${if ((castle and CastlingRights.WQ.value) != 0) 'Q' else '-'}${if ((castle and CastlingRights.BK.value) != 0) 'k' else '-'}${if ((castle and CastlingRights.BQ.value) != 0) 'q' else '-'}\n")
-
+        println(this)
     }
 
     /**

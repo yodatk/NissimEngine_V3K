@@ -24,8 +24,4 @@ enum class Move(val flag: Int, val shift: Int) {
     EN_PASSANT(flag = 0x400000, shift = 22),
     CASTLING(flag = 0x800000, shift = 23);
 
-
-
-
-
 }

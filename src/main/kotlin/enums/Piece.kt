@@ -18,13 +18,14 @@ enum class Piece {
     q,
     k;
 
+
     companion object {
 
-        val whitePieces = arrayOf(P,N,B,R,Q,K)
-        val blackPieces = arrayOf(p,n,b,r,q,k)
-        val allPieces = arrayOf(P,N,B,R,Q,K,p,n,b,r,q,k)
-        fun convertIndexToPiece(i:Int) : Piece?{
-            return when(i){
+        val whitePieces = arrayOf(P, N, B, R, Q, K)
+        val blackPieces = arrayOf(p, n, b, r, q, k)
+        val allPieces = arrayOf(P, N, B, R, Q, K, p, n, b, r, q, k)
+        fun convertIndexToPiece(i: Int): Piece? {
+            return when (i) {
                 0 -> P
                 1 -> N
                 2 -> B
@@ -41,8 +42,8 @@ enum class Piece {
             }
         }
 
-        fun convertCharToPiece(i:Char) : Piece?{
-            return when(i){
+        fun convertCharToPiece(i: Char): Piece? {
+            return when (i) {
                 'P' -> P
                 'N' -> N
                 'B' -> B
