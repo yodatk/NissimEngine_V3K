@@ -192,7 +192,10 @@ class Board {
     /**
      * build the current occupancies of the board according to the 12 bitboards of the pieces
      */
-    private fun matchOccupanciesToPiecesBitBoards() {
+    private fun matchOccupanciesToPiecesBitBoards(reset: Boolean = true) {
+        if (reset) {
+            this.occupanciesBitboards = Array(3) { BitBoard() }
+        }
         for (p in Piece.whitePieces) {
             occupanciesBitboards[Color.WHITE.ordinal].bitwiseOR(pieceBitboards[p.ordinal])
         }
@@ -503,16 +506,20 @@ class Board {
             if (isInRange && !isTargetOccupied) {
                 //check promotion
                 if (isPromotionPossible) {
-                    addPromotionMoves(moveList,sourceSquare,targetSquare, isWhite)
+                    addPromotionMoves(moveList, sourceSquare, targetSquare, isWhite)
                 } else {
                     //adding single push
 
                     moveList.add(
                         Moves.encodeMove(
-                            source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p, promoted = null,
+                            source = sourceSquare,
+                            target = targetSquare,
+                            piece = if (isWhite) Piece.P else Piece.p,
+                            promoted = null,
                             capture = false,
                             double = false,
-                            enpassant = false, castling = false
+                            enpassant = false,
+                            castling = false
                         )
                     )
                     //checking double push
@@ -528,10 +535,14 @@ class Board {
                     if (isInRange && !isDoubleTargetOccupied) {
                         moveList.add(
                             Moves.encodeMove(
-                                source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p, promoted = null,
+                                source = sourceSquare,
+                                target = targetSquare,
+                                piece = if (isWhite) Piece.P else Piece.p,
+                                promoted = null,
                                 capture = false,
                                 double = true,
-                                enpassant = false, castling = false
+                                enpassant = false,
+                                castling = false
                             )
                         )
                     }
@@ -544,14 +555,18 @@ class Board {
                 targetSquare = Square.fromIntegerToSquare(attacks.getLSB())!!
                 if (isPromotionPossible) {
                     //capture promotion
-                    addPromotionMoves(moveList,sourceSquare,targetSquare, isWhite,isCapture = true)
+                    addPromotionMoves(moveList, sourceSquare, targetSquare, isWhite, isCapture = true)
                 } else {
                     moveList.add(
                         Moves.encodeMove(
-                            source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p, promoted = null,
+                            source = sourceSquare,
+                            target = targetSquare,
+                            piece = if (isWhite) Piece.P else Piece.p,
+                            promoted = null,
                             capture = true,
                             double = false,
-                            enpassant = false, castling = false
+                            enpassant = false,
+                            castling = false
                         )
                     )
                 }
@@ -568,10 +583,14 @@ class Board {
                     targetSquare = Square.fromIntegerToSquare(enpassantAtK.getLSB())!!
                     moveList.add(
                         Moves.encodeMove(
-                            source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p, promoted = null,
+                            source = sourceSquare,
+                            target = targetSquare,
+                            piece = if (isWhite) Piece.P else Piece.p,
+                            promoted = null,
                             capture = true,
                             double = false,
-                            enpassant = true, castling = false
+                            enpassant = true,
+                            castling = false
                         )
                     )
                 }
@@ -582,7 +601,13 @@ class Board {
 
     }
 
-    private fun addPromotionMoves(moveList: MutableList<Int>,sourceSquare:Square,targetSquare:Square,isWhite: Boolean,isCapture : Boolean = false){
+    private fun addPromotionMoves(
+        moveList: MutableList<Int>,
+        sourceSquare: Square,
+        targetSquare: Square,
+        isWhite: Boolean,
+        isCapture: Boolean = false
+    ) {
         moveList.add(
             Moves.encodeMove(
                 source = sourceSquare, target = targetSquare, piece = if (isWhite) Piece.P else Piece.p,
@@ -641,13 +666,18 @@ class Board {
 
     }
 
-    fun makeMove(move: Int, isCapturesOnly: Boolean = false): Int {
+    /**
+     * Making the given board on the board if possible. if the move is made return true, else (if the move is invalid) return false
+     * @param move: encoded move to make
+     * @param isCapturesOnly: if true, making the move only if it's including capture
+     */
+    fun makeMove(move: Int, isCapturesOnly: Boolean = false): Boolean {
         if (isCapturesOnly) {
-            if (Moves.getCaptureFromMove(move)) {
+            return if (Moves.getCaptureFromMove(move)) {
                 makeMove(move, isCapturesOnly = false)
             } else {
                 // not a real capture -> return 0;
-                return 0
+                false
             }
         } else {
             //all moves -> get all information from move
@@ -678,12 +708,79 @@ class Board {
             if (isPromoted != null) {
                 this.pieceBitboards[piece.ordinal].setBitOff(target) // removing pawn
                 this.pieceBitboards[isPromoted.ordinal].setBitOn(target) // putting new piece
-                if ( isCapture) printBoard()
+                if (isCapture) printBoard()
             }
 
+            if (isEnPassant) {
+                if (side == Color.WHITE) {
+                    this.pieceBitboards[Piece.p.ordinal].setBitOff(Square.fromIntegerToSquare(target.ordinal + 8)!!)
+                } else {
+                    this.pieceBitboards[Piece.P.ordinal].setBitOff(Square.fromIntegerToSquare(target.ordinal - 8)!!)
+                }
+            }
+
+            //turn off enpassant square
+            this.enpassant = Square.NO_SQUARE
+
+            if (isDouble) {
+                this.enpassant =
+                    Square.fromIntegerToSquare(if (side == Color.WHITE) target.ordinal + 8 else target.ordinal - 8)!!
+            }
+
+            if (isCastle) {
+                when (target) {
+                    //white king side
+                    Square.g1 -> {
+                        this.pieceBitboards[Piece.R.ordinal].setBitOff(Square.h1)
+                        this.pieceBitboards[Piece.R.ordinal].setBitOn(Square.f1)
+                    }
+
+                    //white queen side
+                    Square.c1 -> {
+                        this.pieceBitboards[Piece.R.ordinal].setBitOff(Square.a1)
+                        this.pieceBitboards[Piece.R.ordinal].setBitOn(Square.d1)
+
+                    }
+
+                    //black king side
+                    Square.g8 -> {
+                        this.pieceBitboards[Piece.r.ordinal].setBitOff(Square.h8)
+                        this.pieceBitboards[Piece.r.ordinal].setBitOn(Square.f8)
+
+                    }
+
+                    //white queen side
+                    Square.c8 -> {
+                        this.pieceBitboards[Piece.r.ordinal].setBitOff(Square.a8)
+                        this.pieceBitboards[Piece.r.ordinal].setBitOn(Square.d8)
+                    }
+
+                    else -> return false
+                }
+            }
+
+            // updating castling rights
+            this.castle = this.castle and Moves.CASTLING_RIGHTS_UPDATE_ARRAY[source.ordinal]
+            this.castle = this.castle and Moves.CASTLING_RIGHTS_UPDATE_ARRAY[target.ordinal]
+
+
+            // updating Occupancies
+            matchOccupanciesToPiecesBitBoards()
+
+            //change side
+            this.side = if (side == Color.WHITE) Color.BLACK else Color.WHITE
+            val kingSquare =
+                if (side == Color.WHITE) Square.fromIntegerToSquare(this.pieceBitboards[Piece.k.ordinal].getLSB())!!
+                else Square.fromIntegerToSquare(this.pieceBitboards[Piece.K.ordinal].getLSB())!!
+            return if (isSquareAttacked(kingSquare, side)) {
+                //move is invalid. restore and return false
+                this.copyOtherBoard(boardCopy)
+                false
+            } else {
+                true
+            }
 
         }
-        return 1
     }
 
 
