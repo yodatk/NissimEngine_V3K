@@ -24,6 +24,16 @@ enum class Piece {
         val whitePieces = arrayOf(P, N, B, R, Q, K)
         val blackPieces = arrayOf(p, n, b, r, q, k)
         val allPieces = arrayOf(P, N, B, R, Q, K, p, n, b, r, q, k)
+        val promotedPiecesMap = mapOf<Piece,Int>(
+            Q to Q.ordinal,
+            R to R.ordinal,
+            B to B.ordinal,
+            N to N.ordinal,
+            q to q.ordinal,
+            r to r.ordinal,
+            b to b.ordinal,
+            n to n.ordinal
+        )
         fun convertIndexToPiece(i: Int): Piece? {
             return when (i) {
                 0 -> P

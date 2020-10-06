@@ -35,11 +35,12 @@ object Moves {
         promoted: Piece? = null, capture: Boolean = false, double: Boolean = false,
         enpassant: Boolean = false, castling: Boolean = false
     ): Int {
+        //checking promoted
         return encodeMove(
             source = source.ordinal,
             target = target.ordinal,
             piece = piece.ordinal,
-            promoted = promoted?.ordinal ?: 12,
+            promoted = Piece.promotedPiecesMap.getOrDefault(promoted,0),
             capture = if (capture) 1 else 0,
             double = if (double) 1 else 0,
             enpassant = if (enpassant) 1 else 0,
@@ -60,7 +61,7 @@ object Moves {
 
     fun getPromotedFromMoveAsInt(move: Int): Int = (move and Move.PROMOTED.flag) shr Move.PROMOTED.shift
     fun getPromotedFromMove(move: Int): Piece? =
-        Piece.convertIndexToPiece((move and Move.PROMOTED.flag) shr Move.PROMOTED.shift)
+        if((move and Move.PROMOTED.flag) == 0) null else  Piece.convertIndexToPiece((move and Move.PROMOTED.flag) shr Move.PROMOTED.shift)
 
     fun getCaptureFromMoveAsInt(move: Int): Int = (move and Move.CAPTURE.flag) shr Move.CAPTURE.shift
     fun getCaptureFromMove(move: Int): Boolean = ((move and Move.CAPTURE.flag) shr Move.CAPTURE.shift) != 0
