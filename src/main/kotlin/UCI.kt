@@ -106,4 +106,18 @@ object UCI {
             throw UCIException("Invalid position command: '$_command'")
         }
     }
+
+    fun parseGoCommand(_command: String) {
+        var depth = -1
+        var command = _command.trim()
+        if(command.contains("depth")){
+            command = command.substring(command.indexOf(" ")+1)
+            depth = command.toInt()
+        }
+        else{
+            depth = 6
+        }
+        //!!!!!!!!!!!!!!!different time controll place holder!!!!!!!!!!!!
+
+    }
 }
