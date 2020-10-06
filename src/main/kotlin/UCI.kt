@@ -44,15 +44,28 @@ object UCI {
         var command = _command.trim()
         var board : Board
         if(command.substring(0,8).equals("position")){
-            command = command.substring(9)
+            try {
+                command = command.substring(command.indexOf(" ")+1)
+            }catch (e : Exception){
+                throw UCIException("Invalid posotion command: '$_command'")
+            }
+
             if(command.substring(0,8).equals("startpos")){
                 board = Board(FENDebugConstants.START_POSITION.fen)
-                command = command.substring(8)
+                try {
+                    command = command.substring(command.indexOf(" ")+1)
+                }catch (e : Exception){
+                    throw UCIException("Invalid posotion command: '$_command'")
+                }
             }
             else{
 
                 if(command.substring(0,3).equals("fen")){
-                    command = command.substring(4)
+                    try {
+                        command = command.substring(command.indexOf(" ")+1)
+                    }catch (e : Exception){
+                        throw UCIException("Invalid posotion command: '$_command'")
+                    }
                     board = Board(command)
 
                 }
@@ -62,7 +75,11 @@ object UCI {
             }
             //making additional added moves
             if(command.contains("moves")){
-                command = command.substring(7)
+                try {
+                    command = command.substring(command.indexOf(" ")+1)
+                }catch (e : Exception){
+                    throw UCIException("Invalid position command: '$_command'")
+                }
 
 
                 while(!command.isEmpty()){
@@ -86,8 +103,7 @@ object UCI {
             return board
         }
         else{
-            println("Nissim: HALLWA INVALID COMMAND HALLLWA HALLWA")
-            return Board()
+            throw UCIException("Invalid position command: '$_command'")
         }
     }
 }

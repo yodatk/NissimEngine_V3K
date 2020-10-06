@@ -1,9 +1,7 @@
 import enums.FENDebugConstants
 import enums.Piece
 import enums.Square
-import kotlin.test.Test
-import kotlin.test.BeforeTest
-import kotlin.test.assertEquals
+import kotlin.test.*
 
 @ExperimentalUnsignedTypes
 internal class UCITest {
@@ -139,6 +137,12 @@ internal class UCITest {
         assert(Board.createStartBoard().equals(UCI.parsePosition("position startpos")))
         assert(Board(FENDebugConstants.TRICKY_POSITION.fen).equals(UCI.parsePosition("position fen ${FENDebugConstants.TRICKY_POSITION.fen}")))
         assert(Board("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2").equals(UCI.parsePosition("position startpos moves e2e4 e7e5")))
+        try {
+            UCI.parsePosition("pos startpos moves e2e4 e7e5")
+            fail("supposed to throw UCIException because of invalid command 'pos startpos moves e2e4 e7e5'")
+        }catch (e: UCI.UCIException){
+
+        }
     }
 
 }
