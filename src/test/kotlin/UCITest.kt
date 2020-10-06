@@ -1,3 +1,4 @@
+import enums.FENDebugConstants
 import enums.Piece
 import enums.Square
 import kotlin.test.Test
@@ -131,6 +132,13 @@ internal class UCITest {
     @Test
     fun parseMoveTrickyPositionFailBlack() {
         runningFailedTests(Board(TRICKY_POSITION_WITH_ENPASSANT_AND_PROMOTION_BLACK),impossibleMovesForTrickyPositionBlack)
+    }
+
+    @Test
+    fun parsePosition(){
+        assert(Board.createStartBoard().equals(UCI.parsePosition("position startpos")))
+        assert(Board(FENDebugConstants.TRICKY_POSITION.fen).equals(UCI.parsePosition("position fen ${FENDebugConstants.TRICKY_POSITION.fen}")))
+        assert(Board("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2").equals(UCI.parsePosition("position startpos moves e2e4 e7e5")))
     }
 
 }

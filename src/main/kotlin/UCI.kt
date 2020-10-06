@@ -45,11 +45,13 @@ object UCI {
         var board : Board
         if(command.substring(0,8).equals("position")){
             command = command.substring(9)
-            if(command.substring(0,9).equals("startpos")){
+            if(command.substring(0,8).equals("startpos")){
                 board = Board(FENDebugConstants.START_POSITION.fen)
+                command = command.substring(8)
             }
             else{
-                if(command.substring(0,4).equals("fen")){
+
+                if(command.substring(0,3).equals("fen")){
                     command = command.substring(4)
                     board = Board(command)
 
@@ -60,7 +62,9 @@ object UCI {
             }
             //making additional added moves
             if(command.contains("moves")){
-                command = command.substring(6)
+                command = command.substring(7)
+
+
                 while(!command.isEmpty()){
                     val move = parseMove(command,board)
                     if(move == 0){

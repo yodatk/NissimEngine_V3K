@@ -90,6 +90,23 @@ class Board {
 
     }
 
+    override fun equals(other: Any?): Boolean {
+        if(other is Board){
+            for(i in this.pieceBitboards.indices){
+                if(this.pieceBitboards[i]!= other.pieceBitboards[i]){
+                    return false
+                }
+            }
+            for(i in this.occupanciesBitboards.indices){
+                if(this.occupanciesBitboards[i]!= other.occupanciesBitboards[i]){
+                    return false
+                }
+            }
+            return this.castle == other.castle && this.side == other.side && this.enpassant == other.enpassant
+        }
+        return false
+    }
+
     /**
      * change the state of the board according to the given FEN
      *
