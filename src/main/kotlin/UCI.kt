@@ -1,10 +1,10 @@
+import enums.FENDebugConstants
 import enums.Piece
 import enums.Square
 
 @ExperimentalUnsignedTypes
 object UCI {
     class UCIException(message: String) : Exception(message)
-    class Ex
 
     fun parseMove(stringInput: String, board: Board): Int {
         val listOfMoves = board.generateMoves()
@@ -39,5 +39,51 @@ object UCI {
         }
         //move was not found-> return 0
         return 0
+    }
+    fun parsePosition(_command:String) : Board{
+        var command = _command.trim()
+        var board : Board
+        if(command.substring(0,8).equals("position")){
+            command = command.substring(9)
+            if(command.substring(0,9).equals("startpos")){
+                board = Board(FENDebugConstants.START_POSITION.fen)
+            }
+            else{
+                if(command.substring(0,4).equals("fen")){
+                    command = command.substring(4)
+                    board = Board(command)
+
+                }
+                else{
+                    board=Board(FENDebugConstants.START_POSITION.fen)
+                }
+            }
+            //making additional added moves
+            if(command.contains("moves")){
+                command = command.substring(6)
+                while(!command.isEmpty()){
+                    val move = parseMove(command,board)
+                    if(move == 0){
+                        break
+                    }
+                    else{
+                        val check = board.makeMove(move)
+                        if(!check){
+                            break
+                        }
+                        val index = command.indexOf(' ')
+                        if (index < 0){
+                            break
+                        }
+                        command = command.substring(index+1)
+                    }
+                }
+            }
+            return board
+        }
+        else{
+            println("Nissim: HALLWA INVALID COMMAND HALLLWA HALLWA")
+            return Board()
+        }
     }
 }
