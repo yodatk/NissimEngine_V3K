@@ -32,8 +32,8 @@ object Moves {
 
     fun encodeMove(
         source: Square, target: Square, piece: Piece,
-        promoted: Piece?, capture: Boolean, double: Boolean,
-        enpassant: Boolean, castling: Boolean
+        promoted: Piece? = null, capture: Boolean = false, double: Boolean = false,
+        enpassant: Boolean = false, castling: Boolean = false
     ): Int {
         return encodeMove(
             source = source.ordinal,
@@ -72,7 +72,7 @@ object Moves {
     fun getCastlingFromMoveAsInt(move: Int): Int = (move and Move.CASTLING.flag) shr Move.CASTLING.shift
 
     fun moveUCI(move: Int): String =
-        "${getSourceFromMove(move)}${getTargetFromMove(move)}${getPromotedFromMove(move)?.name?.toLowerCase() ?: " "}"
+        "${getSourceFromMove(move)}${getTargetFromMove(move)}${getPromotedFromMove(move)?.name?.toLowerCase() ?: ""}"
 
     fun printMoveUCI(move: Int) = println(moveUCI(move))
 
