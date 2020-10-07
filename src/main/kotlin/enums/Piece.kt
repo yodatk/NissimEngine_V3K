@@ -24,7 +24,7 @@ enum class Piece {
         val whitePieces = arrayOf(P, N, B, R, Q, K)
         val blackPieces = arrayOf(p, n, b, r, q, k)
         val allPieces = arrayOf(P, N, B, R, Q, K, p, n, b, r, q, k)
-        val promotedPiecesMap = mapOf<Piece,Int>(
+        val promotedPiecesMap = mapOf<Piece?,Int>(
             Q to Q.ordinal,
             R to R.ordinal,
             B to B.ordinal,

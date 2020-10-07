@@ -130,6 +130,7 @@ object UCI {
 
     fun uciLoop() {
         var input:String?
+        System.out.flush()
         printInfo()
         while (true) {
             System.out.flush()
