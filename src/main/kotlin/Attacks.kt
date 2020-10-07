@@ -498,7 +498,7 @@ object Attacks {
      */
     fun getRookAttacks(_square: Square, _occupancy: ULong): ULong {
         val square = _square.ordinal
-        var occupancy =_occupancy
+        var occupancy :ULong =_occupancy
         occupancy = occupancy and (rookMasks[square])
         occupancy *= MagicNumbers.rookMagicNumbers[square]
         occupancy = occupancy shr (64 - rookRelevantBits[square])

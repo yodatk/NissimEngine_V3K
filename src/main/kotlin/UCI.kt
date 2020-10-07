@@ -118,7 +118,7 @@ object UCI {
         }
 
         //!!!!!!!!!!!!!!!different time controll place holder!!!!!!!!!!!!
-        Evaluation.searchPosition(depth)
+        Search.searchPosition(board,depth)
     }
 
     fun printInfo(): Unit {

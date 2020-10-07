@@ -23,15 +23,16 @@ Main
 
 @ExperimentalUnsignedTypes
 fun main() {
-    val debug = true
+    Attacks.initAll()
+    val debug = false
     if(debug){
-        val b = Board("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1 ")
+        val b = Board("1QR5/R4pk1/7p/6p1/4p1P1/3n2PP/8/6K1 w - -")
         b.printBoard()
-        println("score: ${Evaluation.evaluate(b)}")
+        Search.searchPosition(b,4)
 
     }
     else{
-        Attacks.initAll()
+
         UCI.uciLoop()
     }
 

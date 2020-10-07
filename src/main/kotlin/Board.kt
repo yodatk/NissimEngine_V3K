@@ -365,13 +365,13 @@ class Board {
                 Piece.K, Piece.k -> Attacks.kingAttacks[sourceSquare.ordinal]
                 else -> return
             }
-            val occ =
+            val occ : ULong =
                 if (isWhite) occupanciesBitboards[Color.WHITE.ordinal].inv() else occupanciesBitboards[Color.BLACK.ordinal].inv()
             attacks = (attacksSource and occ)
             while (attacks != 0UL) {
                 targetSquare = Square.fromIntegerToSquare(BitBoard.getLSB(attacks))!!
 
-                val occ2 = if (isWhite) (occupanciesBitboards[Color.BLACK.ordinal]) else ( occupanciesBitboards[Color.WHITE.ordinal])
+                val occ2 : ULong = if (isWhite) (occupanciesBitboards[Color.BLACK.ordinal]) else ( occupanciesBitboards[Color.WHITE.ordinal])
 
 
                 if (BitBoard.getBit(occ2,targetSquare) == 0UL) {
@@ -781,7 +781,10 @@ class Board {
                         this.pieceBitboards[Piece.r.ordinal] = BitBoard.setBitOn(this.pieceBitboards[Piece.r.ordinal],Square.d8)
                     }
 
-                    else -> return false
+                    else -> {
+                        this.copyOtherBoard(boardCopy)
+                        return false
+                    }
                 }
             }
 
