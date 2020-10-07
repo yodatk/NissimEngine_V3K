@@ -1,10 +1,16 @@
 import enums.FENDebugConstants
 import enums.Piece
 import enums.Square
+import org.omg.CORBA.portable.OutputStream
+import java.io.PrintStream
+import java.util.*
+
 
 @ExperimentalUnsignedTypes
 object UCI {
     class UCIException(message: String) : Exception(message)
+
+    var board: Board = Board()
 
     fun parseMove(stringInput: String, board: Board): Int {
         val listOfMoves = board.generateMoves()
@@ -40,84 +46,108 @@ object UCI {
         //move was not found-> return 0
         return 0
     }
-    fun parsePosition(_command:String) : Board{
+
+    fun parsePosition(_command: String): Board {
         var command = _command.trim()
-        var board : Board
-        if(command.substring(0,8).equals("position")){
+        var board: Board
+        if (command.substring(0, 8).equals("position")) {
             try {
-                command = command.substring(command.indexOf(" ")+1)
-            }catch (e : Exception){
+                command = command.substring(command.indexOf(" ") + 1)
+            } catch (e: Exception) {
                 throw UCIException("Invalid posotion command: '$_command'")
             }
 
-            if(command.substring(0,8).equals("startpos")){
+            if (command.substring(0, 8).equals("startpos")) {
                 board = Board(FENDebugConstants.START_POSITION.fen)
                 try {
-                    command = command.substring(command.indexOf(" ")+1)
-                }catch (e : Exception){
+                    command = command.substring(command.indexOf(" ") + 1)
+                } catch (e: Exception) {
                     throw UCIException("Invalid posotion command: '$_command'")
                 }
-            }
-            else{
+            } else {
 
-                if(command.substring(0,3).equals("fen")){
+                if (command.substring(0, 3).equals("fen")) {
                     try {
-                        command = command.substring(command.indexOf(" ")+1)
-                    }catch (e : Exception){
+                        command = command.substring(command.indexOf(" ") + 1)
+                    } catch (e: Exception) {
                         throw UCIException("Invalid posotion command: '$_command'")
                     }
                     board = Board(command)
 
-                }
-                else{
-                    board=Board(FENDebugConstants.START_POSITION.fen)
+                } else {
+                    board = Board(FENDebugConstants.START_POSITION.fen)
                 }
             }
             //making additional added moves
-            if(command.contains("moves")){
+            if (command.contains("moves")) {
                 try {
-                    command = command.substring(command.indexOf(" ")+1)
-                }catch (e : Exception){
+                    command = command.substring(command.indexOf(" ") + 1)
+                } catch (e: Exception) {
                     throw UCIException("Invalid position command: '$_command'")
                 }
 
 
-                while(!command.isEmpty()){
-                    val move = parseMove(command,board)
-                    if(move == 0){
+                while (!command.isEmpty()) {
+                    val move = parseMove(command, board)
+                    if (move == 0) {
                         break
-                    }
-                    else{
+                    } else {
                         val check = board.makeMove(move)
-                        if(!check){
+                        if (!check) {
                             break
                         }
                         val index = command.indexOf(' ')
-                        if (index < 0){
+                        if (index < 0) {
                             break
                         }
-                        command = command.substring(index+1)
+                        command = command.substring(index + 1)
                     }
                 }
             }
-            return board
-        }
-        else{
+            this.board = board
+            this.board.printBoard()
+            return this.board
+        } else {
             throw UCIException("Invalid position command: '$_command'")
         }
     }
 
     fun parseGoCommand(_command: String) {
-        var depth = -1
-        var command = _command.trim()
-        if(command.contains("depth")){
-            command = command.substring(command.indexOf(" ")+1)
-            depth = command.toInt()
+        val command = _command.substringAfter("depth ","6")
+        val depth = try{
+            command.toInt()
+        }catch(e:Exception){
+            6
         }
-        else{
-            depth = 6
-        }
-        //!!!!!!!!!!!!!!!different time controll place holder!!!!!!!!!!!!
 
+        //!!!!!!!!!!!!!!!different time controll place holder!!!!!!!!!!!!
+        Search.searchPosition(depth)
+    }
+
+    fun printInfo(): Unit {
+        println("id name Nissim\nid name yodatk\nuciok")
+    }
+
+    fun uciLoop() {
+        var input:String?
+        printInfo()
+        while (true) {
+            System.out.flush()
+            input = readLine()!!
+            when(input.substringBefore(" ",input)){
+                "\n","" -> continue
+                "isready" -> {
+                    println("readyok")
+                    continue
+                }
+                "position" -> parsePosition(input)
+                "ucinewgame" -> parsePosition("position startpos\n")
+                "go" -> parseGoCommand(input)
+                "quit" -> break
+                "uci" -> printInfo()
+                else -> println("NOT VALID COMMAND")
+            }
+
+        }
     }
 }
