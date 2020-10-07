@@ -12,10 +12,42 @@ object Search {
 
     var nodes : ULong = 0UL
 
+    fun quietSearch(board:Board,_alpha:Int,beta:Int) : Int{
+        var alpha = _alpha
+        val eval = Evaluation.evaluate(board)
+        if(eval >= beta){
+            return beta
+        }
+        if(eval > _alpha){
+            alpha = eval
+        }
+        val moveList = board.generateMoves()
+        for(move in moveList){
+            val boardCopy = Board(board)
+            ply++
+            if(!board.makeMove(move,isCapturesOnly = true)){
+                ply--
+                continue
+            }
+            val score = -quietSearch(board,-beta,-alpha)
+            ply--
+            board.copyOtherBoard(boardCopy)
+            if(score >= beta){
+                return beta
+            }
+            if(score > alpha){
+                alpha = score
+            }
+
+        }
+        return alpha
+
+    }
+
     fun negamax(board: Board, _alpha:Int, beta:Int, depth:Int) : Int{
         var alpha = _alpha
         if(depth == 0){
-            return Evaluation.evaluate(board)
+            return quietSearch(board,_alpha,beta)
         }
         nodes++
         var legalMoves = 0
