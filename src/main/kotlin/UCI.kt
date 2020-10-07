@@ -1,9 +1,6 @@
 import enums.FENDebugConstants
 import enums.Piece
 import enums.Square
-import org.omg.CORBA.portable.OutputStream
-import java.io.PrintStream
-import java.util.*
 
 
 @ExperimentalUnsignedTypes
@@ -121,7 +118,7 @@ object UCI {
         }
 
         //!!!!!!!!!!!!!!!different time controll place holder!!!!!!!!!!!!
-        Search.searchPosition(depth)
+        Evaluation.searchPosition(depth)
     }
 
     fun printInfo(): Unit {

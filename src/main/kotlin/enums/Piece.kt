@@ -18,8 +18,29 @@ enum class Piece {
     q,
     k;
 
+//    override fun toString(): String {
+//        return unicodeChars.getOrDefault(this,".")
+//    }
+
 
     companion object {
+        /**
+         * unicode chars not working on windows.
+         */
+//        val unicodeChars = mapOf<Piece,String>(
+//           P to  "♟",
+//            N to "♞",
+//            B to "♝",
+//            R to "♜",
+//            Q to "♛",
+//            K to "♚",
+//            p to "♙",
+//            n to "♘",
+//            b to "♗",
+//            r to "♖",
+//            q to "♕",
+//            k to "♔"
+//        )
 
         val whitePieces = arrayOf(P, N, B, R, Q, K)
         val blackPieces = arrayOf(p, n, b, r, q, k)

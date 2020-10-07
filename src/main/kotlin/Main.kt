@@ -23,7 +23,16 @@ Main
 
 @ExperimentalUnsignedTypes
 fun main() {
-    Attacks.initAll()
-    UCI.uciLoop()
+    val debug = true
+    if(debug){
+        val b = Board.createStartBoard()
+        b.printBoard()
+
+    }
+    else{
+        Attacks.initAll()
+        UCI.uciLoop()
+    }
+
 }
 

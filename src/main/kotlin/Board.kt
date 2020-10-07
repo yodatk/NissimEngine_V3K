@@ -241,13 +241,18 @@ class Board {
                         break
                     }
                 }
-                builder.append(if (piece == -1) ". " else "${Piece.convertIndexToPiece(piece)} ")
+                builder.append(if (piece == -1) "[ ]" else "[${Piece.convertIndexToPiece(piece)}]")
 
             }
             builder.append("\n")
 
         }
-        builder.append("\n   A B C D E F G H\n\n")
+        builder.append("\n  ")
+        for(c in "ABCDEFGH"){
+            builder.append("  $c")
+        }
+        builder.append("\n\n")
+        //builder.append("\n   [ A ][ B ][ C ][ D ][ E ][ F ][ G ][ H ]\n\n")
         builder.append("    Side:               ${side.name}\n")
         builder.append("    En-Passant:         ${this.enpassant.name}\n")
         builder.append("    Castling Rights:    ${if ((castle and CastlingRights.WK.value) != 0) 'K' else '-'}${if ((castle and CastlingRights.WQ.value) != 0) 'Q' else '-'}${if ((castle and CastlingRights.BK.value) != 0) 'k' else '-'}${if ((castle and CastlingRights.BQ.value) != 0) 'q' else '-'}\n")
