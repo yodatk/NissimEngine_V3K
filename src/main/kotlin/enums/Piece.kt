@@ -3,20 +3,20 @@ package enums
 /**
  * Enum for the pieces. white pieces are going to be capital letters, black letters, original letters
  */
-enum class Piece {
+enum class Piece(val value: Int) {
 
-    P,
-    N,
-    B,
-    R,
-    Q,
-    K,
-    p,
-    n,
-    b,
-    r,
-    q,
-    k;
+    P(100),
+    N(300),
+    B(350),
+    R(500),
+    Q(1000),
+    K(10000),
+    p(-100),
+    n(-300),
+    b(-350),
+    r(-500),
+    q(-1000),
+    k(-10000);
 
 //    override fun toString(): String {
 //        return unicodeChars.getOrDefault(this,".")
