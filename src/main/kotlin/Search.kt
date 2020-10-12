@@ -1,4 +1,3 @@
-
 import enums.Color
 import enums.Piece
 import enums.Square
@@ -6,8 +5,6 @@ import kotlin.coroutines.suspendCoroutine
 
 @ExperimentalUnsignedTypes
 object Search {
-
-    //var ply : Int = 0
 
     val MAX_PLY = 64
 
@@ -17,13 +14,11 @@ object Search {
 
     var nodes: ULong = 0UL
 
-    var ply = 0
+    var ply : Int = 0
 
     var principalVariationLength: Array<Int> = Array<Int>(64) { 0 }
 
     var principalVariationTable: Array<Array<Int>> = Array<Array<Int>>(64) { Array(64) { 0 } }
-
-
 
 
     fun enablePVScoring(moveList: List<Int>) {
@@ -49,7 +44,7 @@ object Search {
             alpha = eval
         }
         val originalMoveList = board.generateMoves()
-        val moveList = Evaluation.sortedPossibleMoves(board, originalMoveList,ply)
+        val moveList = Evaluation.sortedPossibleMoves(board, originalMoveList, ply)
 
 
 
@@ -109,13 +104,25 @@ object Search {
         }
         var legalMoves = 0
 
+        // null move pruning
+        if (depth >= 3 && !isInCheck && ply != 0) {
+            val backup = Board(board)
+            board.side = Color.switchSides(board.side)
+            board.enpassant = Square.NO_SQUARE
+            val currentScore = -negamax(board, -beta, -beta + 1, depth - 1 - 2)
+            board.copyOtherBoard(backup)
+            if (currentScore >= beta) {
+                return beta
+            }
+        }
+
         val originalMoveList = board.generateMoves()
 
-        if(Evaluation.followPrincipleVariation){
+        if (Evaluation.followPrincipleVariation) {
             enablePVScoring(originalMoveList)
         }
 
-        val movesList = Evaluation.sortedPossibleMoves(board,originalMoveList ,ply)
+        val movesList = Evaluation.sortedPossibleMoves(board, originalMoveList, ply)
 
         // for LMR purposes
         var movesSearched = 0
@@ -132,35 +139,35 @@ object Search {
             }
 
             legalMoves++
-            var currentScore : Int
-            if(isPVNodeFound){
+            var currentScore: Int
+            if (isPVNodeFound) {
                 // if we find a principal variation node -> try to minimize range of search:
-                currentScore = -negamax(board,(-alpha-1),-alpha,depth-1)
+                currentScore = -negamax(board, (-alpha - 1), -alpha, depth - 1)
 
-                if(currentScore in (alpha + 1) until beta){
+                if (currentScore in (alpha + 1) until beta) {
                     currentScore = -negamax(board, -beta, -alpha, depth - 1)
                 }
-            }
-            else{
-                if(movesSearched == 0){ // LMR condition
+            } else {
+                if (movesSearched == 0) { // LMR condition
                     // no moves searched -> full depth search
                     currentScore = -negamax(board, -beta, -alpha, depth - 1)
-                }
-                else{
+                } else {
                     // LMR
                     // Late Move Reduction
-                    if(movesSearched >= FULL_DEPTH_SEARCH && depth >= REDUCTION_LIMIT && !isInCheck && !Moves.getCaptureFromMove(move) && Moves.getPromotedFromMove(move) == null){
+                    if (movesSearched >= FULL_DEPTH_SEARCH && depth >= REDUCTION_LIMIT && !isInCheck && !Moves.getCaptureFromMove(
+                            move
+                        ) && Moves.getPromotedFromMove(move) == null
+                    ) {
                         // if this move is answring all condition for reduction -> reduct move
-                        currentScore = -negamax(board,-alpha-1,-alpha,depth-2)
-                    }
-                    else{
-                        currentScore = alpha +1 // trick to ensure full search
+                        currentScore = -negamax(board, -alpha - 1, -alpha, depth - 2)
+                    } else {
+                        currentScore = alpha + 1 // trick to ensure full search
                     }
 
-                    if(currentScore > alpha){
+                    if (currentScore > alpha) {
                         //LMR failed. try deep the search, with the same alpha-beta width
-                        currentScore = -negamax(board,-alpha-1,-alpha,depth-1)
-                        if(currentScore in (alpha + 1) until beta){
+                        currentScore = -negamax(board, -alpha - 1, -alpha, depth - 1)
+                        if (currentScore in (alpha + 1) until beta) {
                             // LMR failed completely. do a full search
                             currentScore = -negamax(board, -beta, -alpha, depth - 1)
                         }
