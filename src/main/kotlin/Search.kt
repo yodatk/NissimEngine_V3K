@@ -74,6 +74,8 @@ object Search {
         var depth = _depth
         var alpha = _alpha
 
+        var isPVNodeFound = false
+
         principalVariationLength[ply] = ply
 
         if (depth == 0) {
@@ -119,9 +121,19 @@ object Search {
             }
 
             legalMoves++
+            var currentScore : Int
+            if(isPVNodeFound){
+                // if we find a principal variation node -> try to minimize range of search:
+                currentScore = -negamax(board,(-alpha-1),-alpha,depth-1)
 
-            // getting current score
-            val currentScore: Int = -negamax(board, -beta, -alpha, depth - 1)
+                if(currentScore in (alpha + 1) until beta){
+                    currentScore = -negamax(board, -beta, -alpha, depth - 1)
+                }
+            }
+            else{
+                currentScore = -negamax(board, -beta, -alpha, depth - 1)
+            }
+
 
             //restoring board
             ply--
@@ -149,6 +161,9 @@ object Search {
 
                 //principal variation node
                 alpha = currentScore
+
+                // turn found flag on to minimize the move search
+                isPVNodeFound = true
 
                 // write principle variation move
                 principalVariationTable[ply][ply] = move
@@ -199,29 +214,14 @@ object Search {
 
 
     fun searchPosition(board: Board, depth: Int) {
-
         resetDataBeforeSearch()
-        var score = 0
-
         for (currentDepth in 1..depth) {
-            nodes = 0UL
             Evaluation.followPrincipleVariation = true
-            score = negamax(board, -50000, 50000, currentDepth)
+            val score = negamax(board, -50000, 50000, currentDepth)
 
             println("info score cp $score depth $currentDepth nodes $nodes ${generatePrincipleVariationString()}")
-            println("bestmove ${Moves.moveUCI(principalVariationTable[0][0])}\n")
-
         }
-
-
-
-
-        resetDataBeforeSearch()
-        score = negamax(board, -50000, 50000, depth)
-
-        println("info score cp $score depth $depth nodes $nodes ${generatePrincipleVariationString()}")
         println("bestmove ${Moves.moveUCI(principalVariationTable[0][0])}\n")
-
     }
 
 }

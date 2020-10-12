@@ -26,7 +26,7 @@ fun main() {
     Attacks.initAll()
     val debug = true
     if(debug){
-        val b = Board(FENDebugConstants.TRICKY_POSITION.fen)
+        val b = Board(FENDebugConstants.CMK_POSITION.fen)
 
         b.printBoard()
 
@@ -37,9 +37,7 @@ fun main() {
 
 //        Moves.printMoveList(lst)
 //
-        Search.searchPosition(b,6)
-
-
+        Search.searchPosition(b,7)
     }
     else{
 
