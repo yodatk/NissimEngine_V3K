@@ -24,7 +24,7 @@ Main
 @ExperimentalUnsignedTypes
 fun main() {
     Attacks.initAll()
-    val debug = false
+    val debug = true
     if(debug){
         val b = Board(FENDebugConstants.TRICKY_POSITION.fen)
 
@@ -37,7 +37,7 @@ fun main() {
 
 //        Moves.printMoveList(lst)
 //
-        Search.searchPosition(b,4)
+        Search.searchPosition(b,6)
 
 
     }

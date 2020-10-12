@@ -1,3 +1,4 @@
+
 import enums.Color
 import enums.Piece
 import enums.Square
@@ -8,41 +9,59 @@ object Search {
 
     //var ply : Int = 0
 
+    val MAX_PLY = 64
 
 
-    var nodes : ULong = 0UL
+    var nodes: ULong = 0UL
 
-    var principalVariationLength : Array<Int> = Array<Int> (64) {0}
+    var ply = 0
 
-    var principalVariationTable :  Array<Array<Int>> = Array<Array<Int>> (64) {Array(64) {0} }
+    var principalVariationLength: Array<Int> = Array<Int>(64) { 0 }
 
-    fun quietSearch(board:Board,_alpha:Int,beta:Int,_ply: Int) : Int{
-        var ply = _ply
+    var principalVariationTable: Array<Array<Int>> = Array<Array<Int>>(64) { Array(64) { 0 } }
+
+
+
+
+    fun enablePVScoring(moveList: List<Int>) {
+        Evaluation.followPrincipleVariation = false
+        for (move in moveList) {
+            if (principalVariationTable[0][ply] == move) {
+                Evaluation.scorePrincipleVariation = true
+                Evaluation.followPrincipleVariation = true
+            }
+        }
+
+    }
+
+
+    fun quietSearch(board: Board, _alpha: Int, beta: Int): Int {
         nodes++
         var alpha = _alpha
         val eval = Evaluation.evaluate(board)
-        if(eval >= beta){
+        if (eval >= beta) {
             return beta
         }
-        if(eval > alpha){
+        if (eval > alpha) {
             alpha = eval
         }
-        val moveList = Evaluation.sortedPossibleMoves(board,ply)
-        //val moveList = board.generateMoves()
-        for(move in moveList){
+        val originalMoveList = board.generateMoves()
+        val moveList = Evaluation.sortedPossibleMoves(board, originalMoveList,ply)
+
+        for (move in moveList) {
             val boardCopy = Board(board)
             ply++
-            if(!board.makeMove(move,isCapturesOnly = true)){
+            if (!board.makeMove(move, isCapturesOnly = true)) {
                 ply--
                 continue
             }
-            val score = -quietSearch(board,-beta,-alpha,ply)
+            val score = -quietSearch(board, -beta, -alpha)
             ply--
             board.copyOtherBoard(boardCopy)
-            if(score >= beta){
+            if (score >= beta) {
                 return beta
             }
-            if(score > alpha){
+            if (score > alpha) {
                 alpha = score
             }
 
@@ -51,36 +70,49 @@ object Search {
 
     }
 
-    fun negamax(board: Board, _alpha:Int, beta:Int, _depth:Int,_ply:Int) : Int{
-        var ply = _ply
+    fun negamax(board: Board, _alpha: Int, beta: Int, _depth: Int): Int {
         var depth = _depth
         var alpha = _alpha
 
         principalVariationLength[ply] = ply
-        if(depth == 0){
-            return quietSearch(board,_alpha,beta,ply)
+
+        if (depth == 0) {
+            return quietSearch(board, _alpha, beta)
+        }
+
+        if (ply > MAX_PLY - 1) {
+            //evaluate poisition
+            return Evaluation.evaluate(board)
         }
         nodes++
         var isInCheck =
-        if (board.side == Color.WHITE){
-            board.isSquareAttacked(Square.fromIntegerToSquare(BitBoard.getLSB(board.pieceBitboards[Piece.K.ordinal]))!!,Color.BLACK)
-        }
-            else{
-            board.isSquareAttacked(Square.fromIntegerToSquare(BitBoard.getLSB(board.pieceBitboards[Piece.k.ordinal]))!!,Color.WHITE)
-        }
-        if(isInCheck){
+            if (board.side == Color.WHITE) {
+                board.isSquareAttacked(
+                    Square.fromIntegerToSquare(BitBoard.getLSB(board.pieceBitboards[Piece.K.ordinal]))!!,
+                    Color.BLACK
+                )
+            } else {
+                board.isSquareAttacked(
+                    Square.fromIntegerToSquare(BitBoard.getLSB(board.pieceBitboards[Piece.k.ordinal]))!!,
+                    Color.WHITE
+                )
+            }
+        if (isInCheck) {
             depth++
         }
         var legalMoves = 0
-        var oldAlpha = alpha
 
-        val movesList = Evaluation.sortedPossibleMoves(board,ply)
-        for(move in movesList){
+        val originalMoveList = board.generateMoves()
+        if(Evaluation.followPrincipleVariation){
+            enablePVScoring(originalMoveList)
+        }
+        val movesList = Evaluation.sortedPossibleMoves(board,originalMoveList ,ply)
+        for (move in movesList) {
             //backup board
             val boardCopy = Board(board)
             ply++
 
-            if(!board.makeMove(move)){
+            if (!board.makeMove(move)) {
                 //if move is invalid -> go to different move
                 ply--
                 continue
@@ -89,7 +121,7 @@ object Search {
             legalMoves++
 
             // getting current score
-            val currentScore : Int = -negamax(board,-beta,-alpha,depth-1,ply)
+            val currentScore: Int = -negamax(board, -beta, -alpha, depth - 1)
 
             //restoring board
             ply--
@@ -98,8 +130,8 @@ object Search {
             board.copyOtherBoard(boardCopy)
 
             //fail hard betta cutoff
-            if(currentScore >= beta){
-                if(Moves.getCaptureFromMove(move)){
+            if (currentScore >= beta) {
+                if (Moves.getCaptureFromMove(move)) {
                     //if quiet move -> store it
                     Evaluation.killerMoves[1][ply] = Evaluation.killerMoves[0][ply]
                     Evaluation.killerMoves[0][ply] = move
@@ -108,8 +140,8 @@ object Search {
                 return beta
             }
             //found a better move
-            if(currentScore > alpha){
-                if(Moves.getCaptureFromMove(move)){
+            if (currentScore > alpha) {
+                if (Moves.getCaptureFromMove(move)) {
                     //if quiet move -> store in in history
                     Evaluation.historyMoves[Moves.getPieceFromMoveAsInt(move)][Moves.getTargetFromMoveAsInt(move)] += depth
 
@@ -121,20 +153,20 @@ object Search {
                 // write principle variation move
                 principalVariationTable[ply][ply] = move
 
-                var next = ply+1
-                while(next < principalVariationLength[ply+1]){
-                    principalVariationTable[ply][next] = principalVariationTable[ply+1][next]
+                var next = ply + 1
+                while (next < principalVariationLength[ply + 1]) {
+                    principalVariationTable[ply][next] = principalVariationTable[ply + 1][next]
                     next++
                 }
-                principalVariationLength[ply] = principalVariationLength[ply+1]
+                principalVariationLength[ply] = principalVariationLength[ply + 1]
             }
         }
-        if(legalMoves == 0){
+        if (legalMoves == 0) {
             // checkmate or stalemate
-            return (if(isInCheck){
+            return (if (isInCheck) {
                 //checkmate
-                -49000+ply
-            } else{
+                -49000 + ply
+            } else {
                 //stalemate
                 0
             })
@@ -142,25 +174,53 @@ object Search {
         return alpha
     }
 
-    fun generatePrincipleVariationString(): String  {
+    fun generatePrincipleVariationString(): String {
         val builder = StringBuilder("pv ")
-        var i =0
-        while(i < principalVariationLength[0]){
+        var i = 0
+        while (i < principalVariationLength[0]) {
             builder.append("${Moves.moveUCI(principalVariationTable[0][i])} ")
             i++
         }
         return builder.toString()
     }
 
-
-    fun searchPosition(board:Board,depth: Int) {
+    fun resetDataBeforeSearch() {
         nodes = 0UL
-        val score = negamax(board,-50000,50000,depth,0)
 
-        // bestmove place holder
+        principalVariationLength = Array<Int>(64) { 0 }
 
-            println("info score cp $score depth $depth nodes $nodes ${generatePrincipleVariationString()}")
+        principalVariationTable = Array<Array<Int>>(64) { Array(64) { 0 } }
+
+        Evaluation.resetHistoryAndKillerMoves()
+
+        Evaluation.followPrincipleVariation = false
+        Evaluation.scorePrincipleVariation = false
+    }
+
+
+    fun searchPosition(board: Board, depth: Int) {
+
+        resetDataBeforeSearch()
+        var score = 0
+
+        for (currentDepth in 1..depth) {
+            nodes = 0UL
+            Evaluation.followPrincipleVariation = true
+            score = negamax(board, -50000, 50000, currentDepth)
+
+            println("info score cp $score depth $currentDepth nodes $nodes ${generatePrincipleVariationString()}")
             println("bestmove ${Moves.moveUCI(principalVariationTable[0][0])}\n")
+
+        }
+
+
+
+
+        resetDataBeforeSearch()
+        score = negamax(board, -50000, 50000, depth)
+
+        println("info score cp $score depth $depth nodes $nodes ${generatePrincipleVariationString()}")
+        println("bestmove ${Moves.moveUCI(principalVariationTable[0][0])}\n")
 
     }
 

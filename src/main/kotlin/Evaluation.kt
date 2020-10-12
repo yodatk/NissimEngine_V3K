@@ -192,6 +192,10 @@ object Evaluation {
 
     var historyMoves = Array (12) {Array(64) {0} }
 
+    var followPrincipleVariation = false
+    var scorePrincipleVariation = false
+
+
 //    fun checkSort(b:Board,ply:Int){
 //        val moves = b.generateMoves()
 //        val withScoreList = b.generateMoves().map {  MoveWithScore(it, evaluateMoveScore(b,it,ply)) }
@@ -212,15 +216,22 @@ object Evaluation {
 //    }
 
 
-    fun sortedPossibleMoves(b:Board,ply:Int) : List<Int>{
-        val lst = b.generateMoves()
+
+    fun resetHistoryAndKillerMoves(){
+        killerMoves = Array (2) {Array(64) {0} }
+
+        historyMoves = Array (12) {Array(64) {0} }
+    }
+
+    fun sortedPossibleMoves(b:Board,movesList:List<Int>,ply:Int) : List<Int>{
+
+        val withScoreList = movesList.map {  MoveWithScore(it, evaluateMoveScore(b,it,ply)) }.toMutableList()
 
         //insertion sort
-        val withScoreList = lst.map {  MoveWithScore(it, evaluateMoveScore(b,it,ply)) }.toMutableList()
         var i = 0
-        while(i < lst.size){
+        while(i < movesList.size){
             var j = i+1
-            while(j<lst.size){
+            while(j<movesList.size){
                 if(withScoreList[i].score < withScoreList[j].score){
                     val tempWScore = withScoreList[i]
                     withScoreList[i] = withScoreList[j]
@@ -237,7 +248,7 @@ object Evaluation {
     }
 
     fun printMovesScores(b:Board,ply:Int){
-        val movesList = sortedPossibleMoves(b,ply)
+        val movesList = sortedPossibleMoves(b,b.generateMoves(),ply)
         println("   Moves Scores:\n")
         for(move in movesList){
             println("     move: ${Moves.moveUCI(move)} score: ${evaluateMoveScore(b,move,ply)}")
@@ -246,6 +257,14 @@ object Evaluation {
 
 
     fun evaluateMoveScore(board: Board,move : Int,ply:Int) : Int {
+
+        if(scorePrincipleVariation){
+            if(Search.principalVariationTable[0][Search.ply] == move){
+                scorePrincipleVariation = false
+                return 20000
+            }
+        }
+
          if(Moves.getCaptureFromMove(move)){
              // score capture move
              var targetPiece = Piece.P.ordinal;
