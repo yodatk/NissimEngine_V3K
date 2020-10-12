@@ -8,10 +8,13 @@ object Search {
 
     //var ply : Int = 0
 
-    var bestMove :Int = 0
+
 
     var nodes : ULong = 0UL
 
+    var principalVariationLength : Array<Int> = Array<Int> (64) {0}
+
+    var principalVariationTable :  Array<Array<Int>> = Array<Array<Int>> (64) {Array(64) {0} }
 
     fun quietSearch(board:Board,_alpha:Int,beta:Int,_ply: Int) : Int{
         var ply = _ply
@@ -52,6 +55,8 @@ object Search {
         var ply = _ply
         var depth = _depth
         var alpha = _alpha
+
+        principalVariationLength[ply] = ply
         if(depth == 0){
             return quietSearch(board,_alpha,beta,ply)
         }
@@ -70,7 +75,6 @@ object Search {
         var oldAlpha = alpha
 
         val movesList = Evaluation.sortedPossibleMoves(board,ply)
-        var bestSoFar = movesList[0]
         for(move in movesList){
             //backup board
             val boardCopy = Board(board)
@@ -95,17 +99,34 @@ object Search {
 
             //fail hard betta cutoff
             if(currentScore >= beta){
-                Evaluation.killerMoves[1][ply] = Evaluation.killerMoves[0][ply]
-                Evaluation.killerMoves[0][ply] = move
+                if(Moves.getCaptureFromMove(move)){
+                    //if quiet move -> store it
+                    Evaluation.killerMoves[1][ply] = Evaluation.killerMoves[0][ply]
+                    Evaluation.killerMoves[0][ply] = move
+                }
+
                 return beta
             }
             //found a better move
             if(currentScore > alpha){
-                Evaluation.historyMoves[Moves.getPieceFromMoveAsInt(move)][Moves.getTargetFromMoveAsInt(move)] += depth
-                alpha = currentScore
-                if(ply == 0){
-                    bestSoFar = move
+                if(Moves.getCaptureFromMove(move)){
+                    //if quiet move -> store in in history
+                    Evaluation.historyMoves[Moves.getPieceFromMoveAsInt(move)][Moves.getTargetFromMoveAsInt(move)] += depth
+
                 }
+
+                //principal variation node
+                alpha = currentScore
+
+                // write principle variation move
+                principalVariationTable[ply][ply] = move
+
+                var next = ply+1
+                while(next < principalVariationLength[ply+1]){
+                    principalVariationTable[ply][next] = principalVariationTable[ply+1][next]
+                    next++
+                }
+                principalVariationLength[ply] = principalVariationLength[ply+1]
             }
         }
         if(legalMoves == 0){
@@ -118,24 +139,28 @@ object Search {
                 0
             })
         }
-        if(oldAlpha != alpha){
-            //found a better move
-                bestMove = bestSoFar
-        }
         return alpha
+    }
+
+    fun generatePrincipleVariationString(): String  {
+        val builder = StringBuilder("pv ")
+        var i =0
+        while(i < principalVariationLength[0]){
+            builder.append("${Moves.moveUCI(principalVariationTable[0][i])} ")
+            i++
+        }
+        return builder.toString()
     }
 
 
     fun searchPosition(board:Board,depth: Int) {
-        bestMove = 0
         nodes = 0UL
         val score = negamax(board,-50000,50000,depth,0)
 
         // bestmove place holder
-        if(bestMove!=0){
-            println("info score cp $score depth $depth nodes $nodes")
-            println("bestmove ${Moves.moveUCI(bestMove)}\n")
-        }
+
+            println("info score cp $score depth $depth nodes $nodes ${generatePrincipleVariationString()}")
+            println("bestmove ${Moves.moveUCI(principalVariationTable[0][0])}\n")
 
     }
 

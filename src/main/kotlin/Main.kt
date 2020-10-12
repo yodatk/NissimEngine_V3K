@@ -24,7 +24,7 @@ Main
 @ExperimentalUnsignedTypes
 fun main() {
     Attacks.initAll()
-    val debug = true
+    val debug = false
     if(debug){
         val b = Board(FENDebugConstants.TRICKY_POSITION.fen)
 
