@@ -11,6 +11,9 @@ object Search {
 
     val MAX_PLY = 64
 
+    val FULL_DEPTH_SEARCH = 4
+    val REDUCTION_LIMIT = 3
+
 
     var nodes: ULong = 0UL
 
@@ -47,6 +50,8 @@ object Search {
         }
         val originalMoveList = board.generateMoves()
         val moveList = Evaluation.sortedPossibleMoves(board, originalMoveList,ply)
+
+
 
         for (move in moveList) {
             val boardCopy = Board(board)
@@ -105,10 +110,16 @@ object Search {
         var legalMoves = 0
 
         val originalMoveList = board.generateMoves()
+
         if(Evaluation.followPrincipleVariation){
             enablePVScoring(originalMoveList)
         }
+
         val movesList = Evaluation.sortedPossibleMoves(board,originalMoveList ,ply)
+
+        // for LMR purposes
+        var movesSearched = 0
+
         for (move in movesList) {
             //backup board
             val boardCopy = Board(board)
@@ -131,15 +142,38 @@ object Search {
                 }
             }
             else{
-                currentScore = -negamax(board, -beta, -alpha, depth - 1)
+                if(movesSearched == 0){ // LMR condition
+                    // no moves searched -> full depth search
+                    currentScore = -negamax(board, -beta, -alpha, depth - 1)
+                }
+                else{
+                    // LMR
+                    // Late Move Reduction
+                    if(movesSearched >= FULL_DEPTH_SEARCH && depth >= REDUCTION_LIMIT && !isInCheck && !Moves.getCaptureFromMove(move) && Moves.getPromotedFromMove(move) == null){
+                        // if this move is answring all condition for reduction -> reduct move
+                        currentScore = -negamax(board,-alpha-1,-alpha,depth-2)
+                    }
+                    else{
+                        currentScore = alpha +1 // trick to ensure full search
+                    }
+
+                    if(currentScore > alpha){
+                        //LMR failed. try deep the search, with the same alpha-beta width
+                        currentScore = -negamax(board,-alpha-1,-alpha,depth-1)
+                        if(currentScore in (alpha + 1) until beta){
+                            // LMR failed completely. do a full search
+                            currentScore = -negamax(board, -beta, -alpha, depth - 1)
+                        }
+                    }
+                }
             }
 
 
             //restoring board
             ply--
-
-
             board.copyOtherBoard(boardCopy)
+
+            movesSearched++
 
             //fail hard betta cutoff
             if (currentScore >= beta) {
