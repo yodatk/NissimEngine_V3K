@@ -18,7 +18,7 @@ object Search {
 
     var nodes: ULong = 0UL
 
-    var ply : Int = 0
+    var ply: Int = 0
 
     var principalVariationLength: Array<Int> = Array<Int>(64) { 0 }
 
@@ -77,8 +77,6 @@ object Search {
     fun negamax(board: Board, _alpha: Int, beta: Int, _depth: Int): Int {
         var depth = _depth
         var alpha = _alpha
-
-        var isPVNodeFound = false
 
         principalVariationLength[ply] = ply
 
@@ -144,37 +142,28 @@ object Search {
 
             legalMoves++
             var currentScore: Int
-            if (isPVNodeFound) {
-                // if we find a principal variation node -> try to minimize range of search:
-                currentScore = -negamax(board, (-alpha - 1), -alpha, depth - 1)
-
-                if (currentScore in (alpha + 1) until beta) {
-                    currentScore = -negamax(board, -beta, -alpha, depth - 1)
-                }
+            if (movesSearched == 0) { // LMR condition
+                // no moves searched -> full depth search
+                currentScore = -negamax(board, -beta, -alpha, depth - 1)
             } else {
-                if (movesSearched == 0) { // LMR condition
-                    // no moves searched -> full depth search
-                    currentScore = -negamax(board, -beta, -alpha, depth - 1)
+                // LMR
+                // Late Move Reduction
+                if (movesSearched >= FULL_DEPTH_SEARCH && depth >= REDUCTION_LIMIT && !isInCheck && !Moves.getCaptureFromMove(
+                        move
+                    ) && Moves.getPromotedFromMove(move) == null
+                ) {
+                    // if this move is answring all condition for reduction -> reduct move
+                    currentScore = -negamax(board, -alpha - 1, -alpha, depth - 2)
                 } else {
-                    // LMR
-                    // Late Move Reduction
-                    if (movesSearched >= FULL_DEPTH_SEARCH && depth >= REDUCTION_LIMIT && !isInCheck && !Moves.getCaptureFromMove(
-                            move
-                        ) && Moves.getPromotedFromMove(move) == null
-                    ) {
-                        // if this move is answring all condition for reduction -> reduct move
-                        currentScore = -negamax(board, -alpha - 1, -alpha, depth - 2)
-                    } else {
-                        currentScore = alpha + 1 // trick to ensure full search
-                    }
+                    currentScore = alpha + 1 // trick to ensure full search
+                }
 
-                    if (currentScore > alpha) {
-                        //LMR failed. try deep the search, with the same alpha-beta width
-                        currentScore = -negamax(board, -alpha - 1, -alpha, depth - 1)
-                        if (currentScore in (alpha + 1) until beta) {
-                            // LMR failed completely. do a full search
-                            currentScore = -negamax(board, -beta, -alpha, depth - 1)
-                        }
+                if (currentScore > alpha) {
+                    //LMR failed. try deep the search, with the same alpha-beta width
+                    currentScore = -negamax(board, -alpha - 1, -alpha, depth - 1)
+                    if (currentScore in (alpha + 1) until beta) {
+                        // LMR failed completely. do a full search
+                        currentScore = -negamax(board, -beta, -alpha, depth - 1)
                     }
                 }
             }
@@ -207,8 +196,6 @@ object Search {
                 //principal variation node
                 alpha = currentScore
 
-                // turn found flag on to minimize the move search
-                isPVNodeFound = true
 
                 // write principle variation move
                 principalVariationTable[ply][ply] = move
@@ -265,7 +252,7 @@ object Search {
         for (currentDepth in 1..depth) {
             Evaluation.followPrincipleVariation = true
             val score = negamax(board, alpha, beta, currentDepth)
-            if(score <= alpha || score >= beta){
+            if (score <= alpha || score >= beta) {
                 alpha = -INITIAL_BANDWITH_VALUE
                 beta = INITIAL_BANDWITH_VALUE
                 continue
