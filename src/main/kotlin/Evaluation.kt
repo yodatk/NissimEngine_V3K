@@ -226,25 +226,25 @@ object Evaluation {
     fun sortedPossibleMoves(b:Board,movesList:List<Int>,ply:Int) : List<Int>{
 
         val withScoreList = movesList.map {  MoveWithScore(it, evaluateMoveScore(b,it,ply)) }.toMutableList()
-//
-//        //insertion sort
-//        var i = 0
-//        while(i < movesList.size){
-//            var j = i+1
-//            while(j<movesList.size){
-//                if(withScoreList[i].score < withScoreList[j].score){
-//                    val tempWScore = withScoreList[i]
-//                    withScoreList[i] = withScoreList[j]
-//                    withScoreList[j] = tempWScore
-//                }
-//                j++
-//            }
-//            i++
-//        }
-//        return withScoreList.map { it.move}
 
-        ////quick sort - not implemented yet for debugging
-        return withScoreList.sortedDescending().map{it.move}
+        //insertion sort
+        var i = 0
+        while(i < movesList.size){
+            var j = i+1
+            while(j<movesList.size){
+                if(withScoreList[i].score < withScoreList[j].score){
+                    val tempWScore = withScoreList[i]
+                    withScoreList[i] = withScoreList[j]
+                    withScoreList[j] = tempWScore
+                }
+                j++
+            }
+            i++
+        }
+        return withScoreList.map { it.move}
+
+//        ////quick sort - not implemented yet for debugging
+//        return withScoreList.sortedDescending().map{it.move}
     }
 
     fun printMovesScores(b:Board,ply:Int){

@@ -11,6 +11,10 @@ object Search {
     val FULL_DEPTH_SEARCH = 4
     val REDUCTION_LIMIT = 3
 
+    val INITIAL_BANDWITH_VALUE = 50000
+
+    val WINDOW_INCREMENTOR = 50
+
 
     var nodes: ULong = 0UL
 
@@ -256,9 +260,18 @@ object Search {
 
     fun searchPosition(board: Board, depth: Int) {
         resetDataBeforeSearch()
+        var alpha = -INITIAL_BANDWITH_VALUE
+        var beta = INITIAL_BANDWITH_VALUE
         for (currentDepth in 1..depth) {
             Evaluation.followPrincipleVariation = true
-            val score = negamax(board, -50000, 50000, currentDepth)
+            val score = negamax(board, alpha, beta, currentDepth)
+            if(score <= alpha || score >= beta){
+                alpha = -INITIAL_BANDWITH_VALUE
+                beta = INITIAL_BANDWITH_VALUE
+                continue
+            }
+            alpha = score - WINDOW_INCREMENTOR
+            beta = score + WINDOW_INCREMENTOR
 
             println("info score cp $score depth $currentDepth nodes $nodes ${generatePrincipleVariationString()}")
         }

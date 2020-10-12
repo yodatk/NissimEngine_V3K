@@ -39,7 +39,7 @@ fun main() {
 //        Moves.printMoveList(lst)
 //
         Search.searchPosition(b,7)
-        println("to beat: 1307651")
+        println("to beat: 776305")
     }
     else{
 
