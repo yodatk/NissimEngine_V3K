@@ -26,10 +26,19 @@ fun main() {
     Attacks.initAll()
     val debug = true
     if(debug){
-//        val b = Board("rnbqkbnr/ppp1pppp/8/8/3Pp3/2N5/PPP2PPP/R1BQKBNR b KQkq - 1 3" )
-//        b.printBoard()
-//        Search.searchPosition(b,1)
-        println("move score: ${Moves.MVV_LVA[Piece.P.ordinal][Piece.n.ordinal]}")
+        val b = Board(FENDebugConstants.TRICKY_POSITION.fen)
+
+        b.printBoard()
+
+
+//        Evaluation.checkSort(b,0)
+
+//         var lst = Evaluation.sortedPossibleMoves(b,0)
+
+//        Moves.printMoveList(lst)
+//
+        Search.searchPosition(b,4)
+
 
     }
     else{

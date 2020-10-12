@@ -4,43 +4,7 @@ import enums.Square
 
 object Moves {
 
-    //most valuable piece -> least valuable attacker
-    val MVV_LVA : Array<Array<Int>> = arrayOf(
-        //white pPawn (from pawns to king)
-        arrayOf(105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605),
 
-            //White Knight (from pawns to king)
-        arrayOf(104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604),
-
-            //White Bishop (from pawns to king)
-        arrayOf(103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603),
-
-
-            //White Rook (from pawns to king)
-        arrayOf(102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602),
-
-            //White Queen (from pawns to king)
-        arrayOf(101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601),
-
-            //White King (from pawns to king)
-        arrayOf(100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600),
-
-
-
-            //Black Pawn (from pawns to king)
-        arrayOf(105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605),
-            //Black Knight (from pawns to king)
-        arrayOf( 104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604),
-            //Black Bishop (from pawns to king)
-        arrayOf(103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603),
-            //Black Rook (from pawns to king)
-        arrayOf(102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602),
-            //Black Queen (from pawns to king)
-        arrayOf(101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601),
-            //Black King (from pawns to king)
-        arrayOf(100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600)
-
-    )
 
     val CASTLING_RIGHTS_UPDATE_ARRAY : Array<Int> = arrayOf(
         7, 15, 15, 15, 3, 15, 15, 11,

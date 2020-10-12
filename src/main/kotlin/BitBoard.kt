@@ -30,15 +30,33 @@ object BitBoard {
      */
     fun getBit(board: ULong,square: Square): ULong = (board and (1UL shl square.ordinal))
 
+
+    /***
+     * get the chosen bit of the wanted square from the given BitBoard
+     * @return ULong of the given bit
+     */
+    fun getBit(board: ULong,square: Int): ULong = (board and (1UL shl square))
+
     /***
      * setting on bit in the given square
      */
     fun setBitOn(board: ULong, square: Square) = (board or (1UL shl square.ordinal))
 
+
+    /***
+     * setting on bit in the given square
+     */
+    fun setBitOn(board: ULong, square: Int) = (board or (1UL shl square))
+
     /**
      * setting off bit in given square if possible
      */
     fun setBitOff(board:ULong ,square: Square) = board and (1UL shl square.ordinal).inv()
+
+    /**
+     * setting off bit in given square if possible
+     */
+    fun setBitOff(board:ULong ,square: Int) = board and (1UL shl square).inv()
 
 
 

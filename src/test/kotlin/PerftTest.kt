@@ -195,6 +195,12 @@ internal class PerftTest {
 
     }
 
+    @Test
+    fun nodesTest(){
+        runPerftTestOnGivenFenWithInitialNodeInfo(FENDebugConstants.TRICKY_POSITION.fen,1)
+
+    }
+
 
     @Test
     fun perftTestStartPosition() {

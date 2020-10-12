@@ -3,6 +3,12 @@ import enums.Piece
 import enums.Square
 
 
+data class MoveWithScore(val move:Int,val score:Int) : Comparable<MoveWithScore>{
+    override fun compareTo(other: MoveWithScore): Int {
+        return this.score.compareTo(other.score)
+    }
+}
+
 @ExperimentalUnsignedTypes
 object Evaluation {
 
@@ -144,8 +150,130 @@ object Evaluation {
 
         )
 
+    //most valuable piece -> least valuable attacker
+    val MVV_LVA : Array<Array<Int>> = arrayOf(
+        //white pPawn (from pawns to king)
+        arrayOf(105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605),
+
+        //White Knight (from pawns to king)
+        arrayOf(104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604),
+
+        //White Bishop (from pawns to king)
+        arrayOf(103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603),
 
 
+        //White Rook (from pawns to king)
+        arrayOf(102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602),
+
+        //White Queen (from pawns to king)
+        arrayOf(101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601),
+
+        //White King (from pawns to king)
+        arrayOf(100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600),
+
+
+
+        //Black Pawn (from pawns to king)
+        arrayOf(105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605),
+        //Black Knight (from pawns to king)
+        arrayOf( 104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604),
+        //Black Bishop (from pawns to king)
+        arrayOf(103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603),
+        //Black Rook (from pawns to king)
+        arrayOf(102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602),
+        //Black Queen (from pawns to king)
+        arrayOf(101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601),
+        //Black King (from pawns to king)
+        arrayOf(100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600)
+
+    )
+
+    var killerMoves = Array (2) {Array(64) {0} }
+
+    var historyMoves = Array (12) {Array(64) {0} }
+
+//    fun checkSort(b:Board,ply:Int){
+//        val moves = b.generateMoves()
+//        val withScoreList = b.generateMoves().map {  MoveWithScore(it, evaluateMoveScore(b,it,ply)) }
+//        var flag = false
+//        for (i in moves.indices){
+//            println("move a: ${Moves.moveUCI(moves[i])} move b: ${Moves.moveUCI(withScoreList[i].move)}")
+//            if(moves[i] != withScoreList[i].move){
+//                flag = true
+//                break
+//            }
+//        }
+//        if(flag){
+//            println("NOT SAME")
+//        }
+//        else{
+//            println("SAME")
+//        }
+//    }
+
+
+    fun sortedPossibleMoves(b:Board,ply:Int) : List<Int>{
+        val lst = b.generateMoves()
+
+        //insertion sort
+        val withScoreList = lst.map {  MoveWithScore(it, evaluateMoveScore(b,it,ply)) }.toMutableList()
+        var i = 0
+        while(i < lst.size){
+            var j = i+1
+            while(j<lst.size){
+                if(withScoreList[i].score < withScoreList[j].score){
+                    val tempWScore = withScoreList[i]
+                    withScoreList[i] = withScoreList[j]
+                    withScoreList[j] = tempWScore
+                }
+                j++
+            }
+            i++
+        }
+        return withScoreList.map { it.move}
+
+        //quick sort - not implemented yet for debugging
+        //return withScoreList.sortedDescending().map{it.move}
+    }
+
+    fun printMovesScores(b:Board,ply:Int){
+        val movesList = sortedPossibleMoves(b,ply)
+        println("   Moves Scores:\n")
+        for(move in movesList){
+            println("     move: ${Moves.moveUCI(move)} score: ${evaluateMoveScore(b,move,ply)}")
+        }
+    }
+
+
+    fun evaluateMoveScore(board: Board,move : Int,ply:Int) : Int {
+         if(Moves.getCaptureFromMove(move)){
+             // score capture move
+             var targetPiece = Piece.P.ordinal;
+             val arr = if(board.side == Color.WHITE) Piece.blackPieces else Piece.whitePieces
+             for( piece in arr){
+                 if(BitBoard.getBit(board.pieceBitboards[piece.ordinal],Moves.getTargetFromMove(move)) != 0UL){
+                     targetPiece = piece.ordinal
+                     break
+                 }
+             }
+             return MVV_LVA[Moves.getPieceFromMoveAsInt(move)][targetPiece] + 10000
+         }
+
+        else{
+             // score quiet move
+             if(killerMoves[0][ply] == move){
+                 return 9000
+             }
+             else if(killerMoves[1][ply] == move){
+                 return 8000
+             }
+             else{
+                 return historyMoves[Moves.getPieceFromMoveAsInt(move)][Moves.getTargetFromMoveAsInt(move)]
+             }
+         }
+
+        return 0
+    }
     fun evaluate(board: Board): Int {
         var score = 0
         var currBitboard: ULong

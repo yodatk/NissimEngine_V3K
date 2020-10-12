@@ -739,9 +739,9 @@ class Board {
 
             if (isEnPassant) {
                 if (side == Color.WHITE) {
-                    this.pieceBitboards[Piece.p.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.p.ordinal],Square.fromIntegerToSquare(target.ordinal + 8)!!)
+                    this.pieceBitboards[Piece.p.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.p.ordinal],(target.ordinal + 8))
                 } else {
-                    this.pieceBitboards[Piece.P.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.P.ordinal],Square.fromIntegerToSquare(target.ordinal - 8)!!)
+                    this.pieceBitboards[Piece.P.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.P.ordinal],(target.ordinal - 8))
                 }
             }
 
