@@ -520,6 +520,7 @@ object Attacks {
         initLeaperAttacks()
         initSliderAttacksForPiece(isBishop = true)
         initSliderAttacksForPiece(isBishop = false)
+        ZorbistKeys.initRandomKeys()
 
     }
 
