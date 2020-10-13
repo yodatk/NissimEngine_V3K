@@ -1,11 +1,95 @@
+import enums.Color
 import enums.FENDebugConstants
 import enums.Piece
 import enums.Square
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 
+/***
+ * Object In Charge on the communication: getting request from client and responds with best moves
+ */
 @ExperimentalUnsignedTypes
 object UCI {
+    /**
+     * Custom Exception when UCI input was not valid
+     */
     class UCIException(message: String) : Exception(message)
+
+    /**
+     * flag to determine if to quit searching or not
+     */
+    var isQuit = false
+
+    /**
+     * flag to determine how many moves needs to be done
+     */
+    var movesToGo = 30
+
+    /**
+     * how much time there is for a move
+     */
+    var moveTime = -1
+
+    /**
+     * how much time there is for a move
+     */
+    var time = -1;
+
+    /**
+     * how much time to increment
+     */
+    var increment = 0;
+
+    /**
+     * for time measuring purposes
+     */
+    var startTime: Long = 0
+
+    /**
+     * for time measuring purposes
+     */
+    var stopTime: Long = 0
+
+    /**
+     * flag to determine if there is time control
+     */
+    var isTimeSet = false
+
+    /**
+     * flag to determine if the engine need to stop (becuase of time or because of interruptions
+     */
+    var isStopped = false
+
+//
+//    fun inputWaiting() : Boolean{
+//        var input : String
+//        val scanner = Scanner(System.`in`)
+//        return scanner.hasNext()
+//    }
+
+
+    fun readInput() {
+        val inputScanner = BufferedReader(InputStreamReader(System.`in`))
+        if (inputScanner.ready()) {
+            isStopped = true
+            val input = inputScanner.readLine()
+            if (input.isNotEmpty()) {
+                if (input == "quit" || input == "stop") {
+                    isQuit = true
+                }
+            }
+        }
+    }
+
+
+    fun communicate() {
+        if (isTimeSet && System.currentTimeMillis() > stopTime) {
+            isStopped = true
+        }
+        readInput()
+    }
+
 
     var board: Board = Board()
 
@@ -110,37 +194,137 @@ object UCI {
     }
 
     fun parseGoCommand(_command: String) {
-        val command = _command.substringAfter("depth ","6")
-        val depth = try{
-            command.toInt()
-        }catch(e:Exception){
-            6
+        var command = _command
+        var depth = -1
+        var current: String
+
+        // infinite search
+        if (command.contains("infinite")) {
+            // nothing to be done
         }
 
-        //!!!!!!!!!!!!!!!different time controll place holder!!!!!!!!!!!!
-        Search.searchPosition(board,depth)
+        // adding increment to black command
+        current = command.substringAfter("binc ", "")
+        if (current.isNotEmpty() && board.side == Color.BLACK) {
+            increment = try {
+                current.toInt()
+            } catch (e: Exception) {
+                0
+            }
+        }
+
+        // adding increment to white command
+        current = command.substringAfter("winc ", "")
+        if (current.isNotEmpty() && board.side == Color.WHITE) {
+            increment = try {
+                current.toInt()
+            } catch (e: Exception) {
+                0
+            }
+        }
+
+        // time remaining for white
+        current = command.substringAfter("wtime ", "")
+        if (current.isNotEmpty() && board.side == Color.WHITE) {
+            time = try {
+                current.toInt()
+            } catch (e: Exception) {
+                0
+            }
+        }
+        // time remaining for black
+        current = command.substringAfter("btime ", "")
+        if (current.isNotEmpty() && board.side == Color.BLACK) {
+            time = try {
+                current.toInt()
+            } catch (e: Exception) {
+                0
+            }
+        }
+        // cathing moves to go
+        current = command.substringAfter("movestogo ", "")
+        if (current.isNotEmpty()) {
+            movesToGo = try {
+                current.toInt()
+            } catch (e: Exception) {
+                1
+            }
+        }
+        // catching how much time to calculate
+        current = command.substringAfter("movetime ", "")
+        if (current.isNotEmpty()) {
+            moveTime = try {
+                current.toInt()
+            } catch (e: Exception) {
+                3
+            }
+        }
+        // catching depth to calculate
+        current = command.substringAfter("depth ", "")
+        if (current.isNotEmpty()) {
+            depth = try {
+                current.toInt()
+            } catch (e: Exception) {
+                Search.MAX_NODE_DEPTH
+            }
+        }
+
+
+        if (moveTime != -1) {
+            // if move time is available
+            time = moveTime
+            movesToGo = 1
+        }
+        startTime = System.currentTimeMillis()
+
+        if (time != -1) {
+            //there is time limit
+            isTimeSet = true
+            time /= movesToGo
+            time -= 50
+            stopTime = startTime + time + increment
+        }
+
+        if (depth == -1) {
+            depth = Search.MAX_NODE_DEPTH
+        }
+
+        println("time:${time} start:${startTime} stop:${stopTime} depth:${depth} timeset:${if (isTimeSet) 1 else 0}")
+        Search.searchPosition(board, depth)
+
+
+//        val command = _command.substringAfter("depth ", "${Search.MAX_NODE_DEPTH}")
+//        val depth = try{
+//            command.toInt()
+//        }catch (e: Exception){
+//            Search.MAX_NODE_DEPTH
+//        }
+//
+//        //!!!!!!!!!!!!!!!different time controll place holder!!!!!!!!!!!!
+//        Search.searchPosition(board, depth)
+
     }
 
-    fun printInfo(): Unit {
+    fun printInfo() {
         println("id name Nissim\nid name yodatk\nuciok")
     }
 
     fun uciLoop() {
-        var input:String?
+        var input: String?
         System.out.flush()
         printInfo()
         while (true) {
             System.out.flush()
             input = readLine()!!
-            when(input.substringBefore(" ",input)){
-                "\n","" -> continue
+            when (input.substringBefore(" ", input)) {
+                "\n", "" -> continue
                 "isready" -> {
                     println("readyok")
                     continue
                 }
                 "position" -> parsePosition(input)
                 "ucinewgame" -> parsePosition("position startpos\n")
-                "go" -> parseGoCommand(input)
+                "go" -> parseGoCommand(input.substringAfter("go "))
                 "quit" -> break
                 "uci" -> printInfo()
                 else -> println("NOT VALID COMMAND")

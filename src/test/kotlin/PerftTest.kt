@@ -2,41 +2,43 @@ import enums.FENDebugConstants
 import kotlin.test.assertEquals
 import kotlin.test.Test
 
-@ExperimentalUnsignedTypes
-data class PerftTestResult(
-    var nodes: ULong = 0UL,
-    var captures: ULong = 0UL,
-    var enPassant: ULong = 0UL,
-    var castle: ULong = 0UL,
-    var promotions: ULong = 0UL,
-    var checks: ULong = 0UL,
-    var checkMate: ULong = 0UL
-) {
-    override fun equals(other: Any?): Boolean {
-        if (other is PerftTestResult) {
-            return this.nodes == other.nodes
-                    && this.captures == other.captures
-                    && this.enPassant == other.enPassant
-                    && this.castle == other.castle
-
-        }
-        return false
-    }
-
-    override fun hashCode(): Int {
-        var result = nodes.hashCode()
-        result = 31 * result + captures.hashCode()
-        result = 31 * result + enPassant.hashCode()
-        result = 31 * result + castle.hashCode()
-        result = 31 * result + promotions.hashCode()
-        result = 31 * result + checks.hashCode()
-        result = 31 * result + checkMate.hashCode()
-        return result
-    }
-}
 
 @ExperimentalUnsignedTypes
 internal class PerftTest {
+
+
+    @ExperimentalUnsignedTypes
+    data class PerftTestResult(
+        var nodes: ULong = 0UL,
+        var captures: ULong = 0UL,
+        var enPassant: ULong = 0UL,
+        var castle: ULong = 0UL,
+        var promotions: ULong = 0UL,
+        var checks: ULong = 0UL,
+        var checkMate: ULong = 0UL
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (other is PerftTestResult) {
+                return this.nodes == other.nodes
+                        && this.captures == other.captures
+                        && this.enPassant == other.enPassant
+                        && this.castle == other.castle
+
+            }
+            return false
+        }
+
+        override fun hashCode(): Int {
+            var result = nodes.hashCode()
+            result = 31 * result + captures.hashCode()
+            result = 31 * result + enPassant.hashCode()
+            result = 31 * result + castle.hashCode()
+            result = 31 * result + promotions.hashCode()
+            result = 31 * result + checks.hashCode()
+            result = 31 * result + checkMate.hashCode()
+            return result
+        }
+    }
 
     private val resultsForStartPosition: Array<PerftTestResult> = arrayOf(
         PerftTestResult(nodes = 20UL),

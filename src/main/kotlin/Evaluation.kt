@@ -3,14 +3,16 @@ import enums.Piece
 import enums.Square
 
 
-data class MoveWithScore(val move:Int,val score:Int) : Comparable<MoveWithScore>{
-    override fun compareTo(other: MoveWithScore): Int {
-        return this.score.compareTo(other.score)
-    }
-}
+
 
 @ExperimentalUnsignedTypes
 object Evaluation {
+
+    data class MoveWithScore(val move:Int,val score:Int) : Comparable<MoveWithScore>{
+        override fun compareTo(other: MoveWithScore): Int {
+            return this.score.compareTo(other.score)
+        }
+    }
 
     val pawnPositionalScore = arrayOf(
         90, 90, 90, 90, 90, 90, 90, 90,
@@ -242,7 +244,7 @@ object Evaluation {
             i++
         }
         return withScoreList.map { it.move}
-
+//
 //        ////quick sort - not implemented yet for debugging
 //        return withScoreList.sortedDescending().map{it.move}
     }

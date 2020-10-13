@@ -25,7 +25,7 @@ Main
 
 fun main() {
     Attacks.initAll()
-    val debug = true
+    val debug = false
     if(debug){
         val b = Board(FENDebugConstants.TRICKY_POSITION.fen)
 
@@ -38,8 +38,8 @@ fun main() {
 
 //        Moves.printMoveList(lst)
 //
-        Search.searchPosition(b,7)
-        println("to beat: 723048") // beaten with 418203
+        Search.searchPosition(b,Search.MAX_NODE_DEPTH)
+        println("to beat: 418203") // beaten with 418203
     }
     else{
 

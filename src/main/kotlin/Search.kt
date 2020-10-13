@@ -6,6 +6,8 @@ import kotlin.coroutines.suspendCoroutine
 @ExperimentalUnsignedTypes
 object Search {
 
+    val MAX_NODE_DEPTH = 10
+
     val MAX_PLY = 64
 
     val FULL_DEPTH_SEARCH = 4
@@ -38,6 +40,9 @@ object Search {
 
 
     fun quietSearch(board: Board, _alpha: Int, beta: Int): Int {
+        if((nodes and 2047UL) == 0UL){
+            UCI.communicate()
+        }
         nodes++
         var alpha = _alpha
         val eval = Evaluation.evaluate(board)
@@ -62,6 +67,11 @@ object Search {
             val score = -quietSearch(board, -beta, -alpha)
             ply--
             board.copyOtherBoard(boardCopy)
+
+            if(UCI.isStopped){
+                return 0;
+            }
+
             if (score >= beta) {
                 return beta
             }
@@ -75,6 +85,10 @@ object Search {
     }
 
     fun negamax(board: Board, _alpha: Int, beta: Int, _depth: Int): Int {
+
+        if((nodes and 2047UL) == 0UL){
+            UCI.communicate()
+        }
         var depth = _depth
         var alpha = _alpha
 
@@ -113,6 +127,11 @@ object Search {
             board.enpassant = Square.NO_SQUARE
             val currentScore = -negamax(board, -beta, -beta + 1, depth - 1 - 2)
             board.copyOtherBoard(backup)
+
+            if(UCI.isStopped){
+                return 0
+            }
+
             if (currentScore >= beta) {
                 return beta
             }
@@ -224,7 +243,7 @@ object Search {
     fun generatePrincipleVariationString(): String {
         val builder = StringBuilder("pv ")
         var i = 0
-        while (i < principalVariationLength[0]) {
+        while (principalVariationTable[0][i]!= 0) {
             builder.append("${Moves.moveUCI(principalVariationTable[0][i])} ")
             i++
         }
@@ -242,6 +261,8 @@ object Search {
 
         Evaluation.followPrincipleVariation = false
         Evaluation.scorePrincipleVariation = false
+
+        UCI.isStopped = false
     }
 
 
@@ -250,11 +271,16 @@ object Search {
         var alpha = -INITIAL_BANDWITH_VALUE
         var beta = INITIAL_BANDWITH_VALUE
         for (currentDepth in 1..depth) {
+            if(UCI.isStopped){
+                break
+            }
             Evaluation.followPrincipleVariation = true
             val score = negamax(board, alpha, beta, currentDepth)
+            // fell out of bounds-> try again with initial values
             if (score <= alpha || score >= beta) {
                 alpha = -INITIAL_BANDWITH_VALUE
                 beta = INITIAL_BANDWITH_VALUE
+                println("info score cp $score depth $currentDepth nodes $nodes ${generatePrincipleVariationString()}")
                 continue
             }
             alpha = score - WINDOW_INCREMENTOR
