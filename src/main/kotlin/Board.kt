@@ -255,6 +255,7 @@ class Board {
         builder.append("    Side:               ${side.name}\n")
         builder.append("    En-Passant:         ${this.enpassant.name}\n")
         builder.append("    Castling Rights:    ${if ((castle and CastlingRights.WK.value) != 0) 'K' else '-'}${if ((castle and CastlingRights.WQ.value) != 0) 'Q' else '-'}${if ((castle and CastlingRights.BK.value) != 0) 'k' else '-'}${if ((castle and CastlingRights.BQ.value) != 0) 'q' else '-'}\n")
+        builder.append("    Hash Key:           ${this.generateHashKey()}")
         return builder.toString()
     }
 
@@ -811,6 +812,35 @@ class Board {
 
         }
     }
+
+    fun generateHashKey() : ULong{
+        var finalKey : ULong = 0UL
+        var tempBitboard : ULong
+        for(piece in Piece.allPieces){
+            tempBitboard = this.pieceBitboards[piece.ordinal]
+
+            while(tempBitboard!=0UL){
+                val square : Int = BitBoard.getLSB(tempBitboard)
+
+                finalKey = finalKey xor ZorbistKeys.pieceKeys[piece.ordinal][square]
+
+                tempBitboard = BitBoard.setBitOff(tempBitboard,square)
+            }
+
+        }
+        if(enpassant != Square.NO_SQUARE){
+            finalKey = finalKey xor ZorbistKeys.enpassantKeys[enpassant.ordinal]
+        }
+
+        finalKey = finalKey xor ZorbistKeys.castleKeys[this.castle]
+
+        if(this.side == Color.BLACK){
+            finalKey = finalKey xor ZorbistKeys.sideKey
+        }
+
+        return finalKey
+    }
+
 
 
     companion object {
