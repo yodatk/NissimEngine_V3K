@@ -148,6 +148,14 @@ internal class PerftTest {
             perftDriver(board, depth - 1)
 
             board.copyOtherBoard(copy)
+//            val hash_from_scratch = board.generateHashKey()
+//            if(board.hashKey!=hash_from_scratch){
+//                println("\nMAKE MOVE")
+//                println("move: ${Moves.moveUCI(move)}")
+//                board.printBoard()
+//                println("hash key should be: ${hash_from_scratch}")
+//                //readLine()
+//            }
         }
 
     }

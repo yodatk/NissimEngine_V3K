@@ -31,6 +31,11 @@ class Board {
      */
     var castle: Int
 
+    /**
+     *
+     */
+    var hashKey: ULong
+
 
     constructor() {
         this.pieceBitboards = Array(12) { 0UL }
@@ -38,6 +43,7 @@ class Board {
         this.side = Color.WHITE
         this.enpassant = Square.NO_SQUARE
         this.castle = 0
+        this.hashKey = FENDebugConstants.EMPTY_BOARD_HASH
     }
 
 
@@ -68,6 +74,7 @@ class Board {
             other.occupanciesBitboards[1],
             other.occupanciesBitboards[2],
         )
+        this.hashKey = other.hashKey
     }
 
     /**
@@ -87,6 +94,7 @@ class Board {
         this.enpassant = other.enpassant
         this.pieceBitboards = other.pieceBitboards
         this.occupanciesBitboards = other.occupanciesBitboards
+        this.hashKey = other.hashKey
 
     }
 
@@ -203,6 +211,8 @@ class Board {
         }
         //initializing Occupancies
         matchOccupanciesToPiecesBitBoards()
+
+        this.hashKey = generateHashKey()
 
 
     }
@@ -722,6 +732,9 @@ class Board {
             this.pieceBitboards[piece.ordinal] = BitBoard.setBitOff(this.pieceBitboards[piece.ordinal],source)
             this.pieceBitboards[piece.ordinal] = BitBoard.setBitOn(this.pieceBitboards[piece.ordinal],target)
 
+            // hashing
+            hashKey = hashKey xor ZorbistKeys.pieceKeys[piece.ordinal][source.ordinal]
+            hashKey = hashKey xor ZorbistKeys.pieceKeys[piece.ordinal][target.ordinal]
 
             if (isCapture) {
                 // remove other piece
@@ -729,29 +742,49 @@ class Board {
                     if (BitBoard.getBit(this.pieceBitboards[p.ordinal],target) != 0UL) {
                         // if the current piece is the one to remove: remove it and stop search
                         this.pieceBitboards[p.ordinal] = BitBoard.setBitOff(this.pieceBitboards[p.ordinal],target)
+                        hashKey = hashKey xor ZorbistKeys.pieceKeys[p.ordinal][target.ordinal]
                         break
                     }
                 }
             }
             if (isPromoted != null) {
                 this.pieceBitboards[piece.ordinal] =  BitBoard.setBitOff(this.pieceBitboards[piece.ordinal],target) // removing pawn
+                //hash
+                hashKey = hashKey xor ZorbistKeys.pieceKeys[piece.ordinal][target.ordinal]
                 this.pieceBitboards[isPromoted.ordinal] = BitBoard.setBitOn(this.pieceBitboards[isPromoted.ordinal],target) // putting new piece
+                //hash
+                hashKey = hashKey xor ZorbistKeys.pieceKeys[isPromoted.ordinal][target.ordinal]
             }
 
             if (isEnPassant) {
                 if (side == Color.WHITE) {
                     this.pieceBitboards[Piece.p.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.p.ordinal],(target.ordinal + 8))
+                    // hash
+                    hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.p.ordinal][target.ordinal + 8]
                 } else {
                     this.pieceBitboards[Piece.P.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.P.ordinal],(target.ordinal - 8))
+                    // hash
+                    hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.P.ordinal][target.ordinal - 8]
                 }
+            }
+            if(enpassant != Square.NO_SQUARE){
+                hashKey = hashKey xor ZorbistKeys.enpassantKeys[enpassant.ordinal]
             }
 
             //turn off enpassant square
             this.enpassant = Square.NO_SQUARE
 
             if (isDouble) {
-                this.enpassant =
-                    Square.fromIntegerToSquare(if (side == Color.WHITE) target.ordinal + 8 else target.ordinal - 8)!!
+
+                if(side == Color.WHITE){
+                    enpassant = Square.fromIntegerToSquare(target.ordinal+8)!!
+                    hashKey = hashKey xor ZorbistKeys.enpassantKeys[target.ordinal+8]
+                }
+
+                else{
+                    enpassant = Square.fromIntegerToSquare(target.ordinal-8)!!
+                    hashKey = hashKey xor ZorbistKeys.enpassantKeys[target.ordinal-8]
+                }
             }
 
             if (isCastle) {
@@ -760,12 +793,16 @@ class Board {
                     Square.g1 -> {
                         this.pieceBitboards[Piece.R.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.R.ordinal],Square.h1)
                         this.pieceBitboards[Piece.R.ordinal] = BitBoard.setBitOn(this.pieceBitboards[Piece.R.ordinal],Square.f1)
+                        hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.R.ordinal][Square.h1.ordinal]
+                        hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.R.ordinal][Square.f1.ordinal]
                     }
 
                     //white queen side
                     Square.c1 -> {
                         this.pieceBitboards[Piece.R.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.R.ordinal],Square.a1)
                         this.pieceBitboards[Piece.R.ordinal] = BitBoard.setBitOn(this.pieceBitboards[Piece.R.ordinal],Square.d1)
+                        hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.R.ordinal][Square.a1.ordinal]
+                        hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.R.ordinal][Square.d1.ordinal]
 
                     }
 
@@ -773,6 +810,8 @@ class Board {
                     Square.g8 -> {
                         this.pieceBitboards[Piece.r.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.r.ordinal],Square.h8)
                         this.pieceBitboards[Piece.r.ordinal]= BitBoard.setBitOn(this.pieceBitboards[Piece.r.ordinal],Square.f8)
+                        hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.r.ordinal][Square.h8.ordinal]
+                        hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.r.ordinal][Square.f8.ordinal]
 
                     }
 
@@ -780,6 +819,8 @@ class Board {
                     Square.c8 -> {
                         this.pieceBitboards[Piece.r.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.r.ordinal],Square.a8)
                         this.pieceBitboards[Piece.r.ordinal] = BitBoard.setBitOn(this.pieceBitboards[Piece.r.ordinal],Square.d8)
+                        hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.r.ordinal][Square.a8.ordinal]
+                        hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.r.ordinal][Square.d8.ordinal]
                     }
 
                     else -> {
@@ -788,10 +829,14 @@ class Board {
                     }
                 }
             }
+            //canceling previous castle hash
+            hashKey = hashKey xor  ZorbistKeys.castleKeys[castle]
 
             // updating castling rights
             this.castle = this.castle and Moves.CASTLING_RIGHTS_UPDATE_ARRAY[source.ordinal]
             this.castle = this.castle and Moves.CASTLING_RIGHTS_UPDATE_ARRAY[target.ordinal]
+            // updating previous castle hash
+            hashKey = hashKey xor  ZorbistKeys.castleKeys[castle]
 
 
             // updating Occupancies
@@ -799,6 +844,21 @@ class Board {
 
             //change side
             this.side = if (side == Color.WHITE) Color.BLACK else Color.WHITE
+
+            hashKey = hashKey xor ZorbistKeys.sideKey
+
+//            //======================== for dubug only=============================
+//            val hash_from_scratch = generateHashKey()
+//            if(hashKey!=hash_from_scratch){
+//                println("\nMAKE MOVE")
+//                println("move: ${Moves.moveUCI(move)}")
+//                this.printBoard()
+//                println("hash key should be: ${hash_from_scratch}")
+//                //readLine()
+//            }
+//
+//
+//            //======================== for dubug only=============================
             val kingSquare =
                 if (side == Color.WHITE) Square.fromIntegerToSquare(BitBoard.getLSB(this.pieceBitboards[Piece.k.ordinal]))!!
                 else Square.fromIntegerToSquare(BitBoard.getLSB(this.pieceBitboards[Piece.K.ordinal]))!!
@@ -832,7 +892,9 @@ class Board {
             finalKey = finalKey xor ZorbistKeys.enpassantKeys[enpassant.ordinal]
         }
 
-        finalKey = finalKey xor ZorbistKeys.castleKeys[this.castle]
+            finalKey = finalKey xor ZorbistKeys.castleKeys[this.castle]
+
+
 
         if(this.side == Color.BLACK){
             finalKey = finalKey xor ZorbistKeys.sideKey
