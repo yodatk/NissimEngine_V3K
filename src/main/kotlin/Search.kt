@@ -53,7 +53,7 @@ object Search {
             alpha = eval
         }
         val originalMoveList = board.generateMoves()
-        val moveList = Evaluation.sortedPossibleMoves(board, originalMoveList, ply)
+        val moveList = Evaluation.sortedPossibleMoves(Board(board), originalMoveList, ply)
 
 
 
@@ -64,7 +64,7 @@ object Search {
                 ply--
                 continue
             }
-            val score = -quietSearch(board, -beta, -alpha)
+            val score = -quietSearch(Board(board), -beta, -alpha)
             ply--
             board.copyOtherBoard(boardCopy)
 
@@ -192,11 +192,15 @@ object Search {
             ply--
             board.copyOtherBoard(boardCopy)
 
+            if(UCI.isStopped){
+                return 0
+            }
+
             movesSearched++
 
             //fail hard betta cutoff
             if (currentScore >= beta) {
-                if (Moves.getCaptureFromMove(move)) {
+                if (!Moves.getCaptureFromMove(move)) {
                     //if quiet move -> store it
                     Evaluation.killerMoves[1][ply] = Evaluation.killerMoves[0][ply]
                     Evaluation.killerMoves[0][ply] = move
@@ -206,7 +210,7 @@ object Search {
             }
             //found a better move
             if (currentScore > alpha) {
-                if (Moves.getCaptureFromMove(move)) {
+                if (!Moves.getCaptureFromMove(move)) {
                     //if quiet move -> store in in history
                     Evaluation.historyMoves[Moves.getPieceFromMoveAsInt(move)][Moves.getTargetFromMoveAsInt(move)] += depth
 
