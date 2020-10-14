@@ -33,6 +33,10 @@ fun main() {
 
         b.printBoard()
 
+        ZorbistKeys.writeEntry(b.hashKey,25,1,hashFlag = ZorbistKeys.HASH_FLAG_EXACT)
+        val score = ZorbistKeys.readHashData(hashKey = b.hashKey,20,30,1)
+        println("score: $score")
+
 
 //        Evaluation.checkSort(b,0)
 
@@ -40,7 +44,7 @@ fun main() {
 
 //        Moves.printMoveList(lst)
 //
-        Search.searchPosition(b,Search.MAX_NODE_DEPTH)
+        // Search.searchPosition(b,Search.MAX_NODE_DEPTH)
 //        println("to beat: 418203") // beaten with 418203
     }
     else{
