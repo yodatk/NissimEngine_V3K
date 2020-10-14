@@ -31,10 +31,16 @@ object UCI {
      */
     var moveTime = -1
 
+
+    /**
+     * Time flag
+     */
+    var isTime = false
+
     /**
      * how much time there is for a move
      */
-    var time = -1;
+    var time : ULong = 0UL
 
     /**
      * how much time to increment
@@ -44,12 +50,12 @@ object UCI {
     /**
      * for time measuring purposes
      */
-    var startTime: Long = 0
+    var startTime: ULong = 0UL
 
     /**
      * for time measuring purposes
      */
-    var stopTime: Long = 0
+    var stopTime: ULong = 0UL
 
     /**
      * flag to determine if there is time control
@@ -84,7 +90,7 @@ object UCI {
 
 
     fun communicate() {
-        if (isTimeSet && System.currentTimeMillis() > stopTime) {
+        if (isTimeSet && System.currentTimeMillis().toULong() > stopTime) {
             isStopped = true
         }
         readInput()
@@ -162,7 +168,7 @@ object UCI {
             //making additional added moves
             if (command.contains("moves")) {
                 try {
-                    command = command.substring(command.indexOf(" ") + 1)
+                    command = command.substringAfter("moves ","")
                 } catch (e: Exception) {
                     throw UCIException("Invalid position command: '$_command'")
                 }
@@ -229,20 +235,22 @@ object UCI {
         current = command.substringAfter("wtime ", "")
         current = current.substringBefore(" ", current)
         if (current.isNotEmpty() && board.side == Color.WHITE) {
+            isTime = true
             time = try {
-                current.toInt()
+                current.toULong()
             } catch (e: Exception) {
-                0
+                0UL
             }
         }
         // time remaining for black
         current = command.substringAfter("btime ", "")
         current = current.substringBefore(" ", current)
         if (current.isNotEmpty() && board.side == Color.BLACK) {
+            isTime = true
             time = try {
-                current.toInt()
+                current.toULong()
             } catch (e: Exception) {
-                0
+                0UL
             }
         }
         // cathing moves to go
@@ -280,17 +288,17 @@ object UCI {
 
         if (moveTime != -1) {
             // if move time is available
-            time = moveTime
+            time = moveTime.toULong()
             movesToGo = 1
         }
-        startTime = System.currentTimeMillis()
+        startTime = System.currentTimeMillis().toULong()
 
-        if (time != -1) {
+        if (isTime) {
             //there is time limit
             isTimeSet = true
-            time /= movesToGo
-            time -= 50
-            stopTime = startTime + time + increment
+            time /= movesToGo.toULong()
+            time -= 50UL
+            stopTime = startTime + time + increment.toULong()
         }
 
         if (depth == -1) {

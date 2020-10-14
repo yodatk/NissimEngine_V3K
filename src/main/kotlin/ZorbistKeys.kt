@@ -82,21 +82,34 @@ object ZorbistKeys {
      * @param depth:    Int represent the wanted depth
      * @return Int value represents the value that is saved for the given position in TT table. if not found, return 100000
      */
-    fun readHashData(hashKey: ULong,alpha:Int,beta:Int,depth:Int) : Int{
+    fun readHashData(hashKey: ULong,alpha:Int,beta:Int,depth:Int,ply:Int) : Int{
         val currentEntry = hashTable[generatingTableIndex(hashKey)]
         if(currentEntry.hashKey == hashKey){
             // checking that the given hash key matches the entry in table
             if(currentEntry.depth >= depth){
                 // checking the depth in entry is deep enough for wanted depth
+
+                var score = currentEntry.score
+
+                // retrieve score independent from the actual path
+                // from root node (position) to the current node(position)
+                if(score < -Search.MATE_SCORE) {
+                    score += ply
+                }
+                if(score > Search.MATE_SCORE){
+                    score -= ply
+                }
+
+
                 if(currentEntry.flag == HASH_FLAG_EXACT){
                     // return exact score
-                    return currentEntry.score
+                    return score
                 }
-                if(currentEntry.flag == HASH_FLAG_ALPHA && currentEntry.score <= alpha){
+                if(currentEntry.flag == HASH_FLAG_ALPHA && score <= alpha){
                     // fail low node
                     return alpha
                 }
-                if(currentEntry.flag == HASH_FLAG_BETA && currentEntry.score >= beta){
+                if(currentEntry.flag == HASH_FLAG_BETA && score >= beta){
                     // fail high node
                     return beta
                 }
@@ -114,8 +127,19 @@ object ZorbistKeys {
      * @param depth:        Int represent the wanted depth
      * @param hashFlag:     Int represent the position category(PV,Beta or Alpha)
      */
-    fun writeEntry(hashKey: ULong,score: Int,depth: Int,hashFlag : Int){
+    fun writeEntry(hashKey: ULong,_score: Int,depth: Int,hashFlag : Int,ply:Int){
+        var score = _score
         val newEntry = hashTable[generatingTableIndex(hashKey)]
+
+
+        // store score independent from the actual path from root to current position(node)
+        if(score < -Search.MATE_SCORE){
+            score -= ply
+        }
+        if(score > Search.MATE_SCORE){
+            score += ply
+        }
+
         newEntry.hashKey = hashKey
         newEntry.score = score
         newEntry.flag = hashFlag

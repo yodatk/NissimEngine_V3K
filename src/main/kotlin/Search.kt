@@ -1,10 +1,21 @@
 import enums.Color
 import enums.Piece
 import enums.Square
-import kotlin.coroutines.suspendCoroutine
 
 @ExperimentalUnsignedTypes
 object Search {
+
+
+    /**
+     * Score bounds for the range of the mating scores
+     *
+     *                                           Score Layout
+     *
+     *          [ -INFINITY,-MATE_VALUE, .... -MATE_SCORE ...... score ...... MATE_SCORE ... MATE_VALUE ... INFINITY ]
+     */
+    val INFINITY = 50000
+    val MATE_VALUE = 49000
+    val MATE_SCORE = 48000
 
     val MAX_NODE_DEPTH = 64
 
@@ -13,7 +24,7 @@ object Search {
     val FULL_DEPTH_SEARCH = 4
     val REDUCTION_LIMIT = 3
 
-    val INITIAL_BANDWITH_VALUE = 50000
+
 
     val WINDOW_INCREMENTOR = 50
 
@@ -101,8 +112,8 @@ object Search {
         var hashFlag = ZorbistKeys.HASH_FLAG_ALPHA
 
         //read hash entry
-        currentScore = ZorbistKeys.readHashData(board.hashKey, alpha, beta, depth)
-        if ( ply != 0 && currentScore != ZorbistKeys.UNKOWN_VALUE) {
+        currentScore = ZorbistKeys.readHashData(board.hashKey, alpha, beta, depth,ply)
+        if (ply != 0 && currentScore != ZorbistKeys.UNKOWN_VALUE) {
             //if the move has alreadey been searched
             // return the score for this move without searching it
             return currentScore
@@ -229,7 +240,7 @@ object Search {
             ply--
             board.copyOtherBoard(boardCopy)
 
-            if(UCI.isStopped){
+            if (UCI.isStopped) {
                 return 0
             }
 
@@ -267,7 +278,7 @@ object Search {
 
 
                     //store hash entry with the score equal to beta
-                    ZorbistKeys.writeEntry(board.hashKey, beta, depth, ZorbistKeys.HASH_FLAG_BETA)
+                    ZorbistKeys.writeEntry(board.hashKey, beta, depth, ZorbistKeys.HASH_FLAG_BETA,ply)
 
                     if (!Moves.getCaptureFromMove(move)) {
                         //if quiet move -> store it
@@ -283,7 +294,7 @@ object Search {
             // checkmate or stalemate
             return (if (isInCheck) {
                 //checkmate
-                -49000 + ply
+                -MATE_VALUE + ply
             } else {
                 //stalemate
                 0
@@ -291,7 +302,7 @@ object Search {
         }
 
         //store hash entry with the score equal to alpha
-        ZorbistKeys.writeEntry(board.hashKey, alpha, depth, hashFlag)
+        ZorbistKeys.writeEntry(board.hashKey, alpha, depth, hashFlag,ply)
 
         return alpha
     }
@@ -323,8 +334,8 @@ object Search {
     fun searchPosition(board: Board, depth: Int) {
         resetDataBeforeSearch()
         var score: Int = 0
-        var alpha = -INITIAL_BANDWITH_VALUE
-        var beta = INITIAL_BANDWITH_VALUE
+        var alpha = -INFINITY
+        var beta = INFINITY
         for (currentDepth in 1..depth) {
             if (UCI.isStopped) {
                 break
@@ -333,15 +344,23 @@ object Search {
             score = negamax(board, alpha, beta, currentDepth)
             // fell out of bounds-> try again with initial values
             if (score <= alpha || score >= beta) {
-                alpha = -INITIAL_BANDWITH_VALUE
-                beta = INITIAL_BANDWITH_VALUE
-                println("info score cp $score depth $currentDepth nodes $nodes ${generatePrincipleVariationString()}")
+                alpha = -INFINITY
+                beta = INFINITY
+                println(
+                    "info score cp $score depth $currentDepth nodes $nodes time ${
+                        System.currentTimeMillis().toULong() - UCI.startTime
+                    } ${generatePrincipleVariationString()}"
+                )
                 continue
             }
             alpha = score - WINDOW_INCREMENTOR
             beta = score + WINDOW_INCREMENTOR
 
-            println("info score cp $score depth $currentDepth nodes $nodes ${generatePrincipleVariationString()}")
+            println(
+                "info score cp $score depth $currentDepth nodes $nodes time ${
+                    System.currentTimeMillis().toULong() - UCI.startTime
+                } ${generatePrincipleVariationString()}"
+            )
         }
         println("bestmove ${Moves.moveUCI(principalVariationTable[0][0])}\n")
     }
