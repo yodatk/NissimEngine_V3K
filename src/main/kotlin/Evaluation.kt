@@ -282,14 +282,16 @@ object Evaluation {
 
         else{
              // score quiet move
-             if(killerMoves[0][ply] == move){
-                 return 9000
-             }
-             else if(killerMoves[1][ply] == move){
-                 return 8000
-             }
-             else{
-                 return historyMoves[Moves.getPieceFromMoveAsInt(move)][Moves.getTargetFromMoveAsInt(move)]
+             return when (move) {
+                 killerMoves[0][ply] -> {
+                     9000
+                 }
+                 killerMoves[1][ply] -> {
+                     8000
+                 }
+                 else -> {
+                     historyMoves[Moves.getPieceFromMoveAsInt(move)][Moves.getTargetFromMoveAsInt(move)]
+                 }
              }
          }
 

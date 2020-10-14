@@ -85,12 +85,25 @@ object Search {
     }
 
     fun negamax(board: Board, _alpha: Int, beta: Int, _depth: Int): Int {
+        var depth = _depth
+        var alpha = _alpha
+
+        var currentScore: Int
+
+        var hashFlag = ZorbistKeys.HASH_FLAG_ALPHA
+
+        //read hash entry
+        currentScore = ZorbistKeys.readHashData(board.hashKey,alpha,beta, depth)
+        if(currentScore != ZorbistKeys.UNKOWN_VALUE){
+            //if the move has alreadey been searched
+            // return the score for this move without searching it
+            return currentScore
+        }
 
         if((nodes and 2047UL) == 0UL){
             UCI.communicate()
         }
-        var depth = _depth
-        var alpha = _alpha
+
 
         principalVariationLength[ply] = ply
 
@@ -103,7 +116,7 @@ object Search {
             return Evaluation.evaluate(board)
         }
         nodes++
-        var isInCheck =
+        val isInCheck =
             if (board.side == Color.WHITE) {
                 board.isSquareAttacked(
                     Square.fromIntegerToSquare(BitBoard.getLSB(board.pieceBitboards[Piece.K.ordinal]))!!,
@@ -125,7 +138,8 @@ object Search {
             val backup = Board(board)
             board.side = Color.switchSides(board.side)
             board.enpassant = Square.NO_SQUARE
-            val currentScore = -negamax(board, -beta, -beta + 1, depth - 1 - 2)
+            currentScore = -negamax(board, -beta, -beta + 1, depth - 1 - 2)
+
             board.copyOtherBoard(backup)
 
             if(UCI.isStopped){
@@ -160,7 +174,7 @@ object Search {
             }
 
             legalMoves++
-            var currentScore: Int
+
             if (movesSearched == 0) { // LMR condition
                 // no moves searched -> full depth search
                 currentScore = -negamax(board, -beta, -alpha, depth - 1)
@@ -192,14 +206,15 @@ object Search {
             ply--
             board.copyOtherBoard(boardCopy)
 
-            if(UCI.isStopped){
-                return 0
-            }
-
             movesSearched++
 
             //fail hard betta cutoff
             if (currentScore >= beta) {
+
+
+                //store hash entry with the score equal to beta
+                ZorbistKeys.writeEntry(board.hashKey,beta,depth,ZorbistKeys.HASH_FLAG_BETA)
+
                 if (!Moves.getCaptureFromMove(move)) {
                     //if quiet move -> store it
                     Evaluation.killerMoves[1][ply] = Evaluation.killerMoves[0][ply]
@@ -210,6 +225,12 @@ object Search {
             }
             //found a better move
             if (currentScore > alpha) {
+
+                //switch hash flag from storing score for fail low node, to PV node
+                hashFlag = ZorbistKeys.HASH_FLAG_EXACT
+                //store hash entry with the score equal to beta
+                ZorbistKeys.writeEntry(board.hashKey,beta,depth,ZorbistKeys.HASH_FLAG_BETA)
+
                 if (!Moves.getCaptureFromMove(move)) {
                     //if quiet move -> store in in history
                     Evaluation.historyMoves[Moves.getPieceFromMoveAsInt(move)][Moves.getTargetFromMoveAsInt(move)] += depth
@@ -241,6 +262,10 @@ object Search {
                 0
             })
         }
+
+        //store hash entry with the score equal to alpha
+        ZorbistKeys.writeEntry(board.hashKey,alpha,depth,hashFlag)
+
         return alpha
     }
 
@@ -255,23 +280,24 @@ object Search {
     }
 
     fun resetDataBeforeSearch() {
-        nodes = 0UL
+        nodes = 0UL//
 
-        principalVariationLength = Array<Int>(64) { 0 }
+        principalVariationLength = Array<Int>(64) { 0 }//
 
-        principalVariationTable = Array<Array<Int>>(64) { Array(64) { 0 } }
+        principalVariationTable = Array<Array<Int>>(64) { Array(64) { 0 } }//
 
-        Evaluation.resetHistoryAndKillerMoves()
+        Evaluation.resetHistoryAndKillerMoves()//
 
-        Evaluation.followPrincipleVariation = false
-        Evaluation.scorePrincipleVariation = false
+        Evaluation.followPrincipleVariation = false//
+        Evaluation.scorePrincipleVariation = false//
 
-        UCI.isStopped = false
+        UCI.isStopped = false//
     }
 
 
     fun searchPosition(board: Board, depth: Int) {
         resetDataBeforeSearch()
+        var score : Int
         var alpha = -INITIAL_BANDWITH_VALUE
         var beta = INITIAL_BANDWITH_VALUE
         for (currentDepth in 1..depth) {
@@ -279,7 +305,7 @@ object Search {
                 break
             }
             Evaluation.followPrincipleVariation = true
-            val score = negamax(board, alpha, beta, currentDepth)
+            score = negamax(board, alpha, beta, currentDepth)
             // fell out of bounds-> try again with initial values
             if (score <= alpha || score >= beta) {
                 alpha = -INITIAL_BANDWITH_VALUE
