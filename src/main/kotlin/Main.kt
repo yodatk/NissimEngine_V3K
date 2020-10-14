@@ -20,11 +20,13 @@ Main
 
 fun main() {
     Attacks.initAll()
-    val debug = true
+    val debug = false
     if (debug) {
-        val b = Board(FENDebugConstants.TRICKY_POSITION.fen)
+        val b = Board(FENDebugConstants.START_POSITION.fen)
         b.printBoard()
-        Search.searchPosition(b, 7)
+        Search.searchPosition(b, 10)
+        b.makeMove(Search.principalVariationTable[0][0])
+        Search.searchPosition(b,10)
         //START
         // info score cp 20 depth 7 nodes 56762 pv b1c3 d7d5 d2d4 b8c6 g1f3 g8f6 c1f4
         //bestmove b1c3

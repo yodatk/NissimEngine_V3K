@@ -205,6 +205,7 @@ object UCI {
 
         // adding increment to black command
         current = command.substringAfter("binc ", "")
+        current = current.substringBefore(" ", current)
         if (current.isNotEmpty() && board.side == Color.BLACK) {
             increment = try {
                 current.toInt()
@@ -215,6 +216,7 @@ object UCI {
 
         // adding increment to white command
         current = command.substringAfter("winc ", "")
+        current = current.substringBefore(" ", current)
         if (current.isNotEmpty() && board.side == Color.WHITE) {
             increment = try {
                 current.toInt()
@@ -225,6 +227,7 @@ object UCI {
 
         // time remaining for white
         current = command.substringAfter("wtime ", "")
+        current = current.substringBefore(" ", current)
         if (current.isNotEmpty() && board.side == Color.WHITE) {
             time = try {
                 current.toInt()
@@ -234,6 +237,7 @@ object UCI {
         }
         // time remaining for black
         current = command.substringAfter("btime ", "")
+        current = current.substringBefore(" ", current)
         if (current.isNotEmpty() && board.side == Color.BLACK) {
             time = try {
                 current.toInt()
@@ -243,6 +247,7 @@ object UCI {
         }
         // cathing moves to go
         current = command.substringAfter("movestogo ", "")
+        current = current.substringBefore(" ", current)
         if (current.isNotEmpty()) {
             movesToGo = try {
                 current.toInt()
@@ -252,6 +257,7 @@ object UCI {
         }
         // catching how much time to calculate
         current = command.substringAfter("movetime ", "")
+            current = current.substringBefore(" ", current)
         if (current.isNotEmpty()) {
             moveTime = try {
                 current.toInt()
@@ -261,6 +267,7 @@ object UCI {
         }
         // catching depth to calculate
         current = command.substringAfter("depth ", "")
+            current = current.substringBefore(" ", current)
         if (current.isNotEmpty()) {
             depth = try {
                 current.toInt()
@@ -268,6 +275,7 @@ object UCI {
                 Search.MAX_NODE_DEPTH
             }
         }
+
 
 
         if (moveTime != -1) {
@@ -323,7 +331,10 @@ object UCI {
                     continue
                 }
                 "position" -> parsePosition(input)
-                "ucinewgame" -> parsePosition("position startpos\n")
+                "ucinewgame" -> {
+                    ZorbistKeys.clearHashTable()
+                    parsePosition("position startpos\n")
+                }
                 "go" -> parseGoCommand(input.substringAfter("go "))
                 "quit" -> break
                 "uci" -> printInfo()

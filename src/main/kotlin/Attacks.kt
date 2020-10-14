@@ -522,6 +522,8 @@ object Attacks {
         initSliderAttacksForPiece(isBishop = false)
         ZorbistKeys.initRandomKeys()
 
+        ZorbistKeys.clearHashTable()
+
     }
 
 }

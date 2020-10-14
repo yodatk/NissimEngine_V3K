@@ -748,12 +748,14 @@ class Board {
                 }
             }
             if (isPromoted != null) {
-                this.pieceBitboards[piece.ordinal] =  BitBoard.setBitOff(this.pieceBitboards[piece.ordinal],target) // removing pawn
-                //hash
-                hashKey = hashKey xor ZorbistKeys.pieceKeys[piece.ordinal][target.ordinal]
-                this.pieceBitboards[isPromoted.ordinal] = BitBoard.setBitOn(this.pieceBitboards[isPromoted.ordinal],target) // putting new piece
-                //hash
-                hashKey = hashKey xor ZorbistKeys.pieceKeys[isPromoted.ordinal][target.ordinal]
+
+                if(side == Color.WHITE){
+                    this.pieceBitboards[Piece.P.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.P.ordinal], target)
+                    this.hashKey = this.hashKey xor ZorbistKeys.pieceKeys[Piece.P.ordinal][target.ordinal]
+                }else{
+                    this.pieceBitboards[Piece.p.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.p.ordinal], target)
+                    this.hashKey = this.hashKey xor ZorbistKeys.pieceKeys[Piece.p.ordinal][target.ordinal]
+                }
             }
 
             if (isEnPassant) {
