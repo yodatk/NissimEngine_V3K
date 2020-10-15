@@ -152,14 +152,14 @@ object UCI {
                     throw UCIException("Invalid posotion command: '$_command'")
                 }
             } else {
-
-                if (command.substring(0, 3).equals("fen")) {
-                    try {
-                        command = command.substring(command.indexOf(" ") + 1)
-                    } catch (e: Exception) {
-                        throw UCIException("Invalid posotion command: '$_command'")
-                    }
-                    board = Board(command)
+                val current = command.substringAfter("fen ","")
+                if (current != "") {
+//                    try {
+//                        //command = command.substring(command.indexOf(" ") + 1)
+//                    } catch (e: Exception) {
+//                        throw UCIException("Invalid posotion command: '$_command'")
+//                    }
+                    board = Board(current)
 
                 } else {
                     board = Board(FENDebugConstants.START_POSITION.fen)
@@ -174,7 +174,7 @@ object UCI {
                 }
 
 
-                while (!command.isEmpty()) {
+                while (command.isNotEmpty()) {
                     val move = parseMove(command, board)
                     if (move == 0) {
                         break

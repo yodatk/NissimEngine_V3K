@@ -33,9 +33,9 @@ object Search {
 
     var ply: Int = 0
 
-    var principalVariationLength: Array<Int> = Array<Int>(64) { 0 }
+    var principalVariationLength: Array<Int> = Array<Int>(66) { 0 }
 
-    var principalVariationTable: Array<Array<Int>> = Array<Array<Int>>(64) { Array(64) { 0 } }
+    var principalVariationTable: Array<Array<Int>> = Array<Array<Int>>(66) { Array(66) { 0 } }
 
 
     fun enablePVScoring(moveList: List<Int>) {
@@ -124,16 +124,20 @@ object Search {
         }
 
 
+        if (ply > MAX_PLY - 1) {
+            //evaluate poisition
+            return Evaluation.evaluate(board)
+        }
+
+
+
         principalVariationLength[ply] = ply
 
         if (depth == 0) {
             return quietSearch(board, _alpha, beta)
         }
 
-        if (ply > MAX_PLY - 1) {
-            //evaluate poisition
-            return Evaluation.evaluate(board)
-        }
+
         nodes++
         val isInCheck =
             if (board.side == Color.WHITE) {
@@ -323,9 +327,9 @@ object Search {
         Evaluation.followPrincipleVariation = false//
         Evaluation.scorePrincipleVariation = false//
         Evaluation.resetHistoryAndKillerMoves()//
-        principalVariationLength = Array<Int>(64) { 0 }//
+        principalVariationLength = Array<Int>(66) { 0 }
 
-        principalVariationTable = Array<Array<Int>>(64) { Array(64) { 0 } }//
+        principalVariationTable = Array<Array<Int>>(66) { Array(66) { 0 } }
 
         //ZorbistKeys.clearHashTable()
     }
@@ -333,7 +337,7 @@ object Search {
 
     fun searchPosition(board: Board, depth: Int) {
         resetDataBeforeSearch()
-        var score: Int = 0
+        var score: Int
         var alpha = -INFINITY
         var beta = INFINITY
         for (currentDepth in 1..depth) {
