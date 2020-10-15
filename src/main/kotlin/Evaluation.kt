@@ -37,7 +37,7 @@ object Evaluation {
     val bishopPositionalScore = arrayOf(
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 10, 10, 0, 0, 0,
+        0, 20, 0, 10, 10, 0, 20, 0,
         0, 0, 10, 20, 20, 10, 0, 0,
         0, 0, 10, 20, 20, 10, 0, 0,
         0, 10, 0, 0, 0, 0, 10, 0,
@@ -187,6 +187,32 @@ object Evaluation {
 
     )
 
+    // extract rank from square
+    val GET_RANK_FROM_SQUARE = arrayOf(
+        7, 7, 7, 7, 7, 7, 7, 7,
+        6, 6, 6, 6, 6, 6, 6, 6,
+        5, 5, 5, 5, 5, 5, 5, 5,
+        4, 4, 4, 4, 4, 4, 4, 4,
+        3, 3, 3, 3, 3, 3, 3, 3,
+        2, 2, 2, 2, 2, 2, 2, 2,
+        1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0
+    )
+
+    const val DOUBLE_PAWN_PENALTY = -10
+
+    const val ISOLATED_PAWN_PENALTY = -10
+
+    val PASSED_PAWN_BONUS = arrayOf(
+        0, 10, 30, 50, 75, 100, 150, 200
+    )
+
+
+    const val SEMI_OPEN_FILE_BONUS = 10
+
+    const val OPEN_FILE_SCORE = 15
+
+
     /**
      * File masks [ square ]
      */
@@ -266,8 +292,8 @@ object Evaluation {
 
                 var cancel = 0UL
                 var i = 0
-                while (i<rank){
-                    cancel = cancel or rankMasks[i*8 + file]
+                while (i < rank) {
+                    cancel = cancel or rankMasks[i * 8 + file]
                     i++
                 }
                 whitePassedPawnsMasks[square] = whitePassedPawnsMasks[square] and cancel
@@ -277,37 +303,11 @@ object Evaluation {
                 blackPassedPawnsMasks[square] = blackPassedPawnsMasks[square] or setFileRankMask(file, -1)
                 blackPassedPawnsMasks[square] = blackPassedPawnsMasks[square] or setFileRankMask(file + 1, -1)
                 cancel = cancel.inv()
-                cancel = cancel and (rankMasks[i*8 + file].inv())
+                cancel = cancel and (rankMasks[i * 8 + file].inv())
                 blackPassedPawnsMasks[square] = blackPassedPawnsMasks[square] and cancel
-
-
-                                println(Square.fromIntegerToSquare(square))
-                BitBoard.printBitboard( blackPassedPawnsMasks[square])
-
-
             }
         }
     }
-
-//    fun checkSort(b:Board,ply:Int){
-//        val moves = b.generateMoves()
-//        val withScoreList = b.generateMoves().map {  MoveWithScore(it, evaluateMoveScore(b,it,ply)) }
-//        var flag = false
-//        for (i in moves.indices){
-//            println("move a: ${Moves.moveUCI(moves[i])} move b: ${Moves.moveUCI(withScoreList[i].move)}")
-//            if(moves[i] != withScoreList[i].move){
-//                flag = true
-//                break
-//            }
-//        }
-//        if(flag){
-//            println("NOT SAME")
-//        }
-//        else{
-//            println("SAME")
-//        }
-//    }
-
 
     fun resetHistoryAndKillerMoves() {
         killerMoves = Array(2) { Array(64) { 0 } }
@@ -397,18 +397,88 @@ object Evaluation {
                 score += p.value
                 when (p) {
                     //WHITE
-                    Piece.P -> score += pawnPositionalScore[square]
+                    Piece.P -> {
+
+                        score += pawnPositionalScore[square]
+                        // double pawn count
+                        val doublePawns =
+                            BitBoard.countBits(board.pieceBitboards[Piece.P.ordinal] and fileMasks[square])
+                        if (doublePawns > 1) {
+                            score += DOUBLE_PAWN_PENALTY * doublePawns
+                        }
+                        //isolated pawns
+                        if (board.pieceBitboards[Piece.P.ordinal] and isolatedPawnsMasks[square] == 0UL) {
+                            //give an isolated pawn panelty
+                            score += ISOLATED_PAWN_PENALTY
+                        }
+                        // passed pawns
+                        if (whitePassedPawnsMasks[square] and board.pieceBitboards[Piece.p.ordinal] == 0UL) {
+                            score += PASSED_PAWN_BONUS[GET_RANK_FROM_SQUARE[square]]
+                        }
+
+                    }
                     Piece.N -> score += knightPositionalScore[square]
                     Piece.B -> score += bishopPositionalScore[square]
-                    Piece.R -> score += rookPositionalScore[square]
-                    Piece.K -> score += kingPositionalScore[square]
+                    Piece.R -> {
+                        score += rookPositionalScore[square]
+                        if (board.pieceBitboards[Piece.P.ordinal] and fileMasks[square] == 0UL) {
+                            score += SEMI_OPEN_FILE_BONUS
+                        }
+                        if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
+                            score += OPEN_FILE_SCORE
+                        }
+                    }
+                    Piece.K -> {
+                        score += kingPositionalScore[square]
+                        if (board.pieceBitboards[Piece.P.ordinal] and fileMasks[square] == 0UL) {
+                            score -= SEMI_OPEN_FILE_BONUS
+                        }
+                        if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
+                            score -= OPEN_FILE_SCORE
+                        }
+                    }
 
                     //BLACK
-                    Piece.p -> score -= pawnPositionalScore[mirrorScores[square]]
+                    Piece.p -> {
+                        score -= pawnPositionalScore[mirrorScores[square]]
+                        // double pawn count
+                        val doublePawns =
+                            BitBoard.countBits(board.pieceBitboards[Piece.p.ordinal] and fileMasks[square])
+                        if (doublePawns > 1) {
+                            score -= DOUBLE_PAWN_PENALTY * doublePawns
+                        }
+                        //isolated pawns
+                        if (board.pieceBitboards[Piece.p.ordinal] and isolatedPawnsMasks[square] == 0UL) {
+                            //give an isolated pawn panelty
+                            score -= ISOLATED_PAWN_PENALTY
+                        }
+                        // passed pawns
+                        if (blackPassedPawnsMasks[square] and board.pieceBitboards[Piece.P.ordinal] == 0UL) {
+                            score -= PASSED_PAWN_BONUS[GET_RANK_FROM_SQUARE[mirrorScores[square]]]
+                        }
+
+
+                    }
                     Piece.n -> score -= knightPositionalScore[mirrorScores[square]]
                     Piece.b -> score -= bishopPositionalScore[mirrorScores[square]]
-                    Piece.r -> score -= rookPositionalScore[mirrorScores[square]]
-                    Piece.k -> score -= kingPositionalScore[mirrorScores[square]]
+                    Piece.r -> {
+                        score -= rookPositionalScore[mirrorScores[square]]
+                        if (board.pieceBitboards[Piece.p.ordinal] and fileMasks[square] == 0UL) {
+                            score -= SEMI_OPEN_FILE_BONUS
+                        }
+                        if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
+                            score -= OPEN_FILE_SCORE
+                        }
+                    }
+                    Piece.k -> {
+                        score -= kingPositionalScore[mirrorScores[square]]
+                        if (board.pieceBitboards[Piece.p.ordinal] and fileMasks[square] == 0UL) {
+                            score += SEMI_OPEN_FILE_BONUS
+                        }
+                        if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
+                            score += OPEN_FILE_SCORE
+                        }
+                    }
 
                     else -> break
                 }

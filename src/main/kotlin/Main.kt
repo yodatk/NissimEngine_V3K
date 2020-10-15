@@ -20,9 +20,11 @@ Main
 
 fun main() {
     Attacks.initAll()
-    val debug = true
+    val debug = false
     if (debug) {
-
+        val b = Board("6k1/5p1p/8/8/8/8/5P1P/6K1 w - -")
+        b.printBoard()
+        println("board score: ${Evaluation.evaluate(b)}")
 
     } else {
 
