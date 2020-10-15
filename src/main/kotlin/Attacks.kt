@@ -523,6 +523,7 @@ object Attacks {
         ZorbistKeys.initRandomKeys()
 
         ZorbistKeys.clearHashTable()
+        Evaluation.initEvaluationMasks()
 
     }
 

@@ -3,12 +3,10 @@ import enums.Piece
 import enums.Square
 
 
-
-
 @ExperimentalUnsignedTypes
 object Evaluation {
 
-    data class MoveWithScore(val move:Int,val score:Int) : Comparable<MoveWithScore>{
+    data class MoveWithScore(val move: Int, val score: Int) : Comparable<MoveWithScore> {
         override fun compareTo(other: MoveWithScore): Int {
             return this.score.compareTo(other.score)
         }
@@ -153,7 +151,7 @@ object Evaluation {
         )
 
     //most valuable piece -> least valuable attacker
-    val MVV_LVA : Array<Array<Int>> = arrayOf(
+    val MVV_LVA: Array<Array<Int>> = arrayOf(
         //white pPawn (from pawns to king)
         arrayOf(105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605),
 
@@ -174,11 +172,10 @@ object Evaluation {
         arrayOf(100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600),
 
 
-
         //Black Pawn (from pawns to king)
         arrayOf(105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605),
         //Black Knight (from pawns to king)
-        arrayOf( 104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604),
+        arrayOf(104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604),
         //Black Bishop (from pawns to king)
         arrayOf(103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603),
         //Black Rook (from pawns to king)
@@ -190,13 +187,107 @@ object Evaluation {
 
     )
 
-    var killerMoves = Array (2) {Array(64) {0} }
+    /**
+     * File masks [ square ]
+     */
+    val fileMasks: Array<ULong> = Array(64) { 0UL }
 
-    var historyMoves = Array (12) {Array(64) {0} }
+
+    /**
+     * rank masks [ square ]
+     */
+    val rankMasks: Array<ULong> = Array(64) { 0UL }
+
+    /**
+     * isolated pawns masks [ square ]
+     */
+    val isolatedPawnsMasks: Array<ULong> = Array(64) { 0UL }
+
+    /**
+     * white passed pawns masks [ square ]
+     */
+    val whitePassedPawnsMasks: Array<ULong> = Array(64) { 0UL }
+
+    /**
+     * black passed pawns masks[ square ]
+     */
+    val blackPassedPawnsMasks: Array<ULong> = Array(64) { 0UL }
+
+    var killerMoves = Array(2) { Array(64) { 0 } }
+
+    var historyMoves = Array(12) { Array(64) { 0 } }
 
     var followPrincipleVariation = false
     var scorePrincipleVariation = false
 
+    fun setFileRankMask(fileNumber: Int, rankNumber: Int): ULong {
+        //define file or rank
+        var mask = 0UL
+
+        for (rank in 0..7) {
+            //loop over files
+            for (file in 0..7) {
+                val square = rank * 8 + file
+                if (fileNumber != -1) {
+                    if (file == fileNumber) {
+                        mask = mask or BitBoard.setBitOn(mask, square)
+                    }
+
+                } else if (rankNumber != -1) {
+                    if (rank == rankNumber) {
+                        mask = mask or BitBoard.setBitOn(mask, square)
+                    }
+
+                }
+
+            }
+        }
+
+        return mask
+
+    }
+
+    fun initEvaluationMasks() {
+        for (rank in 0..7) {
+            for (file in 0..7) {
+                val square = rank * 8 + file
+                // init file mask for current square
+                fileMasks[square] = fileMasks[square] or setFileRankMask(file, -1)
+                // init rank mask for current square
+                rankMasks[square] = rankMasks[square] or setFileRankMask(-1, rank)
+                //init isolated pawns masks
+                isolatedPawnsMasks[square] = isolatedPawnsMasks[square] or setFileRankMask(file - 1, -1)
+                isolatedPawnsMasks[square] = isolatedPawnsMasks[square] or setFileRankMask(file + 1, -1)
+
+                // init white passed pawns
+                whitePassedPawnsMasks[square] = whitePassedPawnsMasks[square] or setFileRankMask(file - 1, -1)
+                whitePassedPawnsMasks[square] = whitePassedPawnsMasks[square] or setFileRankMask(file, -1)
+                whitePassedPawnsMasks[square] = whitePassedPawnsMasks[square] or setFileRankMask(file + 1, -1)
+
+                var cancel = 0UL
+                var i = 0
+                while (i<rank){
+                    cancel = cancel or rankMasks[i*8 + file]
+                    i++
+                }
+                whitePassedPawnsMasks[square] = whitePassedPawnsMasks[square] and cancel
+
+                // init black passed pawns
+                blackPassedPawnsMasks[square] = blackPassedPawnsMasks[square] or setFileRankMask(file - 1, -1)
+                blackPassedPawnsMasks[square] = blackPassedPawnsMasks[square] or setFileRankMask(file, -1)
+                blackPassedPawnsMasks[square] = blackPassedPawnsMasks[square] or setFileRankMask(file + 1, -1)
+                cancel = cancel.inv()
+                cancel = cancel and (rankMasks[i*8 + file].inv())
+                blackPassedPawnsMasks[square] = blackPassedPawnsMasks[square] and cancel
+
+
+                                println(Square.fromIntegerToSquare(square))
+                BitBoard.printBitboard( blackPassedPawnsMasks[square])
+
+
+            }
+        }
+    }
 
 //    fun checkSort(b:Board,ply:Int){
 //        val moves = b.generateMoves()
@@ -218,23 +309,22 @@ object Evaluation {
 //    }
 
 
+    fun resetHistoryAndKillerMoves() {
+        killerMoves = Array(2) { Array(64) { 0 } }
 
-    fun resetHistoryAndKillerMoves(){
-        killerMoves = Array (2) {Array(64) {0} }
-
-        historyMoves = Array (12) {Array(64) {0} }
+        historyMoves = Array(12) { Array(64) { 0 } }
     }
 
-    fun sortedPossibleMoves(b:Board,movesList:List<Int>,ply:Int) : List<Int>{
+    fun sortedPossibleMoves(b: Board, movesList: List<Int>, ply: Int): List<Int> {
 
-        val withScoreList = movesList.map {  MoveWithScore(it, evaluateMoveScore(b,it,ply)) }.toMutableList()
+        val withScoreList = movesList.map { MoveWithScore(it, evaluateMoveScore(b, it, ply)) }.toMutableList()
 
         //insertion sort
         var i = 0
-        while(i < movesList.size){
-            var j = i+1
-            while(j<movesList.size){
-                if(withScoreList[i].score < withScoreList[j].score){
+        while (i < movesList.size) {
+            var j = i + 1
+            while (j < movesList.size) {
+                if (withScoreList[i].score < withScoreList[j].score) {
                     val tempWScore = withScoreList[i]
                     withScoreList[i] = withScoreList[j]
                     withScoreList[j] = tempWScore
@@ -243,60 +333,59 @@ object Evaluation {
             }
             i++
         }
-        return withScoreList.map { it.move}
+        return withScoreList.map { it.move }
 ////
 //        //quick sort - not implemented yet for debugging
 //        return withScoreList.sortedDescending().map{it.move}
     }
 
-    fun printMovesScores(b:Board,ply:Int){
-        val movesList = sortedPossibleMoves(b,b.generateMoves(),ply)
+    fun printMovesScores(b: Board, ply: Int) {
+        val movesList = sortedPossibleMoves(b, b.generateMoves(), ply)
         println("   Moves Scores:\n")
-        for(move in movesList){
-            println("     move: ${Moves.moveUCI(move)} score: ${evaluateMoveScore(b,move,ply)}")
+        for (move in movesList) {
+            println("     move: ${Moves.moveUCI(move)} score: ${evaluateMoveScore(b, move, ply)}")
         }
     }
 
 
-    fun evaluateMoveScore(board: Board,move : Int,ply:Int) : Int {
+    fun evaluateMoveScore(board: Board, move: Int, ply: Int): Int {
 
-        if(scorePrincipleVariation){
-            if(Search.principalVariationTable[0][Search.ply] == move){
+        if (scorePrincipleVariation) {
+            if (Search.principalVariationTable[0][Search.ply] == move) {
                 scorePrincipleVariation = false
                 return 20000
             }
         }
 
-         if(Moves.getCaptureFromMove(move)){
-             // score capture move
-             var targetPiece = Piece.P.ordinal;
-             val arr = if(board.side == Color.WHITE) Piece.blackPieces else Piece.whitePieces
-             for( piece in arr){
-                 if(BitBoard.getBit(board.pieceBitboards[piece.ordinal],Moves.getTargetFromMove(move)) != 0UL){
-                     targetPiece = piece.ordinal
-                     break
-                 }
-             }
-             return MVV_LVA[Moves.getPieceFromMoveAsInt(move)][targetPiece] + 10000
-         }
-
-        else{
-             // score quiet move
-             return when (move) {
-                 killerMoves[0][ply] -> {
-                     9000
-                 }
-                 killerMoves[1][ply] -> {
-                     8000
-                 }
-                 else -> {
-                     historyMoves[Moves.getPieceFromMoveAsInt(move)][Moves.getTargetFromMoveAsInt(move)]
-                 }
-             }
-         }
+        if (Moves.getCaptureFromMove(move)) {
+            // score capture move
+            var targetPiece = Piece.P.ordinal
+            val arr = if (board.side == Color.WHITE) Piece.blackPieces else Piece.whitePieces
+            for (piece in arr) {
+                if (BitBoard.getBit(board.pieceBitboards[piece.ordinal], Moves.getTargetFromMove(move)) != 0UL) {
+                    targetPiece = piece.ordinal
+                    break
+                }
+            }
+            return MVV_LVA[Moves.getPieceFromMoveAsInt(move)][targetPiece] + 10000
+        } else {
+            // score quiet move
+            return when (move) {
+                killerMoves[0][ply] -> {
+                    9000
+                }
+                killerMoves[1][ply] -> {
+                    8000
+                }
+                else -> {
+                    historyMoves[Moves.getPieceFromMoveAsInt(move)][Moves.getTargetFromMoveAsInt(move)]
+                }
+            }
+        }
 
         return 0
     }
+
     fun evaluate(board: Board): Int {
         var score = 0
         var currBitboard: ULong
