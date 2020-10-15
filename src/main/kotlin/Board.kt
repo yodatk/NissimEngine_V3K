@@ -756,6 +756,9 @@ class Board {
                     this.pieceBitboards[Piece.p.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.p.ordinal], target)
                     this.hashKey = this.hashKey xor ZorbistKeys.pieceKeys[Piece.p.ordinal][target.ordinal]
                 }
+
+                this.pieceBitboards[isPromoted.ordinal] = BitBoard.setBitOn(this.pieceBitboards[isPromoted.ordinal],target)
+                this.hashKey = this.hashKey xor ZorbistKeys.pieceKeys[isPromoted.ordinal][target.ordinal]
             }
 
             if (isEnPassant) {
