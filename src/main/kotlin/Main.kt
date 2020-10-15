@@ -22,7 +22,7 @@ fun main() {
     Attacks.initAll()
     val debug = false
     if (debug) {
-        val b = Board(FENDebugConstants.START_POSITION.fen)
+    val b = Board(FENDebugConstants.REPETITIONS.fen)
         b.printBoard()
         Search.searchPosition(b, 10)
         b.makeMove(Search.principalVariationTable[0][0])

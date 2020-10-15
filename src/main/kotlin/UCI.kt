@@ -338,7 +338,10 @@ object UCI {
                     println("readyok")
                     continue
                 }
-                "position" -> parsePosition(input)
+                "position" -> {
+                    parsePosition(input)
+                    //ZorbistKeys.clearHashTable()
+                }
                 "ucinewgame" -> {
                     ZorbistKeys.clearHashTable()
                     parsePosition("position startpos\n")

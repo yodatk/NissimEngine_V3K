@@ -244,7 +244,7 @@ object Evaluation {
             i++
         }
         return withScoreList.map { it.move}
-//
+////
 //        //quick sort - not implemented yet for debugging
 //        return withScoreList.sortedDescending().map{it.move}
     }

@@ -25,7 +25,6 @@ object Search {
     val REDUCTION_LIMIT = 3
 
 
-
     val WINDOW_INCREMENTOR = 50
 
 
@@ -36,6 +35,11 @@ object Search {
     var principalVariationLength: Array<Int> = Array<Int>(66) { 0 }
 
     var principalVariationTable: Array<Array<Int>> = Array<Array<Int>>(66) { Array(66) { 0 } }
+
+    //positions repetiotions table
+    var repetitionsTable: Array<ULong> = Array(150) { 0UL }
+
+    var repetitionsIndex: Int = 0
 
 
     fun enablePVScoring(moveList: List<Int>) {
@@ -49,6 +53,22 @@ object Search {
 
     }
 
+    // position repetition detections
+    fun isRepetition(hashKey:ULong): Boolean{
+        // loop over repetition range
+        var i = 0
+        while (i < repetitionsIndex){
+            // if we found same hash key ...
+            if(repetitionsTable[i] == hashKey){
+                // found a repetition
+                return true
+            }
+            i++
+        }
+
+        // if no repetition is found
+        return false
+    }
 
     fun quietSearch(board: Board, _alpha: Int, beta: Int): Int {
         if ((nodes and 2047UL) == 0UL) {
@@ -56,13 +76,15 @@ object Search {
         }
         nodes++
 
+
+
         if (ply > MAX_PLY - 1) {
             //evaluate poisition
-            return Evaluation.evaluate(board)
+            return Evaluation.evaluate(Board(board))
         }
 
         var alpha = _alpha
-        val eval = Evaluation.evaluate(board)
+        val eval = Evaluation.evaluate(Board(board))
         if (eval >= beta) {
             return beta
         }
@@ -77,12 +99,21 @@ object Search {
         for (move in moveList) {
             val boardCopy = Board(board)
             ply++
+            //updating in repetitionsTable
+            repetitionsIndex++
+            repetitionsTable[repetitionsIndex] = board.hashKey
             if (!board.makeMove(move, isCapturesOnly = true)) {
                 ply--
+                //updating in repetitionsTable
+                repetitionsIndex--
                 continue
             }
+
             val score = -quietSearch(Board(board), -beta, -alpha)
+
             ply--
+            //updating in repetitionsTable
+            repetitionsIndex--
             board.copyOtherBoard(boardCopy)
 
             if (UCI.isStopped) {
@@ -100,7 +131,6 @@ object Search {
 
         }
         return alpha
-
     }
 
     fun negamax(board: Board, _alpha: Int, beta: Int, _depth: Int): Int {
@@ -111,9 +141,18 @@ object Search {
 
         var hashFlag = ZorbistKeys.HASH_FLAG_ALPHA
 
-        //read hash entry
-        currentScore = ZorbistKeys.readHashData(board.hashKey, alpha, beta, depth,ply)
-        if (ply != 0 && currentScore != ZorbistKeys.UNKOWN_VALUE) {
+        // if position repetition occurs
+        if(ply != 0 && isRepetition(board.hashKey)){
+            // return draw score
+            return 0
+        }
+
+        // a hack to figure out wether if the current node is PV or not
+        val isPvNode = (beta - alpha) > 1
+
+        //read hash entry if not a root ply, and not a pv_node, and hash is available
+        currentScore = ZorbistKeys.readHashData(board.hashKey, alpha, beta, depth, ply)
+        if (ply != 0 && currentScore != ZorbistKeys.UNKOWN_VALUE && !isPvNode) {
             //if the move has alreadey been searched
             // return the score for this move without searching it
             return currentScore
@@ -124,19 +163,19 @@ object Search {
         }
 
 
-        if (ply > MAX_PLY - 1) {
-            //evaluate poisition
-            return Evaluation.evaluate(board)
-        }
-
-
 
         principalVariationLength[ply] = ply
+
 
         if (depth == 0) {
             return quietSearch(board, _alpha, beta)
         }
 
+
+        if (ply > MAX_PLY - 1) {
+            //evaluate poisition
+            return Evaluation.evaluate(board)
+        }
 
         nodes++
         val isInCheck =
@@ -161,6 +200,9 @@ object Search {
             val backup = Board(board)
 
             ply++
+            //updating in repetitionsTable
+            repetitionsIndex++
+            repetitionsTable[repetitionsIndex] = board.hashKey
 
             // update hash key with enpassant
             if (board.enpassant != Square.NO_SQUARE) {
@@ -177,6 +219,8 @@ object Search {
             currentScore = -negamax(board, -beta, -beta + 1, depth - 1 - 2)
 
             ply--
+            //updating in repetitionsTable
+            repetitionsIndex--
             board.copyOtherBoard(backup)
 
 
@@ -204,10 +248,15 @@ object Search {
             //backup board
             val boardCopy = Board(board)
             ply++
+            //updating in repetitionsTable
+            repetitionsIndex++
+            repetitionsTable[repetitionsIndex] = board.hashKey
 
             if (!board.makeMove(move)) {
                 //if move is invalid -> go to different move
                 ply--
+                //updating in repetitionsTable
+                repetitionsIndex--
                 continue
             }
 
@@ -242,6 +291,8 @@ object Search {
 
             //restoring board
             ply--
+            //updating in repetitionsTable
+            repetitionsIndex--
             board.copyOtherBoard(boardCopy)
 
             if (UCI.isStopped) {
@@ -282,7 +333,7 @@ object Search {
 
 
                     //store hash entry with the score equal to beta
-                    ZorbistKeys.writeEntry(board.hashKey, beta, depth, ZorbistKeys.HASH_FLAG_BETA,ply)
+                    ZorbistKeys.writeEntry(board.hashKey, beta, depth, ZorbistKeys.HASH_FLAG_BETA, ply)
 
                     if (!Moves.getCaptureFromMove(move)) {
                         //if quiet move -> store it
@@ -306,7 +357,7 @@ object Search {
         }
 
         //store hash entry with the score equal to alpha
-        ZorbistKeys.writeEntry(board.hashKey, alpha, depth, hashFlag,ply)
+        ZorbistKeys.writeEntry(board.hashKey, alpha, depth, hashFlag, ply)
 
         return alpha
     }
@@ -350,21 +401,32 @@ object Search {
             if (score <= alpha || score >= beta) {
                 alpha = -INFINITY
                 beta = INFINITY
-                println(
-                    "info score cp $score depth $currentDepth nodes $nodes time ${
-                        System.currentTimeMillis().toULong() - UCI.startTime
-                    } ${generatePrincipleVariationString()}"
-                )
                 continue
             }
             alpha = score - WINDOW_INCREMENTOR
             beta = score + WINDOW_INCREMENTOR
 
-            println(
-                "info score cp $score depth $currentDepth nodes $nodes time ${
-                    System.currentTimeMillis().toULong() - UCI.startTime
-                } ${generatePrincipleVariationString()}"
-            )
+
+            if (score > -MATE_VALUE && score < -MATE_SCORE) {
+                println(
+                    "info score mate ${(-(score + MATE_VALUE) / 2) - 1} depth $currentDepth nodes $nodes time ${
+                        System.currentTimeMillis().toULong() - UCI.startTime
+                    } ${generatePrincipleVariationString()}"
+                )
+
+            } else if (score > MATE_SCORE && score < MATE_VALUE) {
+                println(
+                    "info score mate ${((MATE_VALUE - score) / 2) + 1} depth $currentDepth nodes $nodes time ${
+                        System.currentTimeMillis().toULong() - UCI.startTime
+                    } ${generatePrincipleVariationString()}"
+                )
+            } else {
+                println(
+                    "info score cp $score depth $currentDepth nodes $nodes time ${
+                        System.currentTimeMillis().toULong() - UCI.startTime
+                    } ${generatePrincipleVariationString()}"
+                )
+            }
         }
         println("bestmove ${Moves.moveUCI(principalVariationTable[0][0])}\n")
     }
