@@ -20,11 +20,11 @@ Main
 
 fun main() {
     Attacks.initAll()
-    val debug = false
+    val debug = true
     if (debug) {
-        val b = Board("6k1/ppppprbp/8/8/8/8/PPPPPRBP/6K1 w - -")
+        val b = Board(FENDebugConstants.START_POSITION.fen)
         b.printBoard()
-        println("board score: ${Evaluation.evaluate(b)}")
+        Evaluation.evaluate(b)
 
     } else {
 

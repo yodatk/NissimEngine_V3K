@@ -28,7 +28,7 @@ object ZorbistKeys {
     /**
      * default size of entry
      */
-    val HASH_TABLE_SIZE = 0x400000
+    val HASH_TABLE_SIZE = 800000
 
     /**
      * Class to represent an entry in Transposition table

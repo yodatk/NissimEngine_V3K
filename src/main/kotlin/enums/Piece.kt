@@ -3,20 +3,20 @@ package enums
 /**
  * Enum for the pieces. white pieces are going to be capital letters, black letters, original letters
  */
-enum class Piece(val value: Int) {
+enum class Piece(val openingValue: Int,val endGameValue: Int) {
 
-    P(100),
-    N(300),
-    B(350),
-    R(500),
-    Q(1000),
-    K(10000),
-    p(-100),
-    n(-300),
-    b(-350),
-    r(-500),
-    q(-1000),
-    k(-10000);
+    P(openingValue = 82,endGameValue = 94),
+    N(openingValue = 337,endGameValue = 281),
+    B(openingValue = 365,endGameValue = 297),
+    R(openingValue = 477,endGameValue = 512),
+    Q(openingValue = 1025,endGameValue = 936),
+    K(openingValue = 12000, endGameValue = 12000),
+    p(openingValue = -82, endGameValue = -94),
+    n(openingValue = -337, endGameValue = -281),
+    b(openingValue = -365, endGameValue = -297),
+    r(openingValue = -477, endGameValue = -512),
+    q(openingValue = -1025, endGameValue = -936),
+    k(openingValue = -12000, endGameValue = -12000);
 
 //    override fun toString(): String {
 //        return unicodeChars.getOrDefault(this,".")

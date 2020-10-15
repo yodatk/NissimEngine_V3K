@@ -302,7 +302,9 @@ object UCI {
             //there is time limit
             isTimeSet = true
             time /= movesToGo.toULong()
-            time -= 50UL
+            if(time > 1500UL){
+                time -= 50UL
+            }
             stopTime = startTime + time + increment.toULong()
         }
 
