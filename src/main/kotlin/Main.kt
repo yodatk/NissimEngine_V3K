@@ -22,7 +22,7 @@ fun main() {
     Attacks.initAll()
     val debug = false
     if (debug) {
-        val b = Board("6k1/5p1p/8/8/8/8/5P1P/6K1 w - -")
+        val b = Board("6k1/ppppprbp/8/8/8/8/PPPPPRBP/6K1 w - -")
         b.printBoard()
         println("board score: ${Evaluation.evaluate(b)}")
 

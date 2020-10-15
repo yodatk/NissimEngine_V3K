@@ -203,6 +203,8 @@ object Evaluation {
 
     const val ISOLATED_PAWN_PENALTY = -10
 
+    const val KING_SHIELD_BONUS = 5
+
     val PASSED_PAWN_BONUS = arrayOf(
         0, 10, 30, 50, 75, 100, 150, 200
     )
@@ -418,7 +420,10 @@ object Evaluation {
 
                     }
                     Piece.N -> score += knightPositionalScore[square]
-                    Piece.B -> score += bishopPositionalScore[square]
+                    Piece.B -> {
+                        score += bishopPositionalScore[square]
+                        score += BitBoard.countBits(Attacks.getBishopAttacks(Square.fromIntegerToSquare(square)!!,board.occupanciesBitboards[Color.BOTH.ordinal]))
+                    }
                     Piece.R -> {
                         score += rookPositionalScore[square]
                         if (board.pieceBitboards[Piece.P.ordinal] and fileMasks[square] == 0UL) {
@@ -428,14 +433,23 @@ object Evaluation {
                             score += OPEN_FILE_SCORE
                         }
                     }
+
+                    Piece.Q ->{
+                        score += BitBoard.countBits(Attacks.getQueenAttacks(Square.fromIntegerToSquare(square)!!,board.occupanciesBitboards[Color.BOTH.ordinal]))
+                    }
+
                     Piece.K -> {
+
                         score += kingPositionalScore[square]
+                        // king file calc
                         if (board.pieceBitboards[Piece.P.ordinal] and fileMasks[square] == 0UL) {
                             score -= SEMI_OPEN_FILE_BONUS
                         }
                         if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
                             score -= OPEN_FILE_SCORE
                         }
+                        // king shield bonus
+                        score += BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.WHITE.ordinal]) * KING_SHIELD_BONUS
                     }
 
                     //BLACK
@@ -460,7 +474,10 @@ object Evaluation {
 
                     }
                     Piece.n -> score -= knightPositionalScore[mirrorScores[square]]
-                    Piece.b -> score -= bishopPositionalScore[mirrorScores[square]]
+                    Piece.b -> {
+                        score -= bishopPositionalScore[mirrorScores[square]]
+                        score -= BitBoard.countBits(Attacks.getBishopAttacks(Square.fromIntegerToSquare(square)!!,board.occupanciesBitboards[Color.BOTH.ordinal]))
+                    }
                     Piece.r -> {
                         score -= rookPositionalScore[mirrorScores[square]]
                         if (board.pieceBitboards[Piece.p.ordinal] and fileMasks[square] == 0UL) {
@@ -470,6 +487,11 @@ object Evaluation {
                             score -= OPEN_FILE_SCORE
                         }
                     }
+
+                    Piece.q ->{
+                        score -= BitBoard.countBits(Attacks.getQueenAttacks(Square.fromIntegerToSquare(square)!!,board.occupanciesBitboards[Color.BOTH.ordinal]))
+                    }
+
                     Piece.k -> {
                         score -= kingPositionalScore[mirrorScores[square]]
                         if (board.pieceBitboards[Piece.p.ordinal] and fileMasks[square] == 0UL) {
@@ -478,6 +500,8 @@ object Evaluation {
                         if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
                             score += OPEN_FILE_SCORE
                         }
+                        // king shield bonus
+                        score -= BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.BLACK.ordinal]) * KING_SHIELD_BONUS
                     }
 
                     else -> break
