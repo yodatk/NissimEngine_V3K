@@ -5,6 +5,7 @@ import kotlin.text.StringBuilder
 @ExperimentalUnsignedTypes
 class Board {
 
+
     /**
      * array of bitboards to represents the board - 6 for each color.
      *
@@ -86,6 +87,7 @@ class Board {
         this.side = Color.WHITE
         this.enpassant = Square.NO_SQUARE
         this.castle = 0
+        this.hashKey = 0UL
     }
 
     fun copyOtherBoard(other: Board) {
@@ -129,9 +131,16 @@ class Board {
         if (toReset) {
             this.emptyBoard()
         }
+
+
+        /***NEED TO CHANGE IF WANT TO DO CONCURRENT SEARCH***/
+        Search.repetitionsIndex = 0
+        Search.repetitionsTable = Array(1000) { 0UL }
+        //Search.ply = 0
+        /***NEED TO CHANGE IF WANT TO DO CONCURRENT SEARCH***/
         var index = 0
         var rank = 0
-        var file = 0
+        var file :Int
 
         while (rank < 8) {
             //for each rank
@@ -336,7 +345,7 @@ class Board {
     fun generateMoves(): MutableList<Int> {
         var bitboardCopy: ULong
         val isWhite = side == Color.WHITE
-        var moveList: MutableList<Int> = mutableListOf()
+        val moveList: MutableList<Int> = mutableListOf()
 
         for (piece in if (isWhite) Piece.whitePieces else Piece.blackPieces) {
             bitboardCopy = (this.pieceBitboards[piece.ordinal])
@@ -357,7 +366,7 @@ class Board {
     /**
      * generate all possible moves for the given piece type, in the given board, for the given color
      * @param piece: determining the piece type
-     * @param bitboardCopy: copy of the bitboard of that piece
+     * @param _bitboardCopy: copy of the bitboard of that piece
      * @param isWhite: true-> generate for white. false -> generate for black
      * @param moveList: list of integers that collects all the moves available so far to edit
      */
@@ -523,7 +532,7 @@ class Board {
 
     /***
      * find all the possible moves for pawns for the given board and color
-     * @param bitboardCopy: BItboard represent the bitboard of the pawns
+     * @param _bitboardCopy: BItboard represent the bitboard of the pawns
      * @param isWhite: Boolean to say the color of the pawn: true-> White, false->Black
      * @param moveList: Mutable list of integers represent all the possible moves so far
      */
@@ -908,6 +917,15 @@ class Board {
         return finalKey
     }
 
+    override fun hashCode(): Int {
+        var result = pieceBitboards.contentHashCode()
+        result = 31 * result + occupanciesBitboards.contentHashCode()
+        result = 31 * result + side.hashCode()
+        result = 31 * result + enpassant.hashCode()
+        result = 31 * result + castle
+        result = 31 * result + hashKey.hashCode()
+        return result
+    }
 
 
     companion object {

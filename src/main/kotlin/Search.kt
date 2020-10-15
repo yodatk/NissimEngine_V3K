@@ -37,7 +37,7 @@ object Search {
     var principalVariationTable: Array<Array<Int>> = Array<Array<Int>>(66) { Array(66) { 0 } }
 
     //positions repetiotions table
-    var repetitionsTable: Array<ULong> = Array(150) { 0UL }
+    var repetitionsTable: Array<ULong> = Array(1000) { 0UL } // number of plys in entire game (500 games in entire game)
 
     var repetitionsIndex: Int = 0
 
@@ -97,11 +97,15 @@ object Search {
 
 
         for (move in moveList) {
+
+
             val boardCopy = Board(board)
             ply++
             //updating in repetitionsTable
             repetitionsIndex++
             repetitionsTable[repetitionsIndex] = board.hashKey
+
+
             if (!board.makeMove(move, isCapturesOnly = true)) {
                 ply--
                 //updating in repetitionsTable
@@ -117,7 +121,7 @@ object Search {
             board.copyOtherBoard(boardCopy)
 
             if (UCI.isStopped) {
-                return 0;
+                return 0
             }
 
 

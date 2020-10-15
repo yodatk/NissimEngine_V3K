@@ -45,7 +45,7 @@ object UCI {
     /**
      * how much time to increment
      */
-    var increment = 0;
+    var increment = 0
 
     /**
      * for time measuring purposes
@@ -136,7 +136,7 @@ object UCI {
 
     fun parsePosition(_command: String): Board {
         var command = _command.trim()
-        var board: Board
+        val board: Board
         if (command.substring(0, 8).equals("position")) {
             try {
                 command = command.substring(command.indexOf(" ") + 1)
@@ -179,6 +179,11 @@ object UCI {
                     if (move == 0) {
                         break
                     } else {
+
+                        // increment repetition index
+                        Search.repetitionsIndex++
+                        // write hash key into repetition table
+                        Search.repetitionsTable[Search.repetitionsIndex] = board.hashKey
                         val check = board.makeMove(move)
                         if (!check) {
                             break
@@ -200,13 +205,13 @@ object UCI {
     }
 
     fun parseGoCommand(_command: String) {
-        var command = _command
+        val command = _command
         var depth = -1
         var current: String
 
         // infinite search
         if (command.contains("infinite")) {
-            // nothing to be done
+            /* no-op */
         }
 
         // adding increment to black command
