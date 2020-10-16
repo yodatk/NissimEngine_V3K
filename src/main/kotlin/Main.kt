@@ -20,7 +20,7 @@ Main
 
 fun main() {
     Attacks.initAll()
-    val debug = true
+    val debug = false
     if (debug) {
 //        val b = Board(FENDebugConstants.START_POSITION.fen)
 //        b.printBoard()

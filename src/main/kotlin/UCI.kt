@@ -351,7 +351,7 @@ object UCI {
     fun printInfo() {
         println("id name Nissim $VERSION\n" +
                 "id author yodatk\n" +
-                "option name Hash type spin default $DEFAULT_HASH min $MIN_HASH max $MAX_HASH"+
+                "option name Hash type spin default $DEFAULT_HASH min $MIN_HASH max $MAX_HASH\n"+
                 "uciok")
     }
 

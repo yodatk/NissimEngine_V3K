@@ -82,7 +82,7 @@ object ZorbistKeys {
     }
 
     fun initHashTable(mb: Int) {
-        val hashSize = 0x100000
+        val hashSize = 0x100000 * mb
         hashEntries = hashSize / CLASS_TT_SIZE
 //        if(hashTable!=null){
 //            clearHashTable()

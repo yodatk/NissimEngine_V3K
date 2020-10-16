@@ -799,8 +799,6 @@ object Evaluation {
 //                         // king shield bonus
 //                         score -= BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.BLACK.ordinal]) * KING_SHIELD_BONUS
                      }
-
-                     else -> break
                  }
                 currBitboard = BitBoard.setBitOff(currBitboard, Square.fromIntegerToSquare(square)!!)
             }
