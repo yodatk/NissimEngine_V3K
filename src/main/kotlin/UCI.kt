@@ -313,6 +313,9 @@ object UCI {
                 time -= 50UL
             }
             stopTime = startTime + time + increment.toULong()
+            if(time < 1500UL && increment!=0 && depth == 64) {
+                stopTime = startTime+ increment.toULong()-50UL
+            }
         }
 
         if (depth == -1) {

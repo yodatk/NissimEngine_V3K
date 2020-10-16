@@ -138,10 +138,13 @@ object Search {
     }
 
     fun negamax(board: Board, _alpha: Int, beta: Int, _depth: Int): Int {
+
+        principalVariationLength[ply] = ply
         var depth = _depth
         var alpha = _alpha
 
         var currentScore: Int
+
 
         var hashFlag = ZorbistKeys.HASH_FLAG_ALPHA
 
@@ -168,7 +171,6 @@ object Search {
 
 
 
-        principalVariationLength[ply] = ply
 
 
         if (depth == 0) {
