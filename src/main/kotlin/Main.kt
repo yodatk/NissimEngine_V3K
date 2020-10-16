@@ -22,9 +22,10 @@ fun main() {
     Attacks.initAll()
     val debug = true
     if (debug) {
-        val b = Board(FENDebugConstants.START_POSITION.fen)
-        b.printBoard()
-        println(Evaluation.evaluate(b))
+//        val b = Board(FENDebugConstants.START_POSITION.fen)
+//        b.printBoard()
+//        println(Evaluation.evaluate(b))
+
 
     } else {
 

@@ -25,10 +25,12 @@ object ZorbistKeys {
      */
     val UNKOWN_VALUE = 100000
 
-    /**
-     * default size of entry
-     */
-    val HASH_TABLE_SIZE = 800000
+//    /**
+//     * default size of entry
+//     */
+//    val HASH_TABLE_SIZE = 800000
+
+    const val CLASS_TT_SIZE = 20
 
     /**
      * Class to represent an entry in Transposition table
@@ -55,24 +57,40 @@ object ZorbistKeys {
      */
     var sideKey : ULong = 0UL
 
+
+    var hashEntries = 0
+
     /**
      * Transposition table
      */
-    var hashTable:Array<TT> = Array(HASH_TABLE_SIZE) {TT(0UL,0,0,0)}
+    var hashTable:Array<TT>? = Array(hashEntries) {TT(0UL,0,0,0)}
+
 
     /**
      * Cleaning the hash table
      */
     fun clearHashTable() {
-        for (tt in hashTable){
-            tt.hashKey = 0UL
-            tt.depth = 0
-            tt.flag = 0
-            tt.score = 0
+        if(hashTable!= null){
+            for (tt in hashTable!!){
+                tt.hashKey = 0UL
+                tt.depth = 0
+                tt.flag = 0
+                tt.score = 0
+            }
         }
+
     }
 
-    fun generatingTableIndex(hashKey: ULong) = hashKey.rem(HASH_TABLE_SIZE.toULong()).toInt()
+    fun initHashTable(mb: Int) {
+        val hashSize = 0x100000
+        hashEntries = hashSize / CLASS_TT_SIZE
+//        if(hashTable!=null){
+//            clearHashTable()
+//        }
+        hashTable = Array(hashEntries) {TT(0UL,0,0,0)}
+    }
+
+    fun generatingTableIndex(hashKey: ULong) = hashKey.rem(hashEntries.toULong()).toInt()
 
     /**
      * Read data from TT according to given parameters
@@ -83,7 +101,7 @@ object ZorbistKeys {
      * @return Int value represents the value that is saved for the given position in TT table. if not found, return 100000
      */
     fun readHashData(hashKey: ULong,alpha:Int,beta:Int,depth:Int,ply:Int) : Int{
-        val currentEntry = hashTable[generatingTableIndex(hashKey)]
+        val currentEntry = hashTable!![generatingTableIndex(hashKey)]
         if(currentEntry.hashKey == hashKey){
             // checking that the given hash key matches the entry in table
             if(currentEntry.depth >= depth){
@@ -129,7 +147,7 @@ object ZorbistKeys {
      */
     fun writeEntry(hashKey: ULong,_score: Int,depth: Int,hashFlag : Int,ply:Int){
         var score = _score
-        val newEntry = hashTable[generatingTableIndex(hashKey)]
+        val newEntry = hashTable!![generatingTableIndex(hashKey)]
 
 
         // store score independent from the actual path from root to current position(node)

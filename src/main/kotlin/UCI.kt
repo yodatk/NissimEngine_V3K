@@ -69,6 +69,10 @@ object UCI {
      */
     var isStopped = false
 
+    val MAX_HASH = 128
+    val DEFAULT_HASH = 64
+    val MIN_HASH = 4
+
 //
 //    fun inputWaiting() : Boolean{
 //        var input : String
@@ -345,34 +349,69 @@ object UCI {
     }
 
     fun printInfo() {
-        println("id name Nissim $VERSION\nid author yodatk\nuciok")
+        println("id name Nissim $VERSION\n" +
+                "id author yodatk\n" +
+                "option name Hash type spin default $DEFAULT_HASH min $MIN_HASH max $MAX_HASH"+
+                "uciok")
     }
 
     fun uciLoop() {
+
         var input: String?
         System.out.flush()
         printInfo()
         while (true) {
             System.out.flush()
             input = readLine()!!
-            when (input.substringBefore(" ", input)) {
-                "\n", "" -> continue
-                "isready" -> {
-                    println("readyok")
-                    continue
+            var temp = input.substringAfter("setoption name Hash value ", "")
+            if(temp.isNotEmpty()){
+                temp = temp.substringBefore(" ","").trim()
+                val mb = if(temp.isNotEmpty()){
+                   try {
+                        val c = temp.toInt()
+                       when {
+                           c < MIN_HASH -> {
+                               MIN_HASH
+                           }
+                           c > MAX_HASH -> {
+                               MAX_HASH
+                           }
+                           else -> {
+                               c
+                           }
+                       }
+
+                    } catch (e: Exception) {
+                        DEFAULT_HASH
+                    }
                 }
-                "position" -> {
-                    parsePosition(input)
-                    //ZorbistKeys.clearHashTable()
+                else{
+                    DEFAULT_HASH
                 }
-                "ucinewgame" -> {
-                    ZorbistKeys.clearHashTable()
-                    parsePosition("position startpos\n")
+                println("   Set hash table size to $mb")
+                ZorbistKeys.initHashTable(mb)
+            }
+            else{
+                when (input.substringBefore(" ", input)) {
+                    "\n", "" -> continue
+                    "isready" -> {
+                        println("readyok")
+                        continue
+                    }
+                    "position" -> {
+                        parsePosition(input)
+                        ZorbistKeys.clearHashTable()
+                    }
+                    "ucinewgame" -> {
+                        parsePosition("position startpos\n")
+                        ZorbistKeys.clearHashTable()
+                    }
+                    "go" -> parseGoCommand(input.substringAfter("go "))
+                    "quit" -> break
+                    "uci" -> printInfo()
+                    else -> println("NOT VALID COMMAND")
                 }
-                "go" -> parseGoCommand(input.substringAfter("go "))
-                "quit" -> break
-                "uci" -> printInfo()
-                else -> println("NOT VALID COMMAND")
+
             }
 
         }
