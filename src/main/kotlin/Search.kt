@@ -13,35 +13,40 @@ object Search {
      *
      *          [ -INFINITY,-MATE_VALUE, .... -MATE_SCORE ...... score ...... MATE_SCORE ... MATE_VALUE ... INFINITY ]
      */
-    val INFINITY = 50000
-    val MATE_VALUE = 49000
-    val MATE_SCORE = 48000
+    const val INFINITY = 50000
+    const val MATE_VALUE = 49000
+    const val MATE_SCORE = 48000
 
-    val MAX_NODE_DEPTH = 64
+    const val MAX_NODE_DEPTH = 64
 
-    val MAX_PLY = 64
+    const val MAX_PLY = 64
 
-    val FULL_DEPTH_SEARCH = 4
-    val REDUCTION_LIMIT = 3
-
-
-    val WINDOW_INCREMENTOR = 50
+    const val FULL_DEPTH_SEARCH = 4
+    const val REDUCTION_LIMIT = 3
 
 
+    const val WINDOW_INCREMENTOR = 50
+
+    @JvmStatic
     var nodes: ULong = 0UL
 
+    @JvmStatic
     var ply: Int = 0
 
+    @JvmStatic
     var principalVariationLength: Array<Int> = Array<Int>(66) { 0 }
 
+    @JvmStatic
     var principalVariationTable: Array<Array<Int>> = Array<Array<Int>>(66) { Array(66) { 0 } }
 
+    @JvmStatic
     //positions repetiotions table
     var repetitionsTable: Array<ULong> = Array(1000) { 0UL } // number of plys in entire game (500 games in entire game)
 
+    @JvmStatic
     var repetitionsIndex: Int = 0
 
-
+    @JvmStatic
     fun enablePVScoring(moveList: List<Int>) {
         Evaluation.followPrincipleVariation = false
         for (move in moveList) {
@@ -53,6 +58,7 @@ object Search {
 
     }
 
+    @JvmStatic
     // position repetition detections
     fun isRepetition(hashKey:ULong): Boolean{
         // loop over repetition range
@@ -69,7 +75,7 @@ object Search {
         // if no repetition is found
         return false
     }
-
+    @JvmStatic
     fun quietSearch(board: Board, _alpha: Int, beta: Int): Int {
         if ((nodes and 2047UL) == 0UL) {
             UCI.communicate()
@@ -137,6 +143,7 @@ object Search {
         return alpha
     }
 
+    @JvmStatic
     fun negamax(board: Board, _alpha: Int, beta: Int, _depth: Int): Int {
 
 
@@ -159,7 +166,7 @@ object Search {
 
         //read hash entry if not a root ply, and not a pv_node, and hash is available
         currentScore = ZorbistKeys.readHashData(board.hashKey, alpha, beta, depth, ply)
-        if (ply != 0 && currentScore != ZorbistKeys.UNKOWN_VALUE && !isPvNode) {
+        if (ply != 0 && currentScore != ZorbistKeys.UNKNOWN_VALUE && !isPvNode) {
             //if the move has alreadey been searched
             // return the score for this move without searching it
             return currentScore
@@ -368,7 +375,7 @@ object Search {
 
         return alpha
     }
-
+    @JvmStatic
     fun generatePrincipleVariationString(): String {
         val builder = StringBuilder("pv ")
         var i = 0
@@ -378,7 +385,7 @@ object Search {
         }
         return builder.toString()
     }
-
+    @JvmStatic
     fun resetDataBeforeSearch() {
         nodes = 0UL//
         UCI.isStopped = false//
@@ -392,7 +399,7 @@ object Search {
         //ZorbistKeys.clearHashTable()
     }
 
-
+    @JvmStatic
     fun searchPosition(board: Board, depth: Int) {
         resetDataBeforeSearch()
         var score: Int

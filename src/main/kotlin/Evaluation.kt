@@ -21,6 +21,7 @@ object Evaluation {
     const val ENDGAME_PHASE_SCORE = 518
 
     // positional scores array: [ game pahse ] [ piece ] [ square ]
+    @JvmStatic
     val positionalScore: Array<Array<Array<Int>>> = arrayOf(
 
         // ================= OPENING POSITIONAL SCORES ================= //
@@ -177,6 +178,7 @@ object Evaluation {
             )
     )
 
+    @JvmStatic
     val mirrorScores = arrayOf(
 
         Square.a1.ordinal,
@@ -261,6 +263,7 @@ object Evaluation {
         )
 
     //most valuable piece -> least valuable attacker
+    @JvmStatic
     val MVV_LVA: Array<Array<Int>> = arrayOf(
         //white pPawn (from pawns to king)
         arrayOf(105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605),
@@ -298,6 +301,7 @@ object Evaluation {
     )
 
     // extract rank from square
+    @JvmStatic
     val GET_RANK_FROM_SQUARE = arrayOf(
         7, 7, 7, 7, 7, 7, 7, 7,
         6, 6, 6, 6, 6, 6, 6, 6,
@@ -319,6 +323,7 @@ object Evaluation {
 
     const val KING_SHIELD_BONUS = 5
 
+    @JvmStatic
     val PASSED_PAWN_BONUS = arrayOf(
         0, 10, 30, 50, 75, 100, 150, 200
     )
@@ -341,36 +346,46 @@ object Evaluation {
     /**
      * File masks [ square ]
      */
+    @JvmStatic
     val fileMasks: Array<ULong> = Array(64) { 0UL }
 
 
     /**
      * rank masks [ square ]
      */
+    @JvmStatic
     val rankMasks: Array<ULong> = Array(64) { 0UL }
 
     /**
      * isolated pawns masks [ square ]
      */
+    @JvmStatic
     val isolatedPawnsMasks: Array<ULong> = Array(64) { 0UL }
 
     /**
      * white passed pawns masks [ square ]
      */
+    @JvmStatic
     val whitePassedPawnsMasks: Array<ULong> = Array(64) { 0UL }
 
     /**
      * black passed pawns masks[ square ]
      */
+    @JvmStatic
     val blackPassedPawnsMasks: Array<ULong> = Array(64) { 0UL }
 
+    @JvmStatic
     var killerMoves = Array(2) { Array(64) { 0 } }
 
+    @JvmStatic
     var historyMoves = Array(12) { Array(64) { 0 } }
 
+    @JvmStatic
     var followPrincipleVariation = false
+    @JvmStatic
     var scorePrincipleVariation = false
 
+    @JvmStatic
     fun setFileRankMask(fileNumber: Int, rankNumber: Int): ULong {
         //define file or rank
         var mask = 0UL
@@ -397,7 +412,7 @@ object Evaluation {
         return mask
 
     }
-
+    @JvmStatic
     fun initEvaluationMasks() {
         for (rank in 0..7) {
             for (file in 0..7) {
@@ -433,13 +448,13 @@ object Evaluation {
             }
         }
     }
-
+    @JvmStatic
     fun resetHistoryAndKillerMoves() {
         killerMoves = Array(2) { Array(64) { 0 } }
 
         historyMoves = Array(12) { Array(64) { 0 } }
     }
-
+    @JvmStatic
     fun sortedPossibleMoves(b: Board, movesList: List<Int>, ply: Int): List<Int> {
 
         val withScoreList = movesList.map { MoveWithScore(it, evaluateMoveScore(b, it, ply)) }.toMutableList()
@@ -459,11 +474,11 @@ object Evaluation {
             i++
         }
         return withScoreList.map { it.move }
-////
+//
 //        //quick sort - not implemented yet for debugging
 //        return withScoreList.sortedDescending().map{it.move}
     }
-
+    @JvmStatic
     fun printMovesScores(b: Board, ply: Int) {
         val movesList = sortedPossibleMoves(b, b.generateMoves(), ply)
         println("   Moves Scores:\n")
@@ -472,7 +487,7 @@ object Evaluation {
         }
     }
 
-
+    @JvmStatic
     fun evaluateMoveScore(board: Board, move: Int, ply: Int): Int {
 
         if (scorePrincipleVariation) {
@@ -507,8 +522,6 @@ object Evaluation {
                 }
             }
         }
-
-        return 0
     }
 
     /**
@@ -516,6 +529,7 @@ object Evaluation {
      *  @param board: Board to check
      *  @return int value represents the score of the current "game phase"
      */
+    @JvmStatic
     fun getGamePhaseScore(board: Board): Int {
         var whitePieces = 0
         var blackPieces = 0
@@ -535,7 +549,7 @@ object Evaluation {
         return whitePieces + blackPieces
     }
 
-
+    @JvmStatic
     fun evaluate(board: Board): Int {
         val gamePhaseScore = getGamePhaseScore(board)
 

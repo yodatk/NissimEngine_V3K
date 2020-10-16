@@ -1,5 +1,4 @@
 import enums.Piece
-import enums.Square
 
 /**
  * Defining zorbist keys for tranportation tables and hashing
@@ -10,25 +9,23 @@ object ZorbistKeys {
     /**
      * Flag for finding exact Principle variation node
      */
-    val HASH_FLAG_EXACT = 0
+    const val HASH_FLAG_EXACT = 0
     /**
      * Flag for Fail low node
      */
-    val HASH_FLAG_ALPHA = 1
+
+    const val HASH_FLAG_ALPHA = 1
     /**
      * Flag for Fail high node
      */
-    val HASH_FLAG_BETA = 2
+    const val HASH_FLAG_BETA = 2
 
     /**
      * Value for unknown entry
      */
-    val UNKOWN_VALUE = 100000
 
-//    /**
-//     * default size of entry
-//     */
-//    val HASH_TABLE_SIZE = 800000
+    const val UNKNOWN_VALUE = 100000
+
 
     const val CLASS_TT_SIZE = 20
 
@@ -40,56 +37,56 @@ object ZorbistKeys {
     /**
      * Keys for pieces according to their position on board for hashing purposes
      */
+    @JvmStatic
     var pieceKeys :Array<Array<ULong>> = Array(12) { Array(64) { 0UL} }
 
     /**
      * Keys for enpassant position on board for hashing purposes
      */
+    @JvmStatic
     var enpassantKeys :Array<ULong> =  Array(64) { 0UL}
 
     /**
      * Keys for castling rights for hashing purposes
      */
+    @JvmStatic
     var castleKeys :Array<ULong> =  Array(16) { 0UL}
 
     /**
      * Key for black side only for hashing purposes (if white -> don't add to hash)
      */
+    @JvmStatic
     var sideKey : ULong = 0UL
 
-
+    @JvmStatic
     var hashEntries = 0
 
     /**
      * Transposition table
      */
-    var hashTable:Array<TT>? = Array(hashEntries) {TT(0UL,0,0,0)}
+    @JvmStatic
+    //var hashTable:Array<TT>? = Array(hashEntries) {TT(0UL,0,0,0)}
+    var hashTable : HashMap<ULong,TT> = HashMap()
 
 
     /**
      * Cleaning the hash table
      */
+    @JvmStatic
     fun clearHashTable() {
-        if(hashTable!= null){
-            for (tt in hashTable!!){
-                tt.hashKey = 0UL
-                tt.depth = 0
-                tt.flag = 0
-                tt.score = 0
-            }
-        }
+        hashTable = HashMap()
 
     }
-
-    fun initHashTable(mb: Int) {
-        val hashSize = 0x100000 * mb
-        hashEntries = hashSize / CLASS_TT_SIZE
-//        if(hashTable!=null){
-//            clearHashTable()
-//        }
-        hashTable = Array(hashEntries) {TT(0UL,0,0,0)}
-    }
-
+//    @JvmStatic
+//    fun initHashTable(mb: Int) {
+//        val hashSize = 0x100000 * mb
+//        hashEntries = hashSize / CLASS_TT_SIZE
+////        if(hashTable!=null){
+////            clearHashTable()
+////        }
+//        hashTable = Array(hashEntries) {TT(0UL,0,0,0)}
+//    }
+    @JvmStatic
     fun generatingTableIndex(hashKey: ULong) = hashKey.rem(hashEntries.toULong()).toInt()
 
     /**
@@ -100,55 +97,58 @@ object ZorbistKeys {
      * @param depth:    Int represent the wanted depth
      * @return Int value represents the value that is saved for the given position in TT table. if not found, return 100000
      */
+    @JvmStatic
     fun readHashData(hashKey: ULong,alpha:Int,beta:Int,depth:Int,ply:Int) : Int{
-        val currentEntry = hashTable!![generatingTableIndex(hashKey)]
-        if(currentEntry.hashKey == hashKey){
-            // checking that the given hash key matches the entry in table
-            if(currentEntry.depth >= depth){
-                // checking the depth in entry is deep enough for wanted depth
+        val currentEntry = if(hashTable.containsKey(hashKey)) hashTable[hashKey] else null
+        if(currentEntry!=null){
+            if(currentEntry.hashKey == hashKey){
+                // checking that the given hash key matches the entry in table
+                if(currentEntry.depth >= depth){
+                    // checking the depth in entry is deep enough for wanted depth
 
-                var score = currentEntry.score
+                    var score = currentEntry.score
 
-                // retrieve score independent from the actual path
-                // from root node (position) to the current node(position)
-                if(score < -Search.MATE_SCORE) {
-                    score += ply
-                }
-                if(score > Search.MATE_SCORE){
-                    score -= ply
-                }
+                    // retrieve score independent from the actual path
+                    // from root node (position) to the current node(position)
+                    if(score < -Search.MATE_SCORE) {
+                        score += ply
+                    }
+                    if(score > Search.MATE_SCORE){
+                        score -= ply
+                    }
 
 
-                if(currentEntry.flag == HASH_FLAG_EXACT){
-                    // return exact score
-                    return score
-                }
-                if(currentEntry.flag == HASH_FLAG_ALPHA && score <= alpha){
-                    // fail low node
-                    return alpha
-                }
-                if(currentEntry.flag == HASH_FLAG_BETA && score >= beta){
-                    // fail high node
-                    return beta
-                }
+                    if(currentEntry.flag == HASH_FLAG_EXACT){
+                        // return exact score
+                        return score
+                    }
+                    if(currentEntry.flag == HASH_FLAG_ALPHA && score <= alpha){
+                        // fail low node
+                        return alpha
+                    }
+                    if(currentEntry.flag == HASH_FLAG_BETA && score >= beta){
+                        // fail high node
+                        return beta
+                    }
 
+                }
             }
         }
+
         // couldn't find something relevant in hash table
-        return UNKOWN_VALUE
+        return UNKNOWN_VALUE
     }
 
     /**
      * write data to TT according to given parameters
      * @param hashKey:      ULong represents the hash key of the current board
-     * @param score:        Int represent the current found value of the position
+     * @param _score:        Int represent the current found value of the position
      * @param depth:        Int represent the wanted depth
      * @param hashFlag:     Int represent the position category(PV,Beta or Alpha)
      */
+    @JvmStatic
     fun writeEntry(hashKey: ULong,_score: Int,depth: Int,hashFlag : Int,ply:Int){
         var score = _score
-        val newEntry = hashTable!![generatingTableIndex(hashKey)]
-
 
         // store score independent from the actual path from root to current position(node)
         if(score < -Search.MATE_SCORE){
@@ -158,16 +158,15 @@ object ZorbistKeys {
             score += ply
         }
 
-        newEntry.hashKey = hashKey
-        newEntry.score = score
-        newEntry.flag = hashFlag
-        newEntry.depth = depth
+        val newEntry = TT(hashKey,depth,hashFlag,score)
+        hashTable[hashKey] = newEntry
     }
 
 
     /**
      * Init Zorbiest Keys for all different arrays
      */
+    @JvmStatic
     fun initRandomKeys() {
         RandomNumbers.uIntRandomState = 1804289383U
 

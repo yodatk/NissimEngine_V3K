@@ -9,6 +9,7 @@ object MagicNumbers {
     private const val FF00000000000000: ULong = 71776119061217280UL
 
     @ExperimentalUnsignedTypes
+    @JvmStatic
     val rookMagicNumbers: Array<ULong> = arrayOf(
         9979994641325359136UL,
         90072129987412032UL,
@@ -77,6 +78,7 @@ object MagicNumbers {
     )
 
     @ExperimentalUnsignedTypes
+    @JvmStatic
     val bishopMagicNumbers: Array<ULong> = arrayOf(
         18018832060792964UL,
         9011737055478280UL,
@@ -145,12 +147,14 @@ object MagicNumbers {
     )
 
     @ExperimentalUnsignedTypes
+    @JvmStatic
     fun generateMagicNumber(): ULong {
         return (getRandomULongNumber() and getRandomULongNumber() and getRandomULongNumber())
     }
 
 
     @ExperimentalUnsignedTypes
+    @JvmStatic
     fun findMagicNumber(square: Int, relevantBits: Int, isBishop: Boolean): ULong {
         // init occupencies
         val occupancies = Array(4096) { 0UL }
@@ -220,6 +224,7 @@ object MagicNumbers {
      * as an ULong array
      */
     @ExperimentalUnsignedTypes
+    @JvmStatic
     fun initMagicNumbers() {
         var temp: ULong
         println("ROOK MAGIC NUMBERS\n========")

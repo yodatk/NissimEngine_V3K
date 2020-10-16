@@ -32,6 +32,7 @@ object Attacks {
 
     A B C D E F G H
      */
+    @JvmStatic
     private val NOT_A_FILE: ULong = 18374403900871474942UL
 
 
@@ -48,6 +49,7 @@ object Attacks {
 
     A B C D E F G H
      */
+    @JvmStatic
     private val NOT_H_FILE: ULong = 9187201950435737471UL
 
 
@@ -64,6 +66,7 @@ object Attacks {
 
     A B C D E F G H
      */
+    @JvmStatic
     private val NOT_H_OR_G_FILE: ULong = 4557430888798830399UL
 
 
@@ -80,12 +83,14 @@ object Attacks {
 
     A B C D E F G H
      */
+    @JvmStatic
     private val NOT_A_OR_B_FILE: ULong = 18229723555195321596UL
 
 
     /**
      * bishop relevant occupancy bit count for every square on board
      */
+    @JvmStatic
     var bishopRelevantBits: Array<Int> = arrayOf(
         6, 5, 5, 5, 5, 5, 5, 6,
         5, 5, 5, 5, 5, 5, 5, 5,
@@ -101,6 +106,7 @@ object Attacks {
     /**
      * rook relevant occupancy bit count for every square on board
      */
+    @JvmStatic
     var rookRelevantBits: Array<Int> = arrayOf(
         12, 11, 11, 11, 11, 11, 11, 12,
         11, 10, 10, 10, 10, 10, 10, 11,
@@ -113,26 +119,33 @@ object Attacks {
     )
 
     /** Pawns attack table [ color ] [ square ]*/
+    @JvmStatic
     var pawnAttacks: Array<Array<ULong>> = Array(2) { Array(64) { 0UL } }
 
     /** Knight attack table [ square ]*/
+    @JvmStatic
     var knightAttacks: Array<ULong> = Array(64) { 0UL }
 
     /** King attack table [ square ]*/
+    @JvmStatic
     var kingAttacks: Array<ULong> = Array(64) { 0UL }
 
 
     /** Bishop attack table [ square ]*/
+    @JvmStatic
     var bishopMasks: Array<ULong> = Array(64) { 0UL }
 
     /** Rook attack table [ square ]*/
+    @JvmStatic
     var rookMasks: Array<ULong> = Array(64) { (0UL) }
 
 
     /**bishop attack table[ square ][ occupencies ]*/
+    @JvmStatic
     var bishopAttacks: Array<Array<ULong>> = Array(64) { Array(512) { 0UL } }
 
     /**rook attack table[ square ][ occupencies ]*/
+    @JvmStatic
     var rookAttacks: Array<Array<ULong>> = Array(64) { Array(4096) { 0UL } }
 
 
@@ -140,6 +153,7 @@ object Attacks {
      * generating pawn attack bitboard of a given color and a given square
      * @return Bitboard of the available moves with the pawn of the given color on the given square
      */
+    @JvmStatic
     fun maskPawnAttacks(side: Color, square: Square): ULong {
 
         var board = 0UL
@@ -172,6 +186,7 @@ object Attacks {
      * generating knights movements bitboard from a given square
      * @return Bitboard of the available moves with the Knight on the given square
      */
+    @JvmStatic
     fun maskKnightAttacks(square: Square): ULong {
         var board = 0UL
 
@@ -212,6 +227,7 @@ object Attacks {
      * generating king movements bitboard from a given square
      * @return Bitboard of the available moves with the king on the given square
      */
+    @JvmStatic
     fun maskKingAttacks(square: Square): ULong {
         var board = 0UL
 
@@ -251,6 +267,7 @@ object Attacks {
      * generating Bishop movements bitboard from a given square
      * @return Bitboard of the available moves with the Bishop on the given square
      */
+    @JvmStatic
     fun maskBishopAttacks(square: Square): ULong {
         var attacks = 0UL
         val targetR = square.ordinal / 8
@@ -298,6 +315,7 @@ object Attacks {
      * generating Bishop movements bitboard from a given square *CONSIDERING* given block array
      * @return Bitboard of the available moves with the Bishop on the given square
      */
+    @JvmStatic
     fun bishopAttacksOnTheFly(square: Square, block: ULong): ULong {
         var attacks = 0UL
         val targetR = square.ordinal / 8
@@ -362,6 +380,7 @@ object Attacks {
      * generating Rook movements bitboard from a given square *CONSIDERING* given block array
      * @return Bitboard of the available moves with the Rook on the given square
      */
+    @JvmStatic
     fun rookAttacksOnTheFly(square: Square, block: ULong): ULong {
         var attacks = 0UL
         val targetR = square.ordinal / 8
@@ -406,6 +425,7 @@ object Attacks {
      * generating Rook movements bitboard from a given square
      * @return Bitboard of the available moves with the Rook on the given square
      */
+    @JvmStatic
     fun maskRookAttacks(square: Square): ULong {
         var attacks = 0UL
         val targetR = square.ordinal / 8
@@ -427,7 +447,7 @@ object Attacks {
         return attacks
 
     }
-
+    @JvmStatic
     fun setOccupancy(index: Int, numOfBits: Int, attackMask: ULong): ULong {
         var occupancy = 0UL
         var temp = attackMask
@@ -441,7 +461,7 @@ object Attacks {
         }
         return occupancy
     }
-
+    @JvmStatic
     fun initLeaperAttacks() {
         enumValues<Square>().forEach {
             if (it != Square.NO_SQUARE) {
@@ -452,7 +472,7 @@ object Attacks {
             }
         }
     }
-
+    @JvmStatic
     fun initSliderAttacksForPiece(isBishop: Boolean) {
         //initialize mask
         enumValues<Square>().forEach {
@@ -484,6 +504,7 @@ object Attacks {
     /**
      * get bishop attacks for a given square and occupancy
      */
+    @JvmStatic
     fun getBishopAttacks(_square: Square, _occupancy: ULong): ULong {
         val square = _square.ordinal
         var occupancy : ULong = _occupancy
@@ -496,6 +517,7 @@ object Attacks {
     /**
      * get rook attacks for a given square and occupancy
      */
+    @JvmStatic
     fun getRookAttacks(_square: Square, _occupancy: ULong): ULong {
         val square = _square.ordinal
         var occupancy :ULong =_occupancy
@@ -512,17 +534,18 @@ object Attacks {
     /**
      * get rook attacks for a given square and occupancy
      */
+    @JvmStatic
     fun getQueenAttacks(_square: Square, _occupancy: ULong): ULong {
         return (getRookAttacks(_square, _occupancy) or getBishopAttacks(_square, _occupancy))
     }
-
+    @JvmStatic
     fun initAll() {
         initLeaperAttacks()
         initSliderAttacksForPiece(isBishop = true)
         initSliderAttacksForPiece(isBishop = false)
         ZorbistKeys.initRandomKeys()
 
-        ZorbistKeys.initHashTable(64)
+        //ZorbistKeys.initHashTable(64)
         Evaluation.initEvaluationMasks()
 
 

@@ -21,72 +21,84 @@ object UCI {
     /**
      * flag to determine if to quit searching or not
      */
+    @JvmStatic
     var isQuit = false
 
     /**
      * flag to determine how many moves needs to be done
      */
+    @JvmStatic
     var movesToGo = 30
 
     /**
      * how much time there is for a move
      */
+    @JvmStatic
     var moveTime = -1
 
 
     /**
      * Time flag
      */
+    @JvmStatic
     var isTime = false
 
     /**
      * how much time there is for a move
      */
-    var time : ULong = 0UL
+    @JvmStatic
+    var time: ULong = 0UL
 
     /**
      * how much time to increment
      */
+    @JvmStatic
     var increment = 0
 
     /**
      * for time measuring purposes
      */
+    @JvmStatic
     var startTime: ULong = 0UL
 
     /**
      * for time measuring purposes
      */
+    @JvmStatic
     var stopTime: ULong = 0UL
 
     /**
      * flag to determine if there is time control
      */
+    @JvmStatic
     var isTimeSet = false
 
     /**
      * flag to determine if the engine need to stop (becuase of time or because of interruptions
      */
+    @JvmStatic
     var isStopped = false
 
     /**
      * Hashing Variables for HashTable size
      */
-    val MAX_HASH = 128
-    val DEFAULT_HASH = 64
-    val MIN_HASH = 4
+
+    const val MAX_HASH = 128
+    const val DEFAULT_HASH = 64
+    const val MIN_HASH = 4
 
 
     /**
      * Board Field for parsing given Position
      */
+    @JvmStatic
     var board: Board = Board()
-
 
 
     /**
      * Checking if there is an input in stdin while searching for a move. if so, act according to input
      */
+    @JvmStatic
     fun readInput() {
         val inputScanner = BufferedReader(InputStreamReader(System.`in`))
         if (inputScanner.ready()) {
@@ -104,6 +116,7 @@ object UCI {
     /**
      * Check for comuunications from UCI client
      */
+    @JvmStatic
     fun communicate() {
         if (isTimeSet && System.currentTimeMillis().toULong() > stopTime) {
             isStopped = true
@@ -118,6 +131,7 @@ object UCI {
      * @param board: Board object to perform the move on
      * @return encoded move as integer
      */
+    @JvmStatic
     fun parseMove(stringInput: String, board: Board): Int {
         val listOfMoves = board.generateMoves()
         val inputSource: Square = Square.fromIntegerToSquare((stringInput[0] - 'a') + (8 - (stringInput[1] - '0')) * 8)
@@ -156,6 +170,7 @@ object UCI {
     /**
      * Parse given position to put on board
      */
+    @JvmStatic
     fun parsePosition(_command: String): Board {
         var command = _command.trim()
         val board: Board
@@ -174,7 +189,7 @@ object UCI {
                     throw UCIException("Invalid posotion command: '$_command'")
                 }
             } else {
-                val current = command.substringAfter("fen ","")
+                val current = command.substringAfter("fen ", "")
                 board = if (current != "") {
                     Board(current)
 
@@ -185,7 +200,7 @@ object UCI {
             //making additional added moves
             if (command.contains("moves")) {
                 try {
-                    command = command.substringAfter("moves ","")
+                    command = command.substringAfter("moves ", "")
                 } catch (e: Exception) {
                     throw UCIException("Invalid position command: '$_command'")
                 }
@@ -224,6 +239,7 @@ object UCI {
     /**
      * Parse the UCI command
      */
+    @JvmStatic
     fun parseGoCommand(_command: String) {
         resetTimeControl()
         val command = _command
@@ -291,7 +307,7 @@ object UCI {
         }
         // catching how much time to calculate
         current = command.substringAfter("movetime ", "")
-            current = current.substringBefore(" ", current)
+        current = current.substringBefore(" ", current)
         if (current.isNotEmpty()) {
             moveTime = try {
                 current.toInt()
@@ -301,7 +317,7 @@ object UCI {
         }
         // catching depth to calculate
         current = command.substringAfter("depth ", "")
-            current = current.substringBefore(" ", current)
+        current = current.substringBefore(" ", current)
         if (current.isNotEmpty()) {
             depth = try {
                 current.toInt()
@@ -323,7 +339,7 @@ object UCI {
             //there is time limit
             isTimeSet = true
             time /= movesToGo.toULong()
-            if(time > 1500UL){
+            if (time > 1500UL) {
                 time -= 50UL
             }
             stopTime = startTime + time + increment.toULong()
@@ -340,10 +356,11 @@ object UCI {
     /**
      * reset all variables that's belong to time control before new game
      */
-    fun resetTimeControl(){
+    @JvmStatic
+    fun resetTimeControl() {
         isQuit = false
         movesToGo = 30
-        moveTime =-1
+        moveTime = -1
         isTime = false
         time = 0UL
         increment = 0
@@ -356,16 +373,19 @@ object UCI {
     /**
      * Prints Engine Info
      */
+    @JvmStatic
     fun printInfo() {
-        println("id name Nissim $VERSION\n" +
-                "id author yodatk\n" +
-                "option name Hash type spin default $DEFAULT_HASH min $MIN_HASH max $MAX_HASH\n"+
-                "uciok")
+        println(
+            "id name Nissim $VERSION\n" +
+                    "id author yodatk\n" +
+                    "uciok"
+        )
     }
 
     /**
      * Main Loop to communicate with UCI Client
      */
+    @JvmStatic
     fun uciLoop() {
 
         var input: String?
@@ -374,57 +394,28 @@ object UCI {
         while (true) {
             System.out.flush()
             input = readLine()!!
-            var temp = input.substringAfter("setoption name Hash value ", "")
-            if(temp.isNotEmpty()){
-                temp = temp.substringBefore(" ","").trim()
-                val mb = if(temp.isNotEmpty()){
-                   try {
-                        val c = temp.toInt()
-                       when {
-                           c < MIN_HASH -> {
-                               MIN_HASH
-                           }
-                           c > MAX_HASH -> {
-                               MAX_HASH
-                           }
-                           else -> {
-                               c
-                           }
-                       }
 
-                    } catch (e: Exception) {
-                        DEFAULT_HASH
-                    }
+            when (input.substringBefore(" ", input)) {
+                "\n", "" -> continue
+                "isready" -> {
+                    println("readyok")
+                    continue
                 }
-                else{
-                    DEFAULT_HASH
+                "position" -> {
+                    parsePosition(input)
+                    //ZorbistKeys.clearHashTable()
                 }
-                println("   Set hash table size to $mb")
-                ZorbistKeys.initHashTable(mb)
-            }
-            else{
-                when (input.substringBefore(" ", input)) {
-                    "\n", "" -> continue
-                    "isready" -> {
-                        println("readyok")
-                        continue
-                    }
-                    "position" -> {
-                        parsePosition(input)
-                        //ZorbistKeys.clearHashTable()
-                    }
-                    "ucinewgame" -> {
-                        parsePosition("position startpos\n")
-                        ZorbistKeys.clearHashTable()
-                    }
-                    "go" -> parseGoCommand(input.substringAfter("go "))
-                    "quit" -> break
-                    "uci" -> printInfo()
-                    else -> println("NOT VALID COMMAND")
+                "ucinewgame" -> {
+                    parsePosition("position startpos\n")
+                    ZorbistKeys.clearHashTable()
                 }
-
+                "go" -> parseGoCommand(input.substringAfter("go "))
+                "quit" -> break
+                "uci" -> printInfo()
+                else -> println("NOT VALID COMMAND")
             }
 
         }
+
     }
 }

@@ -10,24 +10,11 @@ import enums.Square
 @ExperimentalUnsignedTypes
 object BitBoard {
 
-//    var board : ULong = 0UL
-//
-//    constructor(){
-//        this.board = 0UL
-//    }
-//
-//    constructor(board: ULong){
-//        this.board = board
-//    }
-//
-//    constructor(other: BitBoard){
-//        this.board = other.board
-//    }
-
     /***
      * get the chosen bit of the wanted square from the given BitBoard
      * @return ULong of the given bit
      */
+    @JvmStatic
     fun getBit(board: ULong,square: Square): ULong = (board and (1UL shl square.ordinal))
 
 
@@ -35,31 +22,36 @@ object BitBoard {
      * get the chosen bit of the wanted square from the given BitBoard
      * @return ULong of the given bit
      */
+    @JvmStatic
     fun getBit(board: ULong,square: Int): ULong = (board and (1UL shl square))
 
     /***
      * setting on bit in the given square
      */
+    @JvmStatic
     fun setBitOn(board: ULong, square: Square) = (board or (1UL shl square.ordinal))
 
 
     /***
      * setting on bit in the given square
      */
+    @JvmStatic
     fun setBitOn(board: ULong, square: Int) = (board or (1UL shl square))
 
     /**
      * setting off bit in given square if possible
      */
+    @JvmStatic
     fun setBitOff(board:ULong ,square: Square) = board and (1UL shl square.ordinal).inv()
 
     /**
      * setting off bit in given square if possible
      */
+    @JvmStatic
     fun setBitOff(board:ULong ,square: Int) = board and (1UL shl square).inv()
 
 
-
+    @JvmStatic
     fun printBitboard(board: ULong) {
         println()
         for (rank in 0..7) {
@@ -84,6 +76,7 @@ object BitBoard {
         println("    Bitboard: $board")
     }
 
+    @JvmStatic
     fun countBits(board:ULong): Int {
         var counter = 0
         var copyBoard = board
@@ -93,7 +86,7 @@ object BitBoard {
         }
         return counter
     }
-
+    @JvmStatic
     fun getLSB(board:ULong): Int {
         return if(board!=0UL){
             countBits((board and (0UL-board)) -1UL)
