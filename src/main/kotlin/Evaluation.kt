@@ -1,4 +1,5 @@
 import enums.Color
+import enums.GamePhase
 import enums.Piece
 import enums.Square
 
@@ -48,38 +49,38 @@ object Evaluation {
                 -105, -21, -58, -33, -17, -28, -19, -23
             ),
             //***************BISHOP***************
-                arrayOf(
-                    -29,   4, -82, -37, -25, -42,   7,  -8,
-                    -26,  16, -18, -13,  30,  59,  18, -47,
-                    -16,  37,  43,  40,  35,  50,  37,  -2,
-                    -4,   5,  19,  50,  37,  37,   7,  -2,
-                    -6,  13,  13,  26,  34,  12,  10,   4,
-                    0,  15,  15,  15,  14,  27,  18,  10,
-                    4,  15,  16,   0,   7,  21,  33,   1,
-                    -33,  -3, -14, -21, -13, -12, -39, -21
-                ),
+            arrayOf(
+                -29, 4, -82, -37, -25, -42, 7, -8,
+                -26, 16, -18, -13, 30, 59, 18, -47,
+                -16, 37, 43, 40, 35, 50, 37, -2,
+                -4, 5, 19, 50, 37, 37, 7, -2,
+                -6, 13, 13, 26, 34, 12, 10, 4,
+                0, 15, 15, 15, 14, 27, 18, 10,
+                4, 15, 16, 0, 7, 21, 33, 1,
+                -33, -3, -14, -21, -13, -12, -39, -21
+            ),
             //***************ROOK***************
             arrayOf(
-                32,  42,  32,  51, 63,  9,  31,  43,
-                27,  32,  58,  62, 80, 67,  26,  44,
-                -5,  19,  26,  36, 17, 45,  61,  16,
-                -24, -11,   7,  26, 24, 35,  -8, -20,
-                -36, -26, -12,  -1,  9, -7,   6, -23,
-                -45, -25, -16, -17,  3,  0,  -5, -33,
-                -44, -16, -20,  -9, -1, 11,  -6, -71,
-                -19, -13,   1,  17, 16,  7, -37, -26
+                32, 42, 32, 51, 63, 9, 31, 43,
+                27, 32, 58, 62, 80, 67, 26, 44,
+                -5, 19, 26, 36, 17, 45, 61, 16,
+                -24, -11, 7, 26, 24, 35, -8, -20,
+                -36, -26, -12, -1, 9, -7, 6, -23,
+                -45, -25, -16, -17, 3, 0, -5, -33,
+                -44, -16, -20, -9, -1, 11, -6, -71,
+                -19, -13, 1, 17, 16, 7, -37, -26
 
-                ),
+            ),
             //***************QUEEN***************
             arrayOf(
-                -28,   0,  29,  12,  59,  44,  43,  45,
-                -24, -39,  -5,   1, -16,  57,  28,  54,
-                -13, -17,   7,   8,  29,  56,  47,  57,
-                -27, -27, -16, -16,  -1,  17,  -2,   1,
-                -9, -26,  -9, -10,  -2,  -4,   3,  -3,
-                -14,   2, -11,  -2,  -5,   2,  14,   5,
-                -35,  -8,  11,   2,   8,  15,  -3,   1,
-                -1, -18,  -9,  10, -15, -25, -31, -50
+                -28, 0, 29, 12, 59, 44, 43, 45,
+                -24, -39, -5, 1, -16, 57, 28, 54,
+                -13, -17, 7, 8, 29, 56, 47, 57,
+                -27, -27, -16, -16, -1, 17, -2, 1,
+                -9, -26, -9, -10, -2, -4, 3, -3,
+                -14, 2, -11, -2, -5, 2, 14, 5,
+                -35, -8, 11, 2, 8, 15, -3, 1,
+                -1, -18, -9, 10, -15, -25, -31, -50
             ),
             //***************KING***************
             arrayOf(
@@ -90,10 +91,10 @@ object Evaluation {
                 -49,  -1, -27, -39, -46, -44, -33, -51,
                 -14, -14, -22, -46, -44, -30, -15, -27,
                 1,   7,  -8, -64, -43, -16,   9,   8,
-                -15,  36,  12, -54,   8, -28,  24,  14
+                -15,  36,  12, -54,   8, -28,  24,  14,
             ),
 
-        ),
+            ),
 
 
         // ================= ENDGAME POSITIONAL SCORES ================= //
@@ -101,63 +102,63 @@ object Evaluation {
         arrayOf(
             //***************PAWN***************
             arrayOf(
-                0,   0,   0,   0,   0,   0,   0,   0,
+                0, 0, 0, 0, 0, 0, 0, 0,
                 178, 173, 158, 134, 147, 132, 165, 187,
-                94, 100,  85,  67,  56,  53,  82,  84,
-                32,  24,  13,   5,  -2,   4,  17,  17,
-                13,   9,  -3,  -7,  -7,  -8,   3,  -1,
-                4,   7,  -6,   1,   0,  -5,  -1,  -8,
-                13,   8,   8,  10,  13,   0,   2,  -7,
-                0,   0,   0,   0,   0,   0,   0,   0
+                94, 100, 85, 67, 56, 53, 82, 84,
+                32, 24, 13, 5, -2, 4, 17, 17,
+                13, 9, -3, -7, -7, -8, 3, -1,
+                4, 7, -6, 1, 0, -5, -1, -8,
+                13, 8, 8, 10, 13, 0, 2, -7,
+                0, 0, 0, 0, 0, 0, 0, 0
 
-                ),
+            ),
 
             //***************KNIGHT***************
             arrayOf(
                 -58, -38, -13, -28, -31, -27, -63, -99,
-                -25,  -8, -25,  -2,  -9, -25, -24, -52,
-                -24, -20,  10,   9,  -1,  -9, -19, -41,
-                -17,   3,  22,  22,  22,  11,   8, -18,
-                -18,  -6,  16,  25,  16,  17,   4, -18,
-                -23,  -3,  -1,  15,  10,  -3, -20, -22,
-                -42, -20, -10,  -5,  -2, -20, -23, -44,
+                -25, -8, -25, -2, -9, -25, -24, -52,
+                -24, -20, 10, 9, -1, -9, -19, -41,
+                -17, 3, 22, 22, 22, 11, 8, -18,
+                -18, -6, 16, 25, 16, 17, 4, -18,
+                -23, -3, -1, 15, 10, -3, -20, -22,
+                -42, -20, -10, -5, -2, -20, -23, -44,
                 -29, -51, -23, -15, -22, -18, -50, -64
             ),
 
             //***************BISHOP***************
             arrayOf(
-                -14, -21, -11,  -8, -7,  -9, -17, -24,
-                -8,  -4,   7, -12, -3, -13,  -4, -14,
-                2,  -8,   0,  -1, -2,   6,   0,   4,
-                -3,   9,  12,   9, 14,  10,   3,   2,
-                -6,   3,  13,  19,  7,  10,  -3,  -9,
-                -12,  -3,   8,  10, 13,   3,  -7, -15,
-                -14, -18,  -7,  -1,  4,  -9, -15, -27,
-                -23,  -9, -23,  -5, -9, -16,  -5, -17
+                -14, -21, -11, -8, -7, -9, -17, -24,
+                -8, -4, 7, -12, -3, -13, -4, -14,
+                2, -8, 0, -1, -2, 6, 0, 4,
+                -3, 9, 12, 9, 14, 10, 3, 2,
+                -6, 3, 13, 19, 7, 10, -3, -9,
+                -12, -3, 8, 10, 13, 3, -7, -15,
+                -14, -18, -7, -1, 4, -9, -15, -27,
+                -23, -9, -23, -5, -9, -16, -5, -17
             ),
 
             //***************ROOK***************
             arrayOf(
-                13, 10, 18, 15, 12,  12,   8,   5,
-                11, 13, 13, 11, -3,   3,   8,   3,
-                7,  7,  7,  5,  4,  -3,  -5,  -3,
-                4,  3, 13,  1,  2,   1,  -1,   2,
-                3,  5,  8,  4, -5,  -6,  -8, -11,
-                -4,  0, -5, -1, -7, -12,  -8, -16,
-                -6, -6,  0,  2, -9,  -9, -11,  -3,
-                -9,  2,  3, -1, -5, -13,   4, -20
+                13, 10, 18, 15, 12, 12, 8, 5,
+                11, 13, 13, 11, -3, 3, 8, 3,
+                7, 7, 7, 5, 4, -3, -5, -3,
+                4, 3, 13, 1, 2, 1, -1, 2,
+                3, 5, 8, 4, -5, -6, -8, -11,
+                -4, 0, -5, -1, -7, -12, -8, -16,
+                -6, -6, 0, 2, -9, -9, -11, -3,
+                -9, 2, 3, -1, -5, -13, 4, -20
             ),
 
             //***************QUEEN***************
             arrayOf(
-                -9,  22,  22,  27,  27,  19,  10,  20,
-                -17,  20,  32,  41,  58,  25,  30,   0,
-                -20,   6,   9,  49,  47,  35,  19,   9,
-                3,  22,  24,  45,  57,  40,  57,  36,
-                -18,  28,  19,  47,  31,  34,  39,  23,
-                -16, -27,  15,   6,   9,  17,  10,   5,
+                -9, 22, 22, 27, 27, 19, 10, 20,
+                -17, 20, 32, 41, 58, 25, 30, 0,
+                -20, 6, 9, 49, 47, 35, 19, 9,
+                3, 22, 24, 45, 57, 40, 57, 36,
+                -18, 28, 19, 47, 31, 34, 39, 23,
+                -16, -27, 15, 6, 9, 17, 10, 5,
                 -22, -23, -30, -16, -16, -23, -36, -32,
-                -33, -28, -22, -43,  -5, -32, -20, -41
+                -33, -28, -22, -43, -5, -32, -20, -41
             ),
 
             //***************KING***************
@@ -172,7 +173,7 @@ object Evaluation {
                 -53, -34, -21, -11, -28, -14, -24, -43
             ),
 
-        )
+            )
     )
 
     val pawnPositionalScore = arrayOf(
@@ -556,19 +557,19 @@ object Evaluation {
      *  @param board: Board to check
      *  @return int value represents the score of the current "game phase"
      */
-    fun getGamePhaseScore(board:Board) : Int{
+    fun getGamePhaseScore(board: Board): Int {
         var whitePieces = 0
         var blackPieces = 0
 
-        for (piece in Piece.whitePieces){
-            if(piece != Piece.P && piece !=Piece.K){
+        for (piece in Piece.whitePieces) {
+            if (piece != Piece.P && piece != Piece.K) {
                 whitePieces += BitBoard.countBits(board.pieceBitboards[piece.ordinal]) * piece.openingValue
 
             }
 
         }
-        for(piece in Piece.blackPieces){
-            if(piece != Piece.p && piece != Piece.k) {
+        for (piece in Piece.blackPieces) {
+            if (piece != Piece.p && piece != Piece.k) {
                 blackPieces += BitBoard.countBits(board.pieceBitboards[piece.ordinal]) * -piece.openingValue
             }
         }
@@ -578,7 +579,23 @@ object Evaluation {
 
     fun evaluate(board: Board): Int {
         val gamePhaseScore = getGamePhaseScore(board)
-        println("gamePhaseScore: $gamePhaseScore")
+
+
+        val gamePhase: GamePhase =
+
+            // determining game phase
+            when {
+                gamePhaseScore > OPENING_PHASE_SCORE -> {
+                    GamePhase.OPENING
+                }
+                gamePhaseScore < ENDGAME_PHASE_SCORE -> {
+                    GamePhase.END_GAME
+                }
+                else -> {
+                    GamePhase.MIDDLE_GAME
+                }
+            }
+
         var score = 0
         var currBitboard: ULong
         var square: Int
@@ -586,136 +603,205 @@ object Evaluation {
             currBitboard = board.pieceBitboards[p.ordinal]
             while (currBitboard != 0UL) {
                 square = BitBoard.getLSB(currBitboard)
-               // score += p.value
-               /* when (p) {
-                    //WHITE
-                    Piece.P -> {
-
-                        score += pawnPositionalScore[square]
-                        // double pawn count
-                        val doublePawns =
-                            BitBoard.countBits(board.pieceBitboards[Piece.P.ordinal] and fileMasks[square])
-                        if (doublePawns > 1) {
-                            score += DOUBLE_PAWN_PENALTY * doublePawns
-                        }
-                        //isolated pawns
-                        if (board.pieceBitboards[Piece.P.ordinal] and isolatedPawnsMasks[square] == 0UL) {
-                            //give an isolated pawn panelty
-                            score += ISOLATED_PAWN_PENALTY
-                        }
-                        // passed pawns
-                        if (whitePassedPawnsMasks[square] and board.pieceBitboards[Piece.p.ordinal] == 0UL) {
-                            score += PASSED_PAWN_BONUS[GET_RANK_FROM_SQUARE[square]]
-                        }
-
+                score += when (gamePhase) {
+                    GamePhase.OPENING -> {
+                        p.openingValue
                     }
-                    Piece.N -> score += knightPositionalScore[square]
-                    Piece.B -> {
-                        score += bishopPositionalScore[square]
-                        score += BitBoard.countBits(
-                            Attacks.getBishopAttacks(
-                                Square.fromIntegerToSquare(square)!!,
-                                board.occupanciesBitboards[Color.BOTH.ordinal]
-                            )
-                        )
+                    GamePhase.END_GAME -> {
+                        p.endGameValue
                     }
-                    Piece.R -> {
-                        score += rookPositionalScore[square]
-                        if (board.pieceBitboards[Piece.P.ordinal] and fileMasks[square] == 0UL) {
-                            score += SEMI_OPEN_FILE_BONUS
-                        }
-                        if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
-                            score += OPEN_FILE_SCORE
-                        }
+                    else -> {
+                        // middle Game
+
+                        (p.openingValue * gamePhaseScore + p.endGameValue *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE
                     }
+                }
+                // score += p.value
+                when (p) {
+                     //WHITE
+                     Piece.P -> {
+                         score += if(gamePhase == GamePhase.MIDDLE_GAME) {
+                             ((positionalScore[GamePhase.OPENING.ordinal][PieceType.PAWN.ordinal][square] * gamePhaseScore + positionalScore[GamePhase.END_GAME.ordinal][PieceType.PAWN.ordinal][square] *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE)
+                         } else{
+                             positionalScore[gamePhase.ordinal][PieceType.PAWN.ordinal][square]
+                         }
+//                         score += pawnPositionalScore[square]
+                         // double pawn count
+//                         val doublePawns =
+//                             BitBoard.countBits(board.pieceBitboards[Piece.P.ordinal] and fileMasks[square])
+//                         if (doublePawns > 1) {
+//                             score += DOUBLE_PAWN_PENALTY * doublePawns
+//                         }
+//                         //isolated pawns
+//                         if (board.pieceBitboards[Piece.P.ordinal] and isolatedPawnsMasks[square] == 0UL) {
+//                             //give an isolated pawn panelty
+//                             score += ISOLATED_PAWN_PENALTY
+//                         }
+//                         // passed pawns
+//                         if (whitePassedPawnsMasks[square] and board.pieceBitboards[Piece.p.ordinal] == 0UL) {
+//                             score += PASSED_PAWN_BONUS[GET_RANK_FROM_SQUARE[square]]
+//                         }
 
-                    Piece.Q -> {
-                        score += BitBoard.countBits(
-                            Attacks.getQueenAttacks(
-                                Square.fromIntegerToSquare(square)!!,
-                                board.occupanciesBitboards[Color.BOTH.ordinal]
-                            )
-                        )
-                    }
+                     }
+                     Piece.N -> {
+                         score += if(gamePhase == GamePhase.MIDDLE_GAME) {
+                             ((positionalScore[GamePhase.OPENING.ordinal][PieceType.KNIGHT.ordinal][square] * gamePhaseScore + positionalScore[GamePhase.END_GAME.ordinal][PieceType.KNIGHT.ordinal][square] *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE)
+                         } else{
+                             positionalScore[gamePhase.ordinal][PieceType.KNIGHT.ordinal][square]
+                         }
+                     }
+                     Piece.B -> {
+                         score += if(gamePhase == GamePhase.MIDDLE_GAME) {
+                             ((positionalScore[GamePhase.OPENING.ordinal][PieceType.BISHOP.ordinal][square] * gamePhaseScore + positionalScore[GamePhase.END_GAME.ordinal][PieceType.BISHOP.ordinal][square] *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE)
+                         } else{
+                             positionalScore[gamePhase.ordinal][PieceType.BISHOP.ordinal][square]
+                         }
+//                         score += BitBoard.countBits(
+//                             Attacks.getBishopAttacks(
+//                                 Square.fromIntegerToSquare(square)!!,
+//                                 board.occupanciesBitboards[Color.BOTH.ordinal]
+//                             )
+//                         )
+                     }
+                     Piece.R -> {
+                         score += if(gamePhase == GamePhase.MIDDLE_GAME) {
+                             ((positionalScore[GamePhase.OPENING.ordinal][PieceType.ROOK.ordinal][square] * gamePhaseScore + positionalScore[GamePhase.END_GAME.ordinal][PieceType.ROOK.ordinal][square] *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE)
+                         } else{
+                             positionalScore[gamePhase.ordinal][PieceType.ROOK.ordinal][square]
+                         }
+//                         if (board.pieceBitboards[Piece.P.ordinal] and fileMasks[square] == 0UL) {
+//                             score += SEMI_OPEN_FILE_BONUS
+//                         }
+//                         if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
+//                             score += OPEN_FILE_SCORE
+//                         }
+                     }
 
-                    Piece.K -> {
+                     Piece.Q -> {
+                         score += if(gamePhase == GamePhase.MIDDLE_GAME) {
+                             ((positionalScore[GamePhase.OPENING.ordinal][PieceType.QUEEN.ordinal][square] * gamePhaseScore + positionalScore[GamePhase.END_GAME.ordinal][PieceType.QUEEN.ordinal][square] *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE)
+                         } else{
+                             positionalScore[gamePhase.ordinal][PieceType.QUEEN.ordinal][square]
+                         }
+//                         score += BitBoard.countBits(
+//                             Attacks.getQueenAttacks(
+//                                 Square.fromIntegerToSquare(square)!!,
+//                                 board.occupanciesBitboards[Color.BOTH.ordinal]
+//                             )
+//                         )
+                     }
 
-                        score += kingPositionalScore[square]
-                        // king file calc
-                        if (board.pieceBitboards[Piece.P.ordinal] and fileMasks[square] == 0UL) {
-                            score -= SEMI_OPEN_FILE_BONUS
-                        }
-                        if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
-                            score -= OPEN_FILE_SCORE
-                        }
-                        // king shield bonus
-                        score += BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.WHITE.ordinal]) * KING_SHIELD_BONUS
-                    }
+                     Piece.K -> {
 
-                    //BLACK
-                    Piece.p -> {
-                        score -= pawnPositionalScore[mirrorScores[square]]
-                        // double pawn count
-                        val doublePawns =
-                            BitBoard.countBits(board.pieceBitboards[Piece.p.ordinal] and fileMasks[square])
-                        if (doublePawns > 1) {
-                            score -= DOUBLE_PAWN_PENALTY * doublePawns
-                        }
-                        //isolated pawns
-                        if (board.pieceBitboards[Piece.p.ordinal] and isolatedPawnsMasks[square] == 0UL) {
-                            //give an isolated pawn panelty
-                            score -= ISOLATED_PAWN_PENALTY
-                        }
-                        // passed pawns
-                        if (blackPassedPawnsMasks[square] and board.pieceBitboards[Piece.P.ordinal] == 0UL) {
-                            score -= PASSED_PAWN_BONUS[GET_RANK_FROM_SQUARE[mirrorScores[square]]]
-                        }
+                         score += if(gamePhase == GamePhase.MIDDLE_GAME) {
+                             ((positionalScore[GamePhase.OPENING.ordinal][PieceType.KING.ordinal][square] * gamePhaseScore + positionalScore[GamePhase.END_GAME.ordinal][PieceType.KING.ordinal][square] *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE)
+                         } else{
+                             positionalScore[gamePhase.ordinal][PieceType.KING.ordinal][square]
+                         }
+//                         // king file calc
+//                         if (board.pieceBitboards[Piece.P.ordinal] and fileMasks[square] == 0UL) {
+//                             score -= SEMI_OPEN_FILE_BONUS
+//                         }
+//                         if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
+//                             score -= OPEN_FILE_SCORE
+//                         }
+//                         // king shield bonus
+//                         score += BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.WHITE.ordinal]) * KING_SHIELD_BONUS
+                     }
+
+                     //BLACK
+                     Piece.p -> {
+                         score -= if(gamePhase == GamePhase.MIDDLE_GAME) {
+                             ((positionalScore[GamePhase.OPENING.ordinal][PieceType.PAWN.ordinal][mirrorScores[square]] * gamePhaseScore + positionalScore[GamePhase.END_GAME.ordinal][PieceType.PAWN.ordinal][mirrorScores[square]] *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE)
+                         } else{
+                             positionalScore[gamePhase.ordinal][PieceType.PAWN.ordinal][mirrorScores[square]]
+                         }
+//                         score -= pawnPositionalScore[mirrorScores[square]]
+//                         // double pawn count
+//                         val doublePawns =
+//                             BitBoard.countBits(board.pieceBitboards[Piece.p.ordinal] and fileMasks[square])
+//                         if (doublePawns > 1) {
+//                             score -= DOUBLE_PAWN_PENALTY * doublePawns
+//                         }
+//                         //isolated pawns
+//                         if (board.pieceBitboards[Piece.p.ordinal] and isolatedPawnsMasks[square] == 0UL) {
+//                             //give an isolated pawn panelty
+//                             score -= ISOLATED_PAWN_PENALTY
+//                         }
+//                         // passed pawns
+//                         if (blackPassedPawnsMasks[square] and board.pieceBitboards[Piece.P.ordinal] == 0UL) {
+//                             score -= PASSED_PAWN_BONUS[GET_RANK_FROM_SQUARE[mirrorScores[square]]]
+//                         }
 
 
-                    }
-                    Piece.n -> score -= knightPositionalScore[mirrorScores[square]]
-                    Piece.b -> {
-                        score -= bishopPositionalScore[mirrorScores[square]]
-                        score -= BitBoard.countBits(
-                            Attacks.getBishopAttacks(
-                                Square.fromIntegerToSquare(square)!!,
-                                board.occupanciesBitboards[Color.BOTH.ordinal]
-                            )
-                        )
-                    }
-                    Piece.r -> {
-                        score -= rookPositionalScore[mirrorScores[square]]
-                        if (board.pieceBitboards[Piece.p.ordinal] and fileMasks[square] == 0UL) {
-                            score -= SEMI_OPEN_FILE_BONUS
-                        }
-                        if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
-                            score -= OPEN_FILE_SCORE
-                        }
-                    }
+                     }
+                     Piece.n -> {
+                         score -= if(gamePhase == GamePhase.MIDDLE_GAME) {
+                             ((positionalScore[GamePhase.OPENING.ordinal][PieceType.KNIGHT.ordinal][mirrorScores[square]] * gamePhaseScore + positionalScore[GamePhase.END_GAME.ordinal][PieceType.KNIGHT.ordinal][mirrorScores[square]] *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE)
+                         } else{
+                             positionalScore[gamePhase.ordinal][PieceType.KNIGHT.ordinal][mirrorScores[square]]
+                         }
+                     }
+                     Piece.b -> {
+                         score -= if(gamePhase == GamePhase.MIDDLE_GAME) {
+                             ((positionalScore[GamePhase.OPENING.ordinal][PieceType.BISHOP.ordinal][mirrorScores[square]] * gamePhaseScore + positionalScore[GamePhase.END_GAME.ordinal][PieceType.BISHOP.ordinal][mirrorScores[square]] *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE)
+                         } else{
+                             positionalScore[gamePhase.ordinal][PieceType.BISHOP.ordinal][mirrorScores[square]]
+                         }
+//                         score -= BitBoard.countBits(
+//                             Attacks.getBishopAttacks(
+//                                 Square.fromIntegerToSquare(square)!!,
+//                                 board.occupanciesBitboards[Color.BOTH.ordinal]
+//                             )
+//                         )
+                     }
+                     Piece.r -> {
+                         score -= if(gamePhase == GamePhase.MIDDLE_GAME) {
+                             ((positionalScore[GamePhase.OPENING.ordinal][PieceType.ROOK.ordinal][mirrorScores[square]] * gamePhaseScore + positionalScore[GamePhase.END_GAME.ordinal][PieceType.ROOK.ordinal][mirrorScores[square]] *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE)
+                         } else{
+                             positionalScore[gamePhase.ordinal][PieceType.ROOK.ordinal][mirrorScores[square]]
+                         }
+//                         if (board.pieceBitboards[Piece.p.ordinal] and fileMasks[square] == 0UL) {
+//                             score -= SEMI_OPEN_FILE_BONUS
+//                         }
+//                         if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
+//                             score -= OPEN_FILE_SCORE
+//                         }
+                     }
 
-                    Piece.q -> {
-                        score -= BitBoard.countBits(
-                            Attacks.getQueenAttacks(
-                                Square.fromIntegerToSquare(square)!!,
-                                board.occupanciesBitboards[Color.BOTH.ordinal]
-                            )
-                        )
-                    }
+                     Piece.q -> {
+                         score -= if(gamePhase == GamePhase.MIDDLE_GAME) {
+                             ((positionalScore[GamePhase.OPENING.ordinal][PieceType.QUEEN.ordinal][mirrorScores[square]] * gamePhaseScore + positionalScore[GamePhase.END_GAME.ordinal][PieceType.QUEEN.ordinal][mirrorScores[square]] *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE)
+                         } else{
+                             positionalScore[gamePhase.ordinal][PieceType.QUEEN.ordinal][mirrorScores[square]]
+                         }
+//                         score -= BitBoard.countBits(
+//                             Attacks.getQueenAttacks(
+//                                 Square.fromIntegerToSquare(square)!!,
+//                                 board.occupanciesBitboards[Color.BOTH.ordinal]
+//                             )
+//                         )
+                     }
 
-                    Piece.k -> {
-                        score -= kingPositionalScore[mirrorScores[square]]
-                        if (board.pieceBitboards[Piece.p.ordinal] and fileMasks[square] == 0UL) {
-                            score += SEMI_OPEN_FILE_BONUS
-                        }
-                        if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
-                            score += OPEN_FILE_SCORE
-                        }
-                        // king shield bonus
-                        score -= BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.BLACK.ordinal]) * KING_SHIELD_BONUS
-                    }
+                     Piece.k -> {
+                         score -= if(gamePhase == GamePhase.MIDDLE_GAME) {
+                             ((positionalScore[GamePhase.OPENING.ordinal][PieceType.KING.ordinal][mirrorScores[square]] * gamePhaseScore + positionalScore[GamePhase.END_GAME.ordinal][PieceType.KING.ordinal][mirrorScores[square]] *  (OPENING_PHASE_SCORE - gamePhaseScore))/ OPENING_PHASE_SCORE)
+                         } else{
+                             positionalScore[gamePhase.ordinal][PieceType.KING.ordinal][mirrorScores[square]]
+                         }
+                         //score -= kingPositionalScore[mirrorScores[square]]
+//                         if (board.pieceBitboards[Piece.p.ordinal] and fileMasks[square] == 0UL) {
+//                             score += SEMI_OPEN_FILE_BONUS
+//                         }
+//                         if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
+//                             score += OPEN_FILE_SCORE
+//                         }
+//                         // king shield bonus
+//                         score -= BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.BLACK.ordinal]) * KING_SHIELD_BONUS
+                     }
 
-                    else -> break
-                } */
+                     else -> break
+                 }
                 currBitboard = BitBoard.setBitOff(currBitboard, Square.fromIntegerToSquare(square)!!)
             }
         }

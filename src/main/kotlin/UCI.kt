@@ -16,6 +16,8 @@ object UCI {
      */
     class UCIException(message: String) : Exception(message)
 
+    const val VERSION = "3.0"
+
     /**
      * flag to determine if to quit searching or not
      */
@@ -205,6 +207,7 @@ object UCI {
     }
 
     fun parseGoCommand(_command: String) {
+        resetTimeControl()
         val command = _command
         var depth = -1
         var current: String
@@ -328,8 +331,21 @@ object UCI {
 
     }
 
+    fun resetTimeControl(){
+        isQuit = false
+        movesToGo = 30
+        moveTime =-1
+        isTime = false
+        time = 0UL
+        increment = 0
+        startTime = 0UL
+        stopTime = 0UL
+        isTimeSet = false
+        isStopped = false
+    }
+
     fun printInfo() {
-        println("id name Nissim\nid name yodatk\nuciok")
+        println("id name Nissim $VERSION\nid author yodatk\nuciok")
     }
 
     fun uciLoop() {

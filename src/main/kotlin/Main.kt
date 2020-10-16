@@ -24,7 +24,7 @@ fun main() {
     if (debug) {
         val b = Board(FENDebugConstants.START_POSITION.fen)
         b.printBoard()
-        Evaluation.evaluate(b)
+        println(Evaluation.evaluate(b))
 
     } else {
 

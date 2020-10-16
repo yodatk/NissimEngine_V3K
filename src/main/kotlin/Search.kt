@@ -410,27 +410,29 @@ object Search {
             alpha = score - WINDOW_INCREMENTOR
             beta = score + WINDOW_INCREMENTOR
 
+            if(principalVariationLength[0] > 0){
+                if (score > -MATE_VALUE && score < -MATE_SCORE) {
+                    println(
+                        "info score mate ${(-(score + MATE_VALUE) / 2) - 1} depth $currentDepth nodes $nodes time ${
+                            System.currentTimeMillis().toULong() - UCI.startTime
+                        } ${generatePrincipleVariationString()}"
+                    )
 
-            if (score > -MATE_VALUE && score < -MATE_SCORE) {
-                println(
-                    "info score mate ${(-(score + MATE_VALUE) / 2) - 1} depth $currentDepth nodes $nodes time ${
-                        System.currentTimeMillis().toULong() - UCI.startTime
-                    } ${generatePrincipleVariationString()}"
-                )
-
-            } else if (score > MATE_SCORE && score < MATE_VALUE) {
-                println(
-                    "info score mate ${((MATE_VALUE - score) / 2) + 1} depth $currentDepth nodes $nodes time ${
-                        System.currentTimeMillis().toULong() - UCI.startTime
-                    } ${generatePrincipleVariationString()}"
-                )
-            } else {
-                println(
-                    "info score cp $score depth $currentDepth nodes $nodes time ${
-                        System.currentTimeMillis().toULong() - UCI.startTime
-                    } ${generatePrincipleVariationString()}"
-                )
+                } else if (score > MATE_SCORE && score < MATE_VALUE) {
+                    println(
+                        "info score mate ${((MATE_VALUE - score) / 2) + 1} depth $currentDepth nodes $nodes time ${
+                            System.currentTimeMillis().toULong() - UCI.startTime
+                        } ${generatePrincipleVariationString()}"
+                    )
+                } else {
+                    println(
+                        "info score cp $score depth $currentDepth nodes $nodes time ${
+                            System.currentTimeMillis().toULong() - UCI.startTime
+                        } ${generatePrincipleVariationString()}"
+                    )
+                }
             }
+
         }
         println("bestmove ${Moves.moveUCI(principalVariationTable[0][0])}\n")
     }
