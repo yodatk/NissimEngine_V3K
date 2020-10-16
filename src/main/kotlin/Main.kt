@@ -1,10 +1,10 @@
-import enums.*
+import enums.FENDebugConstants
 
 /**
  * ================================================
  *
  * NISSIM ENGINE (HALLAWA)
- * @author: Tomer Gonen
+ * @author: Tomer Gonen (yodatk)
  *
  * ================================================
  */
@@ -20,6 +20,9 @@ Main
 
 fun main() {
     Attacks.initAll()
+
+
     UCI.uciLoop()
+
 }
 

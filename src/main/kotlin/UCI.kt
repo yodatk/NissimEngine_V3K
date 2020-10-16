@@ -69,18 +69,24 @@ object UCI {
      */
     var isStopped = false
 
+    /**
+     * Hashing Variables for HashTable size
+     */
     val MAX_HASH = 128
     val DEFAULT_HASH = 64
     val MIN_HASH = 4
 
-//
-//    fun inputWaiting() : Boolean{
-//        var input : String
-//        val scanner = Scanner(System.`in`)
-//        return scanner.hasNext()
-//    }
+
+    /**
+     * Board Field for parsing given Position
+     */
+    var board: Board = Board()
 
 
+
+    /**
+     * Checking if there is an input in stdin while searching for a move. if so, act according to input
+     */
     fun readInput() {
         val inputScanner = BufferedReader(InputStreamReader(System.`in`))
         if (inputScanner.ready()) {
@@ -95,6 +101,9 @@ object UCI {
     }
 
 
+    /**
+     * Check for comuunications from UCI client
+     */
     fun communicate() {
         if (isTimeSet && System.currentTimeMillis().toULong() > stopTime) {
             isStopped = true
@@ -103,8 +112,12 @@ object UCI {
     }
 
 
-    var board: Board = Board()
-
+    /**
+     * Parse Given move and put it on board
+     * @param stringInput: move as string to encode as int
+     * @param board: Board object to perform the move on
+     * @return encoded move as integer
+     */
     fun parseMove(stringInput: String, board: Board): Int {
         val listOfMoves = board.generateMoves()
         val inputSource: Square = Square.fromIntegerToSquare((stringInput[0] - 'a') + (8 - (stringInput[1] - '0')) * 8)
@@ -140,6 +153,9 @@ object UCI {
         return 0
     }
 
+    /**
+     * Parse given position to put on board
+     */
     fun parsePosition(_command: String): Board {
         var command = _command.trim()
         val board: Board
@@ -159,16 +175,11 @@ object UCI {
                 }
             } else {
                 val current = command.substringAfter("fen ","")
-                if (current != "") {
-//                    try {
-//                        //command = command.substring(command.indexOf(" ") + 1)
-//                    } catch (e: Exception) {
-//                        throw UCIException("Invalid posotion command: '$_command'")
-//                    }
-                    board = Board(current)
+                board = if (current != "") {
+                    Board(current)
 
                 } else {
-                    board = Board(FENDebugConstants.START_POSITION.fen)
+                    Board(FENDebugConstants.START_POSITION.fen)
                 }
             }
             //making additional added moves
@@ -210,6 +221,9 @@ object UCI {
         }
     }
 
+    /**
+     * Parse the UCI command
+     */
     fun parseGoCommand(_command: String) {
         resetTimeControl()
         val command = _command
@@ -313,9 +327,6 @@ object UCI {
                 time -= 50UL
             }
             stopTime = startTime + time + increment.toULong()
-            if(time < 1500UL && increment!=0 && depth == 64) {
-                stopTime = startTime+ increment.toULong()-50UL
-            }
         }
 
         if (depth == -1) {
@@ -324,20 +335,11 @@ object UCI {
 
         println("time:${time} start:${startTime} stop:${stopTime} depth:${depth} timeset:${if (isTimeSet) 1 else 0}")
         Search.searchPosition(board, depth)
-
-
-//        val command = _command.substringAfter("depth ", "${Search.MAX_NODE_DEPTH}")
-//        val depth = try{
-//            command.toInt()
-//        }catch (e: Exception){
-//            Search.MAX_NODE_DEPTH
-//        }
-//
-//        //!!!!!!!!!!!!!!!different time controll place holder!!!!!!!!!!!!
-//        Search.searchPosition(board, depth)
-
     }
 
+    /**
+     * reset all variables that's belong to time control before new game
+     */
     fun resetTimeControl(){
         isQuit = false
         movesToGo = 30
@@ -351,6 +353,9 @@ object UCI {
         isStopped = false
     }
 
+    /**
+     * Prints Engine Info
+     */
     fun printInfo() {
         println("id name Nissim $VERSION\n" +
                 "id author yodatk\n" +
@@ -358,6 +363,9 @@ object UCI {
                 "uciok")
     }
 
+    /**
+     * Main Loop to communicate with UCI Client
+     */
     fun uciLoop() {
 
         var input: String?
@@ -403,7 +411,7 @@ object UCI {
                     }
                     "position" -> {
                         parsePosition(input)
-                        ZorbistKeys.clearHashTable()
+                        //ZorbistKeys.clearHashTable()
                     }
                     "ucinewgame" -> {
                         parsePosition("position startpos\n")

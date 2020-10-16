@@ -34,7 +34,7 @@ object Evaluation {
                 -27, -2, -5, 12, 17, 6, 10, -25,
                 -26, -4, -4, -10, 3, 3, 33, -12,
                 -35, -1, -20, -23, -15, 24, 38, -22,
-                0, 0, 0, 0, 0, 0, 0, 0
+                0, 0, 0, 0, 0, 0, 0, 0,
             ),
 
             //***************KNIGHT***************
@@ -46,7 +46,7 @@ object Evaluation {
                 -13, 4, 16, 13, 28, 19, 21, -8,
                 -23, -9, 12, 10, 19, 17, 25, -16,
                 -29, -53, -12, -3, -1, 18, -14, -19,
-                -105, -21, -58, -33, -17, -28, -19, -23
+                -105, -21, -58, -33, -17, -28, -19, -23,
             ),
             //***************BISHOP***************
             arrayOf(
@@ -57,7 +57,7 @@ object Evaluation {
                 -6, 13, 13, 26, 34, 12, 10, 4,
                 0, 15, 15, 15, 14, 27, 18, 10,
                 4, 15, 16, 0, 7, 21, 33, 1,
-                -33, -3, -14, -21, -13, -12, -39, -21
+                -33, -3, -14, -21, -13, -12, -39, -21,
             ),
             //***************ROOK***************
             arrayOf(
@@ -68,7 +68,7 @@ object Evaluation {
                 -36, -26, -12, -1, 9, -7, 6, -23,
                 -45, -25, -16, -17, 3, 0, -5, -33,
                 -44, -16, -20, -9, -1, 11, -6, -71,
-                -19, -13, 1, 17, 16, 7, -37, -26
+                -19, -13, 1, 17, 16, 7, -37, -26,
 
             ),
             //***************QUEEN***************
@@ -80,7 +80,7 @@ object Evaluation {
                 -9, -26, -9, -10, -2, -4, 3, -3,
                 -14, 2, -11, -2, -5, 2, 14, 5,
                 -35, -8, 11, 2, 8, 15, -3, 1,
-                -1, -18, -9, 10, -15, -25, -31, -50
+                -1, -18, -9, 10, -15, -25, -31, -50,
             ),
             //***************KING***************
             arrayOf(
@@ -92,6 +92,7 @@ object Evaluation {
                 -14, -14, -22, -46, -44, -30, -15, -27,
                 1, 7, -8, -64, -43, -16, 9, 8,
                 -15, 36, 12, -54, 8, -28, 24, 14,
+
             ),
 
             ),
@@ -109,7 +110,7 @@ object Evaluation {
                 13, 9, -3, -7, -7, -8, 3, -1,
                 4, 7, -6, 1, 0, -5, -1, -8,
                 13, 8, 8, 10, 13, 0, 2, -7,
-                0, 0, 0, 0, 0, 0, 0, 0
+                0, 0, 0, 0, 0, 0, 0, 0,
 
             ),
 
@@ -122,7 +123,7 @@ object Evaluation {
                 -18, -6, 16, 25, 16, 17, 4, -18,
                 -23, -3, -1, 15, 10, -3, -20, -22,
                 -42, -20, -10, -5, -2, -20, -23, -44,
-                -29, -51, -23, -15, -22, -18, -50, -64
+                -29, -51, -23, -15, -22, -18, -50, -64,
             ),
 
             //***************BISHOP***************
@@ -134,7 +135,7 @@ object Evaluation {
                 -6, 3, 13, 19, 7, 10, -3, -9,
                 -12, -3, 8, 10, 13, 3, -7, -15,
                 -14, -18, -7, -1, 4, -9, -15, -27,
-                -23, -9, -23, -5, -9, -16, -5, -17
+                -23, -9, -23, -5, -9, -16, -5, -17,
             ),
 
             //***************ROOK***************
@@ -146,7 +147,7 @@ object Evaluation {
                 3, 5, 8, 4, -5, -6, -8, -11,
                 -4, 0, -5, -1, -7, -12, -8, -16,
                 -6, -6, 0, 2, -9, -9, -11, -3,
-                -9, 2, 3, -1, -5, -13, 4, -20
+                -9, 2, 3, -1, -5, -13, 4, -20,
             ),
 
             //***************QUEEN***************
@@ -158,7 +159,7 @@ object Evaluation {
                 -18, 28, 19, 47, 31, 34, 39, 23,
                 -16, -27, 15, 6, 9, 17, 10, 5,
                 -22, -23, -30, -16, -16, -23, -36, -32,
-                -33, -28, -22, -43, -5, -32, -20, -41
+                -33, -28, -22, -43, -5, -32, -20, -41,
             ),
 
             //***************KING***************
@@ -174,61 +175,6 @@ object Evaluation {
             ),
 
             )
-    )
-
-    val pawnPositionalScore = arrayOf(
-        90, 90, 90, 90, 90, 90, 90, 90,
-        30, 30, 30, 40, 40, 30, 30, 30,
-        20, 20, 20, 30, 30, 30, 20, 20,
-        10, 10, 10, 20, 20, 10, 10, 10,
-        5, 5, 10, 20, 20, 5, 5, 5,
-        0, 0, 0, 5, 5, 0, 0, 0,
-        0, 0, 0, -10, -10, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0
-    )
-
-    val knightPositionalScore = arrayOf(
-        -5, 0, 0, 0, 0, 0, 0, -5,
-        -5, 0, 0, 10, 10, 0, 0, -5,
-        -5, 5, 20, 20, 20, 20, 5, -5,
-        -5, 10, 20, 30, 30, 20, 10, -5,
-        -5, 10, 20, 30, 30, 20, 10, -5,
-        -5, 5, 20, 10, 10, 20, 5, -5,
-        -5, 0, 0, 0, 0, 0, 0, -5,
-        -5, -10, 0, 0, 0, 0, -10, -5
-    )
-
-    val bishopPositionalScore = arrayOf(
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 20, 0, 10, 10, 0, 20, 0,
-        0, 0, 10, 20, 20, 10, 0, 0,
-        0, 0, 10, 20, 20, 10, 0, 0,
-        0, 10, 0, 0, 0, 0, 10, 0,
-        0, 30, 0, 0, 0, 0, 30, 0,
-        0, 0, -10, 0, 0, -10, 0, 0
-    )
-
-    val rookPositionalScore = arrayOf(
-        50, 50, 50, 50, 50, 50, 50, 50,
-        50, 50, 50, 50, 50, 50, 50, 50,
-        0, 0, 10, 20, 20, 10, 0, 0,
-        0, 0, 10, 20, 20, 10, 0, 0,
-        0, 0, 10, 20, 20, 10, 0, 0,
-        0, 0, 10, 20, 20, 10, 0, 0,
-        0, 0, 10, 20, 20, 10, 0, 0,
-        0, 0, 0, 20, 20, 0, 0, 0
-    )
-
-    val kingPositionalScore = arrayOf(
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 5, 5, 5, 5, 0, 0,
-        0, 5, 5, 10, 10, 5, 5, 0,
-        0, 5, 10, 20, 20, 10, 5, 0,
-        0, 5, 10, 20, 20, 10, 5, 0,
-        0, 0, 5, 10, 10, 5, 0, 0,
-        0, 5, 5, -5, -5, 0, 5, 0,
-        0, 0, 5, 0, -15, 0, 10, 0
     )
 
     val mirrorScores = arrayOf(
@@ -745,7 +691,7 @@ object Evaluation {
                             endGameScore -= ISOLATED_PAWN_PENALTY_ENDGAME
                         }
                         // passed pawns
-                        if (blackPassedPawnsMasks[square] and board.pieceBitboards[Piece.p.ordinal] == 0UL) {
+                        if (blackPassedPawnsMasks[square] and board.pieceBitboards[Piece.P.ordinal] == 0UL) {
                             openingScore -= PASSED_PAWN_BONUS[GET_RANK_FROM_SQUARE[square]]
                             endGameScore -= PASSED_PAWN_BONUS[GET_RANK_FROM_SQUARE[square]]
                         }
@@ -824,8 +770,8 @@ object Evaluation {
                             endGameScore += OPEN_FILE_SCORE
                         }
                         // king shield bonus
-                        openingScore -= BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.WHITE.ordinal]) * KING_SHIELD_BONUS
-                        endGameScore -= BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.WHITE.ordinal]) * KING_SHIELD_BONUS
+                        openingScore -= BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.BLACK.ordinal]) * KING_SHIELD_BONUS
+                        endGameScore -= BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.BLACK.ordinal]) * KING_SHIELD_BONUS
                     }
                 }
                 currBitboard = BitBoard.setBitOff(currBitboard, Square.fromIntegerToSquare(square)!!)
