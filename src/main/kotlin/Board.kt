@@ -3,85 +3,93 @@ import kotlin.text.StringBuilder
 
 
 @ExperimentalUnsignedTypes
-class Board {
+object Board {
 
 
     /**
      * array of bitboards to represents the board - 6 for each color.
      *
      */
-    var pieceBitboards: Array<ULong>
+    @JvmStatic
+    var pieceBitboards: Array<ULong> = Array(12) { 0UL }
+
 
     /**
      * array of 3 bit boards - white pieces, black pieces, and both
      */
-    var occupanciesBitboards: Array<ULong>
+    @JvmStatic
+    var occupanciesBitboards: Array<ULong> = Array(3) { 0UL }
 
     /**
      * int to represent which side is now playing
      */
-    var side: Color
+    @JvmStatic
+    var side: Color = Color.WHITE
 
     /**
      * Int to represent which tile is now en-passant available
      */
-    var enpassant: Square
+    @JvmStatic
+    var enpassant: Square = Square.NO_SQUARE
 
     /**
      * Int to represnet the current game castling rights
      */
-    var castle: Int
+    @JvmStatic
+    var castle: Int = 0
 
     /**
      *
      */
-    var hashKey: ULong
+    @JvmStatic
+    var hashKey: ULong = FENDebugConstants.EMPTY_BOARD_HASH
 
-
-    constructor() {
-        this.pieceBitboards = Array(12) { 0UL }
-        this.occupanciesBitboards = Array(3) { 0UL }
-        this.side = Color.WHITE
-        this.enpassant = Square.NO_SQUARE
-        this.castle = 0
-        this.hashKey = FENDebugConstants.EMPTY_BOARD_HASH
-    }
-
-
-    constructor(fen: String) : this() {
-        this.parseFEN(fen, toReset = false)
-    }
-
-    constructor(other: Board) {
-        this.castle = other.castle
-        this.side = other.side
-        this.enpassant = other.enpassant
-        this.pieceBitboards = arrayOf(
-            other.pieceBitboards[0],
-            other.pieceBitboards[1], other.pieceBitboards[2],
-            other.pieceBitboards[3],
-            other.pieceBitboards[4],
-            other.pieceBitboards[5],
-            other.pieceBitboards[6],
-            other.pieceBitboards[7],
-            other.pieceBitboards[8],
-            other.pieceBitboards[9],
-            other.pieceBitboards[10],
-            other.pieceBitboards[11]
-        )
-
-        this.occupanciesBitboards = arrayOf(
-            other.occupanciesBitboards[0],
-            other.occupanciesBitboards[1],
-            other.occupanciesBitboards[2],
-        )
-        this.hashKey = other.hashKey
-    }
+//
+//    constructor() {
+//        this.pieceBitboards = Array(12) { 0UL }
+//        this.occupanciesBitboards = Array(3) { 0UL }
+//        this.side = Color.WHITE
+//        this.enpassant = Square.NO_SQUARE
+//        this.castle = 0
+//        this.hashKey = FENDebugConstants.EMPTY_BOARD_HASH
+//    }
+//
+//
+//    constructor(fen: String) : this() {
+//        this.parseFEN(fen, toReset = false)
+//    }
+//
+//    constructor(other: Board) {
+//        this.castle = other.castle
+//        this.side = other.side
+//        this.enpassant = other.enpassant
+//        this.pieceBitboards = arrayOf(
+//            other.pieceBitboards[0],
+//            other.pieceBitboards[1], other.pieceBitboards[2],
+//            other.pieceBitboards[3],
+//            other.pieceBitboards[4],
+//            other.pieceBitboards[5],
+//            other.pieceBitboards[6],
+//            other.pieceBitboards[7],
+//            other.pieceBitboards[8],
+//            other.pieceBitboards[9],
+//            other.pieceBitboards[10],
+//            other.pieceBitboards[11]
+//        )
+//
+//        this.occupanciesBitboards = arrayOf(
+//            other.occupanciesBitboards[0],
+//            other.occupanciesBitboards[1],
+//            other.occupanciesBitboards[2],
+//        )
+//        this.hashKey = other.hashKey
+//    }
 
     /**
      * reset the board to an empty one
      */
-    private fun emptyBoard() {
+    @JvmStatic
+    fun emptyBoard() {
         this.pieceBitboards = Array(12) { 0UL }
         this.occupanciesBitboards = Array(3) { 0UL }
         this.side = Color.WHITE
@@ -90,31 +98,22 @@ class Board {
         this.hashKey = 0UL
     }
 
-    fun copyOtherBoard(other: Board) {
-        this.castle = other.castle
-        this.side = other.side
-        this.enpassant = other.enpassant
-        this.pieceBitboards = other.pieceBitboards
-        this.occupanciesBitboards = other.occupanciesBitboards
-        this.hashKey = other.hashKey
+    @JvmStatic
+    fun copyOtherBoard(
+        castle: Int,
+        side: Color,
+        enpassant: Square,
+        pieceBitboards: Array<ULong>,
+        occupanciesBitboards: Array<ULong>,
+        hashKey: ULong
+    ) {
+        this.castle = castle
+        this.side = side
+        this.enpassant = enpassant
+        this.pieceBitboards = pieceBitboards
+        this.occupanciesBitboards = occupanciesBitboards
+        this.hashKey = hashKey
 
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if(other is Board){
-            for(i in this.pieceBitboards.indices){
-                if(this.pieceBitboards[i]!= other.pieceBitboards[i]){
-                    return false
-                }
-            }
-            for(i in this.occupanciesBitboards.indices){
-                if(this.occupanciesBitboards[i]!= other.occupanciesBitboards[i]){
-                    return false
-                }
-            }
-            return this.castle == other.castle && this.side == other.side && this.enpassant == other.enpassant
-        }
-        return false
     }
 
     /**
@@ -124,6 +123,7 @@ class Board {
      * @param toReset: boolean to determine if the board needs to be reset before parsing
      * @throws FENException if the given FEN is not valid
      */
+    @JvmStatic
     fun parseFEN(fen: String, toReset: Boolean = true) {
         if (fen.isEmpty()) {
             throw FENException("empty string fen")
@@ -140,7 +140,7 @@ class Board {
         /***NEED TO CHANGE IF WANT TO DO CONCURRENT SEARCH***/
         var index = 0
         var rank = 0
-        var file :Int
+        var file: Int
 
         while (rank < 8) {
             //for each rank
@@ -152,7 +152,7 @@ class Board {
                     // putting piece on board. if invalid piece character -> throws error
                     val piece: Piece =
                         Piece.convertCharToPiece(fen[index]) ?: throw FENException("invalid piece: '${fen[index]}'")
-                    this.pieceBitboards[piece.ordinal] = BitBoard.setBitOn(this.pieceBitboards[piece.ordinal],square)
+                    this.pieceBitboards[piece.ordinal] = BitBoard.setBitOn(this.pieceBitboards[piece.ordinal], square)
                     index++
                 }
                 if (fen[index] in '0'..'9') {
@@ -160,7 +160,7 @@ class Board {
                     val offset = fen[index] - '0'
                     var piece: Piece? = null
                     for (p in Piece.allPieces) {
-                        if (BitBoard.getBit(this.pieceBitboards[p.ordinal],square) != 0UL) {
+                        if (BitBoard.getBit(this.pieceBitboards[p.ordinal], square) != 0UL) {
                             piece = p
                             break
                         }
@@ -229,18 +229,23 @@ class Board {
     /**
      * build the current occupancies of the board according to the 12 bitboards of the pieces
      */
+    @JvmStatic
     private fun matchOccupanciesToPiecesBitBoards(reset: Boolean = true) {
         if (reset) {
             this.occupanciesBitboards = Array(3) { 0UL }
         }
         for (p in Piece.whitePieces) {
-            occupanciesBitboards[Color.WHITE.ordinal] = occupanciesBitboards[Color.WHITE.ordinal] or pieceBitboards[p.ordinal]
+            occupanciesBitboards[Color.WHITE.ordinal] =
+                occupanciesBitboards[Color.WHITE.ordinal] or pieceBitboards[p.ordinal]
         }
         for (p in Piece.blackPieces) {
-            occupanciesBitboards[Color.BLACK.ordinal] =  occupanciesBitboards[Color.BLACK.ordinal] or (pieceBitboards[p.ordinal])
+            occupanciesBitboards[Color.BLACK.ordinal] =
+                occupanciesBitboards[Color.BLACK.ordinal] or (pieceBitboards[p.ordinal])
         }
-        occupanciesBitboards[Color.BOTH.ordinal] = occupanciesBitboards[Color.BOTH.ordinal] or (occupanciesBitboards[Color.WHITE.ordinal])
-        occupanciesBitboards[Color.BOTH.ordinal] = occupanciesBitboards[Color.BOTH.ordinal] or (occupanciesBitboards[Color.BLACK.ordinal])
+        occupanciesBitboards[Color.BOTH.ordinal] =
+            occupanciesBitboards[Color.BOTH.ordinal] or (occupanciesBitboards[Color.WHITE.ordinal])
+        occupanciesBitboards[Color.BOTH.ordinal] =
+            occupanciesBitboards[Color.BOTH.ordinal] or (occupanciesBitboards[Color.BLACK.ordinal])
     }
 
 
@@ -254,7 +259,7 @@ class Board {
                 }
                 var piece = -1
                 for (p in 0..11) {
-                    if (BitBoard.getBit(this.pieceBitboards[p],square) != 0UL) {
+                    if (BitBoard.getBit(this.pieceBitboards[p], square) != 0UL) {
 
                         piece = p
                         break
@@ -267,7 +272,7 @@ class Board {
 
         }
         builder.append("\n  ")
-        for(c in "ABCDEFGH"){
+        for (c in "ABCDEFGH") {
             builder.append("  $c")
         }
         builder.append("\n\n")
@@ -289,6 +294,7 @@ class Board {
      * Q -> white queen        q -> black queen
      * K -> white king         k -> black king
      */
+    @JvmStatic
     fun printBoard() {
         println(this)
     }
@@ -299,6 +305,7 @@ class Board {
      * @param side: the color which is attcking
      * @return: true if square is attacked, false other wise
      */
+    @JvmStatic
     fun isSquareAttacked(square: Square, side: Color): Boolean {
         // attacked by white pawns
         if ((side == Color.WHITE) && ((Attacks.pawnAttacks[Color.BLACK.ordinal][square.ordinal] and this.pieceBitboards[Piece.P.ordinal]) != 0UL)) {
@@ -342,6 +349,7 @@ class Board {
      * generate all possible moves for the current side in the current board situation
      * @return List of integers that represents all the possible moves on the board
      */
+    @JvmStatic
     fun generateMoves(): MutableList<Int> {
         var bitboardCopy: ULong
         val isWhite = side == Color.WHITE
@@ -370,6 +378,7 @@ class Board {
      * @param isWhite: true-> generate for white. false -> generate for black
      * @param moveList: list of integers that collects all the moves available so far to edit
      */
+    @JvmStatic
     fun generateMovesForPiece(piece: Piece, _bitboardCopy: ULong, isWhite: Boolean, moveList: MutableList<Int>) {
         var bitboardCopy = _bitboardCopy
         var sourceSquare: Square
@@ -385,16 +394,17 @@ class Board {
                 Piece.K, Piece.k -> Attacks.kingAttacks[sourceSquare.ordinal]
                 else -> return
             }
-            val occ : ULong =
+            val occ: ULong =
                 if (isWhite) occupanciesBitboards[Color.WHITE.ordinal].inv() else occupanciesBitboards[Color.BLACK.ordinal].inv()
             attacks = (attacksSource and occ)
             while (attacks != 0UL) {
                 targetSquare = Square.fromIntegerToSquare(BitBoard.getLSB(attacks))!!
 
-                val occ2 : ULong = if (isWhite) (occupanciesBitboards[Color.BLACK.ordinal]) else ( occupanciesBitboards[Color.WHITE.ordinal])
+                val occ2: ULong =
+                    if (isWhite) (occupanciesBitboards[Color.BLACK.ordinal]) else (occupanciesBitboards[Color.WHITE.ordinal])
 
 
-                if (BitBoard.getBit(occ2,targetSquare) == 0UL) {
+                if (BitBoard.getBit(occ2, targetSquare) == 0UL) {
                     // quiet moves
                     moveList.add(
                         Moves.encodeMove(
@@ -417,10 +427,10 @@ class Board {
                     )
                 }
 
-                attacks = BitBoard.setBitOff(attacks,targetSquare)
+                attacks = BitBoard.setBitOff(attacks, targetSquare)
             }
 
-            bitboardCopy = BitBoard.setBitOff(bitboardCopy,sourceSquare)
+            bitboardCopy = BitBoard.setBitOff(bitboardCopy, sourceSquare)
 
         }
 
@@ -432,6 +442,7 @@ class Board {
      * @param isWhite: true -> generate for White, false-> check for black
      * @param moveList: list of all the moves so far that are available on the board to edit
      */
+    @JvmStatic
     fun generateCastlingMoves(isWhite: Boolean, moveList: MutableList<Int>) {
         if (isKingSide(isWhite)) {
             moveList.add(
@@ -469,6 +480,7 @@ class Board {
      * @param isWhite Boolean  true->check for white, false -> check for black
      * @return: true if castling is possible, false otherwise
      */
+    @JvmStatic
     private fun isQueenSide(isWhite: Boolean): Boolean {
 
         /// white player have castling rights
@@ -479,9 +491,18 @@ class Board {
         // no obstacles in the way of king side castling
         val isClear =
 
-            BitBoard.getBit(this.occupanciesBitboards[Color.BOTH.ordinal], (if (isWhite) Square.c1 else Square.c8)) == 0UL
-                    &&  BitBoard.getBit(this.occupanciesBitboards[Color.BOTH.ordinal],(if (isWhite) Square.b1 else Square.b8) )== 0UL
-                    && BitBoard.getBit(this.occupanciesBitboards[Color.BOTH.ordinal], (if (isWhite) Square.d1 else Square.d8) )== 0UL
+            BitBoard.getBit(
+                this.occupanciesBitboards[Color.BOTH.ordinal],
+                (if (isWhite) Square.c1 else Square.c8)
+            ) == 0UL
+                    && BitBoard.getBit(
+                this.occupanciesBitboards[Color.BOTH.ordinal],
+                (if (isWhite) Square.b1 else Square.b8)
+            ) == 0UL
+                    && BitBoard.getBit(
+                this.occupanciesBitboards[Color.BOTH.ordinal],
+                (if (isWhite) Square.d1 else Square.d8)
+            ) == 0UL
 
         // no threat on castling squares
         val isThreatened =
@@ -504,6 +525,7 @@ class Board {
      * @param isWhite Boolean  true->check for white, false -> check for black
      * @return: true if castling is possible, false otherwise
      */
+    @JvmStatic
     private fun isKingSide(isWhite: Boolean): Boolean {
         /// white player have castling rights
         val isHavingCastleRight =
@@ -511,8 +533,14 @@ class Board {
 
         // no obstacles in the way of king side castling
         val isClear =
-            (BitBoard.getBit(this.occupanciesBitboards[Color.BOTH.ordinal],(if (isWhite) Square.g1 else Square.g8)) == 0UL
-                    && BitBoard.getBit(this.occupanciesBitboards[Color.BOTH.ordinal],(if (isWhite) Square.f1 else Square.f8) )== 0UL)
+            (BitBoard.getBit(
+                this.occupanciesBitboards[Color.BOTH.ordinal],
+                (if (isWhite) Square.g1 else Square.g8)
+            ) == 0UL
+                    && BitBoard.getBit(
+                this.occupanciesBitboards[Color.BOTH.ordinal],
+                (if (isWhite) Square.f1 else Square.f8)
+            ) == 0UL)
         // no threat on castling squares
         val isThreatened =
             ((if (isWhite) this.isSquareAttacked(
@@ -536,6 +564,7 @@ class Board {
      * @param isWhite: Boolean to say the color of the pawn: true-> White, false->Black
      * @param moveList: Mutable list of integers represent all the possible moves so far
      */
+    @JvmStatic
     fun generateMovesForPawns(_bitboardCopy: ULong, isWhite: Boolean, moveList: MutableList<Int>) {
         var bitboardCopy = _bitboardCopy
         while (bitboardCopy != 0UL) {
@@ -546,7 +575,8 @@ class Board {
                 )!!
             val isPromotionPossible =
                 if (isWhite) sourceSquare.ordinal in Square.a7.ordinal..Square.h7.ordinal else sourceSquare.ordinal in Square.a2.ordinal..Square.h2.ordinal
-            val isTargetOccupied: Boolean = BitBoard.getBit(occupanciesBitboards[Color.BOTH.ordinal],targetSquare) != 0UL
+            val isTargetOccupied: Boolean =
+                BitBoard.getBit(occupanciesBitboards[Color.BOTH.ordinal], targetSquare) != 0UL
             var isInRange =
                 if (isWhite) targetSquare.ordinal >= Square.a8.ordinal else targetSquare.ordinal <= Square.h1.ordinal
             if (isInRange && !isTargetOccupied) {
@@ -575,7 +605,7 @@ class Board {
                             targetSquare.ordinal + 8
                         )!!
                     val isDoubleTargetOccupied: Boolean =
-                        BitBoard.getBit(occupanciesBitboards[Color.BOTH.ordinal],(targetSquare)) != 0UL
+                        BitBoard.getBit(occupanciesBitboards[Color.BOTH.ordinal], (targetSquare)) != 0UL
                     isInRange =
                         if (isWhite) sourceSquare.ordinal in Square.a2.ordinal..Square.h2.ordinal else sourceSquare.ordinal in Square.a7.ordinal..Square.h7.ordinal
                     if (isInRange && !isDoubleTargetOccupied) {
@@ -617,7 +647,7 @@ class Board {
                     )
                 }
 
-                attacks = BitBoard.setBitOff(attacks,targetSquare)
+                attacks = BitBoard.setBitOff(attacks, targetSquare)
             }
 
             if (enpassant != Square.NO_SQUARE) {
@@ -642,11 +672,12 @@ class Board {
                 }
             }
             // moving to the next bit
-            bitboardCopy = BitBoard.setBitOff(bitboardCopy,sourceSquare)
+            bitboardCopy = BitBoard.setBitOff(bitboardCopy, sourceSquare)
         }
 
     }
 
+    @JvmStatic
     private fun addPromotionMoves(
         moveList: MutableList<Int>,
         sourceSquare: Square,
@@ -696,6 +727,7 @@ class Board {
      * print all squared that are under attacked by the given color in board
      * @param side: color that is attacking in the board
      */
+    @JvmStatic
     fun printAttackedSquares(side: Color) {
         println()
         for (rank in 0..7) {
@@ -717,6 +749,7 @@ class Board {
      * @param move: encoded move to make
      * @param isCapturesOnly: if true, making the move only if it's including capture
      */
+    @JvmStatic
     fun makeMove(move: Int, isCapturesOnly: Boolean = false): Boolean {
         if (isCapturesOnly) {
             return if (Moves.getCaptureFromMove(move)) {
@@ -727,7 +760,32 @@ class Board {
             }
         } else {
             //all moves -> get all information from move
-            val boardCopy = Board(this)
+            //val boardCopy = Board(this)
+            val tempCastle = this.castle
+            val tempSide = this.side
+            val tempEnpassant = this.enpassant
+            val tempPieceBitboards = arrayOf(
+                this.pieceBitboards[0],
+                this.pieceBitboards[1], this.pieceBitboards[2],
+                this.pieceBitboards[3],
+                this.pieceBitboards[4],
+                this.pieceBitboards[5],
+                this.pieceBitboards[6],
+                this.pieceBitboards[7],
+                this.pieceBitboards[8],
+                this.pieceBitboards[9],
+                this.pieceBitboards[10],
+                this.pieceBitboards[11]
+            )
+
+            val tempOccupanciesBitboards = arrayOf(
+                this.occupanciesBitboards[0],
+                this.occupanciesBitboards[1],
+                this.occupanciesBitboards[2],
+            )
+            val tempHashKey = this.hashKey
+
+
             val source = Moves.getSourceFromMove(move)
             val target = Moves.getTargetFromMove(move)
             val piece = Moves.getPieceFromMove(move)
@@ -738,8 +796,8 @@ class Board {
             val isCastle = Moves.getCastlingFromMove(move)
 
             // move piece
-            this.pieceBitboards[piece.ordinal] = BitBoard.setBitOff(this.pieceBitboards[piece.ordinal],source)
-            this.pieceBitboards[piece.ordinal] = BitBoard.setBitOn(this.pieceBitboards[piece.ordinal],target)
+            this.pieceBitboards[piece.ordinal] = BitBoard.setBitOff(this.pieceBitboards[piece.ordinal], source)
+            this.pieceBitboards[piece.ordinal] = BitBoard.setBitOn(this.pieceBitboards[piece.ordinal], target)
 
             // hashing
             hashKey = hashKey xor ZorbistKeys.pieceKeys[piece.ordinal][source.ordinal]
@@ -748,9 +806,9 @@ class Board {
             if (isCapture) {
                 // remove other piece
                 for (p in (if (side == Color.WHITE) Piece.blackPieces else Piece.whitePieces)) {
-                    if (BitBoard.getBit(this.pieceBitboards[p.ordinal],target) != 0UL) {
+                    if (BitBoard.getBit(this.pieceBitboards[p.ordinal], target) != 0UL) {
                         // if the current piece is the one to remove: remove it and stop search
-                        this.pieceBitboards[p.ordinal] = BitBoard.setBitOff(this.pieceBitboards[p.ordinal],target)
+                        this.pieceBitboards[p.ordinal] = BitBoard.setBitOff(this.pieceBitboards[p.ordinal], target)
                         hashKey = hashKey xor ZorbistKeys.pieceKeys[p.ordinal][target.ordinal]
                         break
                     }
@@ -758,30 +816,36 @@ class Board {
             }
             if (isPromoted != null) {
 
-                if(side == Color.WHITE){
-                    this.pieceBitboards[Piece.P.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.P.ordinal], target)
+                if (side == Color.WHITE) {
+                    this.pieceBitboards[Piece.P.ordinal] =
+                        BitBoard.setBitOff(this.pieceBitboards[Piece.P.ordinal], target)
                     this.hashKey = this.hashKey xor ZorbistKeys.pieceKeys[Piece.P.ordinal][target.ordinal]
-                }else{
-                    this.pieceBitboards[Piece.p.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.p.ordinal], target)
+                } else {
+                    this.pieceBitboards[Piece.p.ordinal] =
+                        BitBoard.setBitOff(this.pieceBitboards[Piece.p.ordinal], target)
                     this.hashKey = this.hashKey xor ZorbistKeys.pieceKeys[Piece.p.ordinal][target.ordinal]
                 }
 
-                this.pieceBitboards[isPromoted.ordinal] = BitBoard.setBitOn(this.pieceBitboards[isPromoted.ordinal],target)
+                this.pieceBitboards[isPromoted.ordinal] =
+                    BitBoard.setBitOn(this.pieceBitboards[isPromoted.ordinal], target)
+
                 this.hashKey = this.hashKey xor ZorbistKeys.pieceKeys[isPromoted.ordinal][target.ordinal]
             }
 
             if (isEnPassant) {
                 if (side == Color.WHITE) {
-                    this.pieceBitboards[Piece.p.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.p.ordinal],(target.ordinal + 8))
+                    this.pieceBitboards[Piece.p.ordinal] =
+                        BitBoard.setBitOff(this.pieceBitboards[Piece.p.ordinal], (target.ordinal + 8))
                     // hash
                     hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.p.ordinal][target.ordinal + 8]
                 } else {
-                    this.pieceBitboards[Piece.P.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.P.ordinal],(target.ordinal - 8))
+                    this.pieceBitboards[Piece.P.ordinal] =
+                        BitBoard.setBitOff(this.pieceBitboards[Piece.P.ordinal], (target.ordinal - 8))
                     // hash
                     hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.P.ordinal][target.ordinal - 8]
                 }
             }
-            if(enpassant != Square.NO_SQUARE){
+            if (enpassant != Square.NO_SQUARE) {
                 hashKey = hashKey xor ZorbistKeys.enpassantKeys[enpassant.ordinal]
             }
 
@@ -790,14 +854,12 @@ class Board {
 
             if (isDouble) {
 
-                if(side == Color.WHITE){
-                    enpassant = Square.fromIntegerToSquare(target.ordinal+8)!!
-                    hashKey = hashKey xor ZorbistKeys.enpassantKeys[target.ordinal+8]
-                }
-
-                else{
-                    enpassant = Square.fromIntegerToSquare(target.ordinal-8)!!
-                    hashKey = hashKey xor ZorbistKeys.enpassantKeys[target.ordinal-8]
+                if (side == Color.WHITE) {
+                    enpassant = Square.fromIntegerToSquare(target.ordinal + 8)!!
+                    hashKey = hashKey xor ZorbistKeys.enpassantKeys[target.ordinal + 8]
+                } else {
+                    enpassant = Square.fromIntegerToSquare(target.ordinal - 8)!!
+                    hashKey = hashKey xor ZorbistKeys.enpassantKeys[target.ordinal - 8]
                 }
             }
 
@@ -805,16 +867,20 @@ class Board {
                 when (target) {
                     //white king side
                     Square.g1 -> {
-                        this.pieceBitboards[Piece.R.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.R.ordinal],Square.h1)
-                        this.pieceBitboards[Piece.R.ordinal] = BitBoard.setBitOn(this.pieceBitboards[Piece.R.ordinal],Square.f1)
+                        this.pieceBitboards[Piece.R.ordinal] =
+                            BitBoard.setBitOff(this.pieceBitboards[Piece.R.ordinal], Square.h1)
+                        this.pieceBitboards[Piece.R.ordinal] =
+                            BitBoard.setBitOn(this.pieceBitboards[Piece.R.ordinal], Square.f1)
                         hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.R.ordinal][Square.h1.ordinal]
                         hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.R.ordinal][Square.f1.ordinal]
                     }
 
                     //white queen side
                     Square.c1 -> {
-                        this.pieceBitboards[Piece.R.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.R.ordinal],Square.a1)
-                        this.pieceBitboards[Piece.R.ordinal] = BitBoard.setBitOn(this.pieceBitboards[Piece.R.ordinal],Square.d1)
+                        this.pieceBitboards[Piece.R.ordinal] =
+                            BitBoard.setBitOff(this.pieceBitboards[Piece.R.ordinal], Square.a1)
+                        this.pieceBitboards[Piece.R.ordinal] =
+                            BitBoard.setBitOn(this.pieceBitboards[Piece.R.ordinal], Square.d1)
                         hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.R.ordinal][Square.a1.ordinal]
                         hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.R.ordinal][Square.d1.ordinal]
 
@@ -822,8 +888,10 @@ class Board {
 
                     //black king side
                     Square.g8 -> {
-                        this.pieceBitboards[Piece.r.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.r.ordinal],Square.h8)
-                        this.pieceBitboards[Piece.r.ordinal]= BitBoard.setBitOn(this.pieceBitboards[Piece.r.ordinal],Square.f8)
+                        this.pieceBitboards[Piece.r.ordinal] =
+                            BitBoard.setBitOff(this.pieceBitboards[Piece.r.ordinal], Square.h8)
+                        this.pieceBitboards[Piece.r.ordinal] =
+                            BitBoard.setBitOn(this.pieceBitboards[Piece.r.ordinal], Square.f8)
                         hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.r.ordinal][Square.h8.ordinal]
                         hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.r.ordinal][Square.f8.ordinal]
 
@@ -831,26 +899,28 @@ class Board {
 
                     //white queen side
                     Square.c8 -> {
-                        this.pieceBitboards[Piece.r.ordinal] = BitBoard.setBitOff(this.pieceBitboards[Piece.r.ordinal],Square.a8)
-                        this.pieceBitboards[Piece.r.ordinal] = BitBoard.setBitOn(this.pieceBitboards[Piece.r.ordinal],Square.d8)
+                        this.pieceBitboards[Piece.r.ordinal] =
+                            BitBoard.setBitOff(this.pieceBitboards[Piece.r.ordinal], Square.a8)
+                        this.pieceBitboards[Piece.r.ordinal] =
+                            BitBoard.setBitOn(this.pieceBitboards[Piece.r.ordinal], Square.d8)
                         hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.r.ordinal][Square.a8.ordinal]
                         hashKey = hashKey xor ZorbistKeys.pieceKeys[Piece.r.ordinal][Square.d8.ordinal]
                     }
 
                     else -> {
-                        this.copyOtherBoard(boardCopy)
+                        this.copyOtherBoard(tempCastle,tempSide,tempEnpassant,tempPieceBitboards,tempOccupanciesBitboards,tempHashKey)
                         return false
                     }
                 }
             }
             //canceling previous castle hash
-            hashKey = hashKey xor  ZorbistKeys.castleKeys[castle]
+            hashKey = hashKey xor ZorbistKeys.castleKeys[castle]
 
             // updating castling rights
             this.castle = this.castle and Moves.CASTLING_RIGHTS_UPDATE_ARRAY[source.ordinal]
             this.castle = this.castle and Moves.CASTLING_RIGHTS_UPDATE_ARRAY[target.ordinal]
             // updating previous castle hash
-            hashKey = hashKey xor  ZorbistKeys.castleKeys[castle]
+            hashKey = hashKey xor ZorbistKeys.castleKeys[castle]
 
 
             // updating Occupancies
@@ -878,7 +948,7 @@ class Board {
                 else Square.fromIntegerToSquare(BitBoard.getLSB(this.pieceBitboards[Piece.K.ordinal]))!!
             return if (isSquareAttacked(kingSquare, side)) {
                 //move is invalid. restore and return false
-                this.copyOtherBoard(boardCopy)
+                this.copyOtherBoard(tempCastle,tempSide,tempEnpassant,tempPieceBitboards,tempOccupanciesBitboards,tempHashKey)
                 false
             } else {
                 true
@@ -887,53 +957,35 @@ class Board {
         }
     }
 
-    fun generateHashKey() : ULong{
-        var finalKey : ULong = 0UL
-        var tempBitboard : ULong
-        for(piece in Piece.allPieces){
+    @JvmStatic
+    fun generateHashKey(): ULong {
+        var finalKey: ULong = 0UL
+        var tempBitboard: ULong
+        for (piece in Piece.allPieces) {
             tempBitboard = this.pieceBitboards[piece.ordinal]
 
-            while(tempBitboard!=0UL){
-                val square : Int = BitBoard.getLSB(tempBitboard)
+            while (tempBitboard != 0UL) {
+                val square: Int = BitBoard.getLSB(tempBitboard)
 
                 finalKey = finalKey xor ZorbistKeys.pieceKeys[piece.ordinal][square]
 
-                tempBitboard = BitBoard.setBitOff(tempBitboard,square)
+                tempBitboard = BitBoard.setBitOff(tempBitboard, square)
             }
 
         }
-        if(enpassant != Square.NO_SQUARE){
+        if (enpassant != Square.NO_SQUARE) {
             finalKey = finalKey xor ZorbistKeys.enpassantKeys[enpassant.ordinal]
         }
 
-            finalKey = finalKey xor ZorbistKeys.castleKeys[this.castle]
+        finalKey = finalKey xor ZorbistKeys.castleKeys[this.castle]
 
 
 
-        if(this.side == Color.BLACK){
+        if (this.side == Color.BLACK) {
             finalKey = finalKey xor ZorbistKeys.sideKey
         }
 
         return finalKey
-    }
-
-    override fun hashCode(): Int {
-        var result = pieceBitboards.contentHashCode()
-        result = 31 * result + occupanciesBitboards.contentHashCode()
-        result = 31 * result + side.hashCode()
-        result = 31 * result + enpassant.hashCode()
-        result = 31 * result + castle
-        result = 31 * result + hashKey.hashCode()
-        return result
-    }
-
-
-    companion object {
-        fun createStartBoard(): Board {
-            return Board(FENDebugConstants.START_POSITION.fen)
-        }
-
-
     }
 
     class FENException(message: String) : Exception(message)

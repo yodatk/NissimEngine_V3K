@@ -455,9 +455,12 @@ object Evaluation {
         historyMoves = Array(12) { Array(64) { 0 } }
     }
     @JvmStatic
-    fun sortedPossibleMoves(b: Board, movesList: List<Int>, ply: Int): List<Int> {
+    fun sortedPossibleMoves(movesList: List<Int>, ply: Int): List<Int> {
 
-        val withScoreList = movesList.map { MoveWithScore(it, evaluateMoveScore(b, it, ply)) }.toMutableList()
+
+
+         // BEST SO FAR
+        val withScoreList = movesList.map { MoveWithScore(it, evaluateMoveScore(it, ply)) }.toMutableList()
 
         //insertion sort
         var i = 0
@@ -479,16 +482,16 @@ object Evaluation {
 //        return withScoreList.sortedDescending().map{it.move}
     }
     @JvmStatic
-    fun printMovesScores(b: Board, ply: Int) {
-        val movesList = sortedPossibleMoves(b, b.generateMoves(), ply)
+    fun printMovesScores(ply: Int) {
+        val movesList = sortedPossibleMoves(Board.generateMoves(), ply)
         println("   Moves Scores:\n")
         for (move in movesList) {
-            println("     move: ${Moves.moveUCI(move)} score: ${evaluateMoveScore(b, move, ply)}")
+            println("     move: ${Moves.moveUCI(move)} score: ${evaluateMoveScore(move, ply)}")
         }
     }
 
     @JvmStatic
-    fun evaluateMoveScore(board: Board, move: Int, ply: Int): Int {
+    fun evaluateMoveScore( move: Int, ply: Int): Int {
 
         if (scorePrincipleVariation) {
             if (Search.principalVariationTable[0][Search.ply] == move) {
@@ -500,9 +503,9 @@ object Evaluation {
         if (Moves.getCaptureFromMove(move)) {
             // score capture move
             var targetPiece = Piece.P.ordinal
-            val arr = if (board.side == Color.WHITE) Piece.blackPieces else Piece.whitePieces
+            val arr = if (Board.side == Color.WHITE) Piece.blackPieces else Piece.whitePieces
             for (piece in arr) {
-                if (BitBoard.getBit(board.pieceBitboards[piece.ordinal], Moves.getTargetFromMove(move)) != 0UL) {
+                if (BitBoard.getBit(Board.pieceBitboards[piece.ordinal], Moves.getTargetFromMove(move)) != 0UL) {
                     targetPiece = piece.ordinal
                     break
                 }
@@ -530,28 +533,28 @@ object Evaluation {
      *  @return int value represents the score of the current "game phase"
      */
     @JvmStatic
-    fun getGamePhaseScore(board: Board): Int {
+    fun getGamePhaseScore(): Int {
         var whitePieces = 0
         var blackPieces = 0
 
         for (piece in Piece.whitePieces) {
             if (piece != Piece.P && piece != Piece.K) {
-                whitePieces += BitBoard.countBits(board.pieceBitboards[piece.ordinal]) * piece.openingValue
+                whitePieces += BitBoard.countBits(Board.pieceBitboards[piece.ordinal]) * piece.openingValue
 
             }
 
         }
         for (piece in Piece.blackPieces) {
             if (piece != Piece.p && piece != Piece.k) {
-                blackPieces += BitBoard.countBits(board.pieceBitboards[piece.ordinal]) * -piece.openingValue
+                blackPieces += BitBoard.countBits(Board.pieceBitboards[piece.ordinal]) * (-piece.openingValue)
             }
         }
         return whitePieces + blackPieces
     }
 
     @JvmStatic
-    fun evaluate(board: Board): Int {
-        val gamePhaseScore = getGamePhaseScore(board)
+    fun evaluate(): Int {
+        val gamePhaseScore = getGamePhaseScore()
 
 
         val gamePhase: GamePhase =
@@ -575,7 +578,7 @@ object Evaluation {
         var currBitboard: ULong
         var square: Int
         for (p in Piece.allPieces) {
-            currBitboard = board.pieceBitboards[p.ordinal]
+            currBitboard = Board.pieceBitboards[p.ordinal]
             while (currBitboard != 0UL) {
                 square = BitBoard.getLSB(currBitboard)
 
@@ -594,19 +597,19 @@ object Evaluation {
 
                         // double pawns
                         val doublePawns =
-                            BitBoard.countBits(board.pieceBitboards[Piece.P.ordinal] and fileMasks[square])
+                            BitBoard.countBits(Board.pieceBitboards[Piece.P.ordinal] and fileMasks[square])
                         if (doublePawns > 1) {
                             openingScore += (doublePawns - 1) * DOUBLE_PAWN_PENALTY_OPENING
                             endGameScore += (doublePawns - 1) * DOUBLE_PAWN_PENALTY_ENDGAME
                         }
                         // isolated pawns
-                        if (board.pieceBitboards[Piece.P.ordinal] and isolatedPawnsMasks[square] == 0UL) {
+                        if (Board.pieceBitboards[Piece.P.ordinal] and isolatedPawnsMasks[square] == 0UL) {
                             //give an isolated pawn panelty
                             openingScore += ISOLATED_PAWN_PENALTY_OPENING
                             endGameScore += ISOLATED_PAWN_PENALTY_ENDGAME
                         }
                         // passed pawns
-                        if (whitePassedPawnsMasks[square] and board.pieceBitboards[Piece.p.ordinal] == 0UL) {
+                        if (whitePassedPawnsMasks[square] and Board.pieceBitboards[Piece.p.ordinal] == 0UL) {
                             openingScore += PASSED_PAWN_BONUS[GET_RANK_FROM_SQUARE[square]]
                             endGameScore += PASSED_PAWN_BONUS[GET_RANK_FROM_SQUARE[square]]
                         }
@@ -622,11 +625,11 @@ object Evaluation {
                         openingScore += positionalScore[GamePhase.OPENING.ordinal][PieceType.BISHOP.ordinal][square]
                         endGameScore += positionalScore[GamePhase.END_GAME.ordinal][PieceType.BISHOP.ordinal][square]
 
-                        // mobility
+//                        // mobility
                         val mobilityCount = (BitBoard.countBits(
                             Attacks.getBishopAttacks(
                                 Square.fromIntegerToSquare(square)!!,
-                                board.occupanciesBitboards[Color.BOTH.ordinal]
+                                Board.occupanciesBitboards[Color.BOTH.ordinal]
                             )
                         ) - BISHOP_UNIT)
                         openingScore += mobilityCount * BISHOP_MOBILITY_UNIT_OPENING
@@ -638,12 +641,12 @@ object Evaluation {
                         endGameScore += positionalScore[GamePhase.END_GAME.ordinal][PieceType.ROOK.ordinal][square]
 
                         // semi-open considiration
-                         if (board.pieceBitboards[Piece.P.ordinal] and fileMasks[square] == 0UL) {
+                         if (Board.pieceBitboards[Piece.P.ordinal] and fileMasks[square] == 0UL) {
                              openingScore += SEMI_OPEN_FILE_BONUS
                              endGameScore += SEMI_OPEN_FILE_BONUS
                          }
                         // open file considiration
-                         if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
+                         if ((Board.pieceBitboards[Piece.P.ordinal] or Board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
                              openingScore += OPEN_FILE_SCORE
                              endGameScore += OPEN_FILE_SCORE
                          }
@@ -658,7 +661,7 @@ object Evaluation {
                          val mobilityCount = (BitBoard.countBits(
                              Attacks.getQueenAttacks(
                                  Square.fromIntegerToSquare(square)!!,
-                                 board.occupanciesBitboards[Color.BOTH.ordinal]
+                                 Board.occupanciesBitboards[Color.BOTH.ordinal]
                              )
                          ) - QUEEN_UNIT)
                         openingScore += mobilityCount * QUEEN_MOBILITY_UNIT_OPENING
@@ -672,18 +675,18 @@ object Evaluation {
                         endGameScore += positionalScore[GamePhase.END_GAME.ordinal][PieceType.KING.ordinal][square]
 
                          // king semi-open file calculations
-                         if (board.pieceBitboards[Piece.P.ordinal] and fileMasks[square] == 0UL) {
+                         if (Board.pieceBitboards[Piece.P.ordinal] and fileMasks[square] == 0UL) {
                              openingScore -= SEMI_OPEN_FILE_BONUS
                              endGameScore -= SEMI_OPEN_FILE_BONUS
                          }
                         // king open file calculations
-                         if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
+                         if ((Board.pieceBitboards[Piece.P.ordinal] or Board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
                              openingScore -= OPEN_FILE_SCORE
                              endGameScore -= OPEN_FILE_SCORE
                          }
                          // king shield bonus
-                         openingScore += BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.WHITE.ordinal]) * KING_SHIELD_BONUS
-                        endGameScore += BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.WHITE.ordinal]) * KING_SHIELD_BONUS
+                         openingScore += BitBoard.countBits(Attacks.kingAttacks[square] and Board.occupanciesBitboards[Color.WHITE.ordinal]) * KING_SHIELD_BONUS
+                        endGameScore += BitBoard.countBits(Attacks.kingAttacks[square] and Board.occupanciesBitboards[Color.WHITE.ordinal]) * KING_SHIELD_BONUS
                     }
 
                     //BLACK
@@ -693,19 +696,19 @@ object Evaluation {
                         endGameScore -= positionalScore[GamePhase.END_GAME.ordinal][PieceType.PAWN.ordinal][mirrorScores[square]]
                         // double pawns
                         val doublePawns =
-                            BitBoard.countBits(board.pieceBitboards[Piece.p.ordinal] and fileMasks[square])
+                            BitBoard.countBits(Board.pieceBitboards[Piece.p.ordinal] and fileMasks[square])
                         if (doublePawns > 1) {
                             openingScore -= (doublePawns - 1) * DOUBLE_PAWN_PENALTY_OPENING
                             endGameScore -= (doublePawns - 1) * DOUBLE_PAWN_PENALTY_ENDGAME
                         }
                         // isolated pawns
-                        if (board.pieceBitboards[Piece.p.ordinal] and isolatedPawnsMasks[square] == 0UL) {
+                        if (Board.pieceBitboards[Piece.p.ordinal] and isolatedPawnsMasks[square] == 0UL) {
                             //give an isolated pawn panelty
                             openingScore -= ISOLATED_PAWN_PENALTY_OPENING
                             endGameScore -= ISOLATED_PAWN_PENALTY_ENDGAME
                         }
                         // passed pawns
-                        if (blackPassedPawnsMasks[square] and board.pieceBitboards[Piece.P.ordinal] == 0UL) {
+                        if (blackPassedPawnsMasks[square] and Board.pieceBitboards[Piece.P.ordinal] == 0UL) {
                             openingScore -= PASSED_PAWN_BONUS[GET_RANK_FROM_SQUARE[square]]
                             endGameScore -= PASSED_PAWN_BONUS[GET_RANK_FROM_SQUARE[square]]
                         }
@@ -728,7 +731,7 @@ object Evaluation {
                         val mobilityCount = (BitBoard.countBits(
                             Attacks.getBishopAttacks(
                                 Square.fromIntegerToSquare(square)!!,
-                                board.occupanciesBitboards[Color.BOTH.ordinal]
+                                Board.occupanciesBitboards[Color.BOTH.ordinal]
                             )
                         ) - BISHOP_UNIT)
                         openingScore -= mobilityCount * BISHOP_MOBILITY_UNIT_OPENING
@@ -741,12 +744,12 @@ object Evaluation {
 
 
                         // semi-open considiration
-                        if (board.pieceBitboards[Piece.p.ordinal] and fileMasks[square] == 0UL) {
+                        if (Board.pieceBitboards[Piece.p.ordinal] and fileMasks[square] == 0UL) {
                             openingScore -= SEMI_OPEN_FILE_BONUS
                             endGameScore -= SEMI_OPEN_FILE_BONUS
                         }
                         // open file considiration
-                        if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
+                        if ((Board.pieceBitboards[Piece.P.ordinal] or Board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
                             openingScore -= OPEN_FILE_SCORE
                             endGameScore -= OPEN_FILE_SCORE
                         }
@@ -761,7 +764,7 @@ object Evaluation {
                         val mobilityCount = (BitBoard.countBits(
                             Attacks.getQueenAttacks(
                                 Square.fromIntegerToSquare(square)!!,
-                                board.occupanciesBitboards[Color.BOTH.ordinal]
+                                Board.occupanciesBitboards[Color.BOTH.ordinal]
                             )
                         ) - QUEEN_UNIT)
                         openingScore -= mobilityCount * QUEEN_MOBILITY_UNIT_OPENING
@@ -774,18 +777,18 @@ object Evaluation {
                         endGameScore -= positionalScore[GamePhase.END_GAME.ordinal][PieceType.KING.ordinal][mirrorScores[square]]
 
                         // king semi-open file calculations
-                        if (board.pieceBitboards[Piece.p.ordinal] and fileMasks[square] == 0UL) {
+                        if (Board.pieceBitboards[Piece.p.ordinal] and fileMasks[square] == 0UL) {
                             openingScore += SEMI_OPEN_FILE_BONUS
                             endGameScore += SEMI_OPEN_FILE_BONUS
                         }
                         // king open file calculations
-                        if ((board.pieceBitboards[Piece.P.ordinal] or board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
+                        if ((Board.pieceBitboards[Piece.P.ordinal] or Board.pieceBitboards[Piece.p.ordinal]) and fileMasks[square] == 0UL) {
                             openingScore += OPEN_FILE_SCORE
                             endGameScore += OPEN_FILE_SCORE
                         }
                         // king shield bonus
-                        openingScore -= BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.BLACK.ordinal]) * KING_SHIELD_BONUS
-                        endGameScore -= BitBoard.countBits(Attacks.kingAttacks[square] and board.occupanciesBitboards[Color.BLACK.ordinal]) * KING_SHIELD_BONUS
+                        openingScore -= BitBoard.countBits(Attacks.kingAttacks[square] and Board.occupanciesBitboards[Color.BLACK.ordinal]) * KING_SHIELD_BONUS
+                        endGameScore -= BitBoard.countBits(Attacks.kingAttacks[square] and Board.occupanciesBitboards[Color.BLACK.ordinal]) * KING_SHIELD_BONUS
                     }
                 }
                 currBitboard = BitBoard.setBitOff(currBitboard, Square.fromIntegerToSquare(square)!!)
@@ -808,6 +811,6 @@ object Evaluation {
 
             }
         }
-        return if (board.side == Color.WHITE) score else -score
+        return if (Board.side == Color.WHITE) score else -score
     }
 }

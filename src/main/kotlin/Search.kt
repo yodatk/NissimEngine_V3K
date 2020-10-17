@@ -76,7 +76,7 @@ object Search {
         return false
     }
     @JvmStatic
-    fun quietSearch(board: Board, _alpha: Int, beta: Int): Int {
+    fun quietSearch(_alpha: Int, beta: Int): Int {
         if ((nodes and 2047UL) == 0UL) {
             UCI.communicate()
         }
@@ -86,45 +86,68 @@ object Search {
 
         if (ply > MAX_PLY - 1) {
             //evaluate poisition
-            return Evaluation.evaluate(Board(board))
+            return Evaluation.evaluate()
         }
 
         var alpha = _alpha
-        val eval = Evaluation.evaluate(Board(board))
+        val eval = Evaluation.evaluate()
         if (eval >= beta) {
             return beta
         }
         if (eval > alpha) {
             alpha = eval
         }
-        val originalMoveList = board.generateMoves()
-        val moveList = Evaluation.sortedPossibleMoves(Board(board), originalMoveList, ply)
+        val originalMoveList = Board.generateMoves()
+        val moveList = Evaluation.sortedPossibleMoves(originalMoveList, ply)
 
 
 
         for (move in moveList) {
 
 
-            val boardCopy = Board(board)
+//            val boardCopy = Board(board)
+            val tempCastle = Board.castle
+            val tempSide = Board.side
+            val tempEnpassant = Board.enpassant
+            val tempPieceBitboards = arrayOf(
+                Board.pieceBitboards[0],
+                Board.pieceBitboards[1], Board.pieceBitboards[2],
+                Board.pieceBitboards[3],
+                Board.pieceBitboards[4],
+                Board.pieceBitboards[5],
+                Board.pieceBitboards[6],
+                Board.pieceBitboards[7],
+                Board.pieceBitboards[8],
+                Board.pieceBitboards[9],
+                Board.pieceBitboards[10],
+                Board.pieceBitboards[11]
+            )
+
+            val tempOccupanciesBitboards = arrayOf(
+                Board.occupanciesBitboards[0],
+                Board.occupanciesBitboards[1],
+                Board.occupanciesBitboards[2],
+            )
+            val tempHashKey = Board.hashKey
             ply++
             //updating in repetitionsTable
             repetitionsIndex++
-            repetitionsTable[repetitionsIndex] = board.hashKey
+            repetitionsTable[repetitionsIndex] = Board.hashKey
 
 
-            if (!board.makeMove(move, isCapturesOnly = true)) {
+            if (!Board.makeMove(move, isCapturesOnly = true)) {
                 ply--
                 //updating in repetitionsTable
                 repetitionsIndex--
                 continue
             }
 
-            val score = -quietSearch(Board(board), -beta, -alpha)
+            val score = -quietSearch(-beta, -alpha)
 
             ply--
             //updating in repetitionsTable
             repetitionsIndex--
-            board.copyOtherBoard(boardCopy)
+            Board.copyOtherBoard(tempCastle,tempSide,tempEnpassant,tempPieceBitboards,tempOccupanciesBitboards,tempHashKey)
 
             if (UCI.isStopped) {
                 return 0
@@ -144,8 +167,9 @@ object Search {
     }
 
     @JvmStatic
-    fun negamax(board: Board, _alpha: Int, beta: Int, _depth: Int): Int {
+    fun negamax(_alpha: Int, beta: Int, _depth: Int): Int {
 
+        principalVariationLength[ply] = ply
 
         var depth = _depth
         var alpha = _alpha
@@ -156,7 +180,7 @@ object Search {
         var hashFlag = ZorbistKeys.HASH_FLAG_ALPHA
 
         // if position repetition occurs
-        if(ply != 0 && isRepetition(board.hashKey)){
+        if(ply != 0 && isRepetition(Board.hashKey)){
             // return draw score
             return 0
         }
@@ -165,7 +189,8 @@ object Search {
         val isPvNode = (beta - alpha) > 1
 
         //read hash entry if not a root ply, and not a pv_node, and hash is available
-        currentScore = ZorbistKeys.readHashData(board.hashKey, alpha, beta, depth, ply)
+        currentScore = ZorbistKeys.readHashData(Board.hashKey, alpha, beta, depth, ply)
+
         if (ply != 0 && currentScore != ZorbistKeys.UNKNOWN_VALUE && !isPvNode) {
             //if the move has alreadey been searched
             // return the score for this move without searching it
@@ -177,30 +202,30 @@ object Search {
         }
 
 
-        principalVariationLength[ply] = ply
+
 
 
         if (depth == 0) {
-            return quietSearch(board, _alpha, beta)
+            return quietSearch(_alpha, beta)
         }
 
 
         if (ply > MAX_PLY - 1) {
             //evaluate poisition
-            return Evaluation.evaluate(board)
+            return Evaluation.evaluate()
         }
 
 
         nodes++
         val isInCheck =
-            if (board.side == Color.WHITE) {
-                board.isSquareAttacked(
-                    Square.fromIntegerToSquare(BitBoard.getLSB(board.pieceBitboards[Piece.K.ordinal]))!!,
+            if (Board.side == Color.WHITE) {
+                Board.isSquareAttacked(
+                    Square.fromIntegerToSquare(BitBoard.getLSB(Board.pieceBitboards[Piece.K.ordinal]))!!,
                     Color.BLACK
                 )
             } else {
-                board.isSquareAttacked(
-                    Square.fromIntegerToSquare(BitBoard.getLSB(board.pieceBitboards[Piece.k.ordinal]))!!,
+                Board.isSquareAttacked(
+                    Square.fromIntegerToSquare(BitBoard.getLSB(Board.pieceBitboards[Piece.k.ordinal]))!!,
                     Color.WHITE
                 )
             }
@@ -211,31 +236,53 @@ object Search {
 
         // null move pruning
         if (depth >= 3 && !isInCheck && ply != 0) {
-            val backup = Board(board)
+            val tempCastle = Board.castle
+            val tempSide = Board.side
+            val tempEnpassant = Board.enpassant
+            val tempPieceBitboards = arrayOf(
+                Board.pieceBitboards[0],
+                Board.pieceBitboards[1], Board.pieceBitboards[2],
+                Board.pieceBitboards[3],
+                Board.pieceBitboards[4],
+                Board.pieceBitboards[5],
+                Board.pieceBitboards[6],
+                Board.pieceBitboards[7],
+                Board.pieceBitboards[8],
+                Board.pieceBitboards[9],
+                Board.pieceBitboards[10],
+                Board.pieceBitboards[11]
+            )
+
+            val tempOccupanciesBitboards = arrayOf(
+                Board.occupanciesBitboards[0],
+                Board.occupanciesBitboards[1],
+                Board.occupanciesBitboards[2],
+            )
+            val tempHashKey = Board.hashKey
 
             ply++
             //updating in repetitionsTable
             repetitionsIndex++
-            repetitionsTable[repetitionsIndex] = board.hashKey
+            repetitionsTable[repetitionsIndex] = Board.hashKey
 
             // update hash key with enpassant
-            if (board.enpassant != Square.NO_SQUARE) {
-                board.hashKey = board.hashKey xor ZorbistKeys.enpassantKeys[board.enpassant.ordinal]
+            if (Board.enpassant != Square.NO_SQUARE) {
+                Board.hashKey = Board.hashKey xor ZorbistKeys.enpassantKeys[Board.enpassant.ordinal]
             }
 
-            board.enpassant = Square.NO_SQUARE
+            Board.enpassant = Square.NO_SQUARE
 
-            board.side = Color.switchSides(board.side)
+            Board.side = Color.switchSides(Board.side)
 
             // hash the side
-            board.hashKey = board.hashKey xor ZorbistKeys.sideKey
+            Board.hashKey = Board.hashKey xor ZorbistKeys.sideKey
 
-            currentScore = -negamax(board, -beta, -beta + 1, depth - 1 - 2)
+            currentScore = -negamax(-beta, -beta + 1, depth - 1 - 2)
 
             ply--
             //updating in repetitionsTable
             repetitionsIndex--
-            board.copyOtherBoard(backup)
+            Board.copyOtherBoard(tempCastle,tempSide,tempEnpassant,tempPieceBitboards,tempOccupanciesBitboards,tempHashKey)
 
 
             if (UCI.isStopped) {
@@ -247,26 +294,48 @@ object Search {
             }
         }
 
-        val originalMoveList = board.generateMoves()
+        val originalMoveList = Board.generateMoves()
 
         if (Evaluation.followPrincipleVariation) {
             enablePVScoring(originalMoveList)
         }
 
-        val movesList = Evaluation.sortedPossibleMoves(board, originalMoveList, ply)
+        val movesList = Evaluation.sortedPossibleMoves(originalMoveList, ply)
 
         // for LMR purposes
         var movesSearched = 0
 
         for (move in movesList) {
             //backup board
-            val boardCopy = Board(board)
+            val tempCastle = Board.castle
+            val tempSide = Board.side
+            val tempEnpassant = Board.enpassant
+            val tempPieceBitboards = arrayOf(
+                Board.pieceBitboards[0],
+                Board.pieceBitboards[1], Board.pieceBitboards[2],
+                Board.pieceBitboards[3],
+                Board.pieceBitboards[4],
+                Board.pieceBitboards[5],
+                Board.pieceBitboards[6],
+                Board.pieceBitboards[7],
+                Board.pieceBitboards[8],
+                Board.pieceBitboards[9],
+                Board.pieceBitboards[10],
+                Board.pieceBitboards[11]
+            )
+
+            val tempOccupanciesBitboards = arrayOf(
+                Board.occupanciesBitboards[0],
+                Board.occupanciesBitboards[1],
+                Board.occupanciesBitboards[2],
+            )
+            val tempHashKey = Board.hashKey
             ply++
             //updating in repetitionsTable
             repetitionsIndex++
-            repetitionsTable[repetitionsIndex] = board.hashKey
+            repetitionsTable[repetitionsIndex] = Board.hashKey
 
-            if (!board.makeMove(move)) {
+            if (!Board.makeMove(move)) {
                 //if move is invalid -> go to different move
                 ply--
                 //updating in repetitionsTable
@@ -278,7 +347,7 @@ object Search {
 
             if (movesSearched == 0) { // LMR condition
                 // no moves searched -> full depth search
-                currentScore = -negamax(board, -beta, -alpha, depth - 1)
+                currentScore = -negamax( -beta, -alpha, depth - 1)
             } else {
                 // LMR
                 // Late Move Reduction
@@ -287,17 +356,17 @@ object Search {
                     ) && Moves.getPromotedFromMove(move) == null
                 ) {
                     // if this move is answring all condition for reduction -> reduct move
-                    currentScore = -negamax(board, -alpha - 1, -alpha, depth - 2)
+                    currentScore = -negamax( -alpha - 1, -alpha, depth - 2)
                 } else {
                     currentScore = alpha + 1 // trick to ensure full search
                 }
 
                 if (currentScore > alpha) {
                     //LMR failed. try deep the search, with the same alpha-beta width
-                    currentScore = -negamax(board, -alpha - 1, -alpha, depth - 1)
+                    currentScore = -negamax( -alpha - 1, -alpha, depth - 1)
                     if (currentScore in (alpha + 1) until beta) {
                         // LMR failed completely. do a full search
-                        currentScore = -negamax(board, -beta, -alpha, depth - 1)
+                        currentScore = -negamax( -beta, -alpha, depth - 1)
                     }
                 }
             }
@@ -307,7 +376,7 @@ object Search {
             ply--
             //updating in repetitionsTable
             repetitionsIndex--
-            board.copyOtherBoard(boardCopy)
+            Board.copyOtherBoard(tempCastle,tempSide,tempEnpassant,tempPieceBitboards,tempOccupanciesBitboards,tempHashKey)
 
             if (UCI.isStopped) {
                 return 0
@@ -347,7 +416,7 @@ object Search {
 
 
                     //store hash entry with the score equal to beta
-                    ZorbistKeys.writeEntry(board.hashKey, beta, depth, ZorbistKeys.HASH_FLAG_BETA, ply)
+                    ZorbistKeys.writeEntry(Board.hashKey, beta, depth, ZorbistKeys.HASH_FLAG_BETA, ply)
 
                     if (!Moves.getCaptureFromMove(move)) {
                         //if quiet move -> store it
@@ -371,7 +440,7 @@ object Search {
         }
 
         //store hash entry with the score equal to alpha
-        ZorbistKeys.writeEntry(board.hashKey, alpha, depth, hashFlag, ply)
+        ZorbistKeys.writeEntry(Board.hashKey, alpha, depth, hashFlag, ply)
 
         return alpha
     }
@@ -400,7 +469,7 @@ object Search {
     }
 
     @JvmStatic
-    fun searchPosition(board: Board, depth: Int) {
+    fun searchPosition(depth: Int) {
         resetDataBeforeSearch()
         var score: Int
         var alpha = -INFINITY
@@ -410,7 +479,9 @@ object Search {
                 break
             }
             Evaluation.followPrincipleVariation = true
-            score = negamax(board, alpha, beta, currentDepth)
+
+            score = negamax(alpha, beta, currentDepth)
+
             // fell out of bounds-> try again with initial values
             if (score <= alpha || score >= beta) {
                 alpha = -INFINITY
@@ -420,7 +491,7 @@ object Search {
             alpha = score - WINDOW_INCREMENTOR
             beta = score + WINDOW_INCREMENTOR
 
-            if(principalVariationLength[0] > 0){
+            if(principalVariationLength[0] != 0){
                 if (score > -MATE_VALUE && score < -MATE_SCORE) {
                     println(
                         "info score mate ${(-(score + MATE_VALUE) / 2) - 1} depth $currentDepth nodes $nodes time ${

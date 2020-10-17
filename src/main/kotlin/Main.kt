@@ -1,3 +1,4 @@
+import enums.FENDebugConstants
 
 /**
  * ================================================
@@ -21,6 +22,5 @@ fun main() {
     Attacks.initAll()
 
     UCI.uciLoop()
-
 }
 

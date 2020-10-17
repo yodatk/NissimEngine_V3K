@@ -89,13 +89,6 @@ object UCI {
 
 
     /**
-     * Board Field for parsing given Position
-     */
-    @JvmStatic
-    var board: Board = Board()
-
-
-    /**
      * Checking if there is an input in stdin while searching for a move. if so, act according to input
      */
     @JvmStatic
@@ -132,8 +125,8 @@ object UCI {
      * @return encoded move as integer
      */
     @JvmStatic
-    fun parseMove(stringInput: String, board: Board): Int {
-        val listOfMoves = board.generateMoves()
+    fun parseMove(stringInput: String): Int {
+        val listOfMoves = Board.generateMoves()
         val inputSource: Square = Square.fromIntegerToSquare((stringInput[0] - 'a') + (8 - (stringInput[1] - '0')) * 8)
             ?: throw UCIException("invalid source square: ${stringInput.subSequence(0, 2)}")
         val inputTarget: Square = Square.fromIntegerToSquare((stringInput[2] - 'a') + (8 - (stringInput[3] - '0')) * 8)
@@ -171,9 +164,9 @@ object UCI {
      * Parse given position to put on board
      */
     @JvmStatic
-    fun parsePosition(_command: String): Board {
+    fun parsePosition(_command: String) {
+        Board.emptyBoard()
         var command = _command.trim()
-        val board: Board
         if (command.substring(0, 8).equals("position")) {
             try {
                 command = command.substring(command.indexOf(" ") + 1)
@@ -182,7 +175,7 @@ object UCI {
             }
 
             if (command.substring(0, 8).equals("startpos")) {
-                board = Board(FENDebugConstants.START_POSITION.fen)
+                Board.parseFEN(FENDebugConstants.START_POSITION.fen)
                 try {
                     command = command.substring(command.indexOf(" ") + 1)
                 } catch (e: Exception) {
@@ -190,11 +183,11 @@ object UCI {
                 }
             } else {
                 val current = command.substringAfter("fen ", "")
-                board = if (current != "") {
-                    Board(current)
+                if (current != "") {
+                    Board.parseFEN(current)
 
                 } else {
-                    Board(FENDebugConstants.START_POSITION.fen)
+                    Board.parseFEN(FENDebugConstants.START_POSITION.fen)
                 }
             }
             //making additional added moves
@@ -207,7 +200,7 @@ object UCI {
 
 
                 while (command.isNotEmpty()) {
-                    val move = parseMove(command, board)
+                    val move = parseMove(command)
                     if (move == 0) {
                         break
                     } else {
@@ -215,8 +208,8 @@ object UCI {
                         // increment repetition index
                         Search.repetitionsIndex++
                         // write hash key into repetition table
-                        Search.repetitionsTable[Search.repetitionsIndex] = board.hashKey
-                        val check = board.makeMove(move)
+                        Search.repetitionsTable[Search.repetitionsIndex] = Board.hashKey
+                        val check = Board.makeMove(move)
                         if (!check) {
                             break
                         }
@@ -228,9 +221,9 @@ object UCI {
                     }
                 }
             }
-            this.board = board
-            this.board.printBoard()
-            return this.board
+//            this.board = board
+            Board.printBoard()
+//            return this.board
         } else {
             throw UCIException("Invalid position command: '$_command'")
         }
@@ -254,7 +247,7 @@ object UCI {
         // adding increment to black command
         current = command.substringAfter("binc ", "")
         current = current.substringBefore(" ", current)
-        if (current.isNotEmpty() && board.side == Color.BLACK) {
+        if (current.isNotEmpty() && Board.side == Color.BLACK) {
             increment = try {
                 current.toInt()
             } catch (e: Exception) {
@@ -265,7 +258,7 @@ object UCI {
         // adding increment to white command
         current = command.substringAfter("winc ", "")
         current = current.substringBefore(" ", current)
-        if (current.isNotEmpty() && board.side == Color.WHITE) {
+        if (current.isNotEmpty() && Board.side == Color.WHITE) {
             increment = try {
                 current.toInt()
             } catch (e: Exception) {
@@ -276,7 +269,7 @@ object UCI {
         // time remaining for white
         current = command.substringAfter("wtime ", "")
         current = current.substringBefore(" ", current)
-        if (current.isNotEmpty() && board.side == Color.WHITE) {
+        if (current.isNotEmpty() && Board.side == Color.WHITE) {
             isTime = true
             time = try {
                 current.toULong()
@@ -287,7 +280,7 @@ object UCI {
         // time remaining for black
         current = command.substringAfter("btime ", "")
         current = current.substringBefore(" ", current)
-        if (current.isNotEmpty() && board.side == Color.BLACK) {
+        if (current.isNotEmpty() && Board.side == Color.BLACK) {
             isTime = true
             time = try {
                 current.toULong()
@@ -350,7 +343,7 @@ object UCI {
         }
 
         println("time:${time} start:${startTime} stop:${stopTime} depth:${depth} timeset:${if (isTimeSet) 1 else 0}")
-        Search.searchPosition(board, depth)
+        Search.searchPosition(depth)
     }
 
     /**
@@ -403,7 +396,7 @@ object UCI {
                 }
                 "position" -> {
                     parsePosition(input)
-                    //ZorbistKeys.clearHashTable()
+                    ZorbistKeys.clearHashTable()
                 }
                 "ucinewgame" -> {
                     parsePosition("position startpos\n")

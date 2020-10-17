@@ -126,7 +126,30 @@ internal class PerftTest {
         for (move in moveList) {
 
 
-            val copy = Board(board)
+            val tempCastle = Board.castle
+            val tempSide = Board.side
+            val tempEnpassant = Board.enpassant
+            val tempPieceBitboards = arrayOf(
+                Board.pieceBitboards[0],
+                Board.pieceBitboards[1], Board.pieceBitboards[2],
+                Board.pieceBitboards[3],
+                Board.pieceBitboards[4],
+                Board.pieceBitboards[5],
+                Board.pieceBitboards[6],
+                Board.pieceBitboards[7],
+                Board.pieceBitboards[8],
+                Board.pieceBitboards[9],
+                Board.pieceBitboards[10],
+                Board.pieceBitboards[11]
+            )
+
+            val tempOccupanciesBitboards = arrayOf(
+                Board.occupanciesBitboards[0],
+                Board.occupanciesBitboards[1],
+                Board.occupanciesBitboards[2],
+            )
+            val tempHashKey = Board.hashKey
+
             if (!board.makeMove(move)) {
                 continue
             }
@@ -147,7 +170,7 @@ internal class PerftTest {
             }
             perftDriver(board, depth - 1)
 
-            board.copyOtherBoard(copy)
+            board.copyOtherBoard(tempCastle,tempSide,tempEnpassant,tempPieceBitboards,tempOccupanciesBitboards,tempHashKey)
 //            val hash_from_scratch = board.generateHashKey()
 //            if(board.hashKey!=hash_from_scratch){
 //                println("\nMAKE MOVE")
@@ -163,11 +186,11 @@ internal class PerftTest {
     fun runPerftTestOnGivenFEN(fen: String, initialDepth: Int): PerftTestResult {
         result = PerftTestResult()
         Attacks.initAll()
-        val b = Board(fen)
-        b.printBoard()
+        Board.parseFEN(fen)
+        Board.printBoard()
         //val movesList: List<Int> = b.generateMoves()
         val start = System.currentTimeMillis()
-        perftDriver(b, initialDepth)
+        perftDriver(Board, initialDepth)
 
         println("time that took for the test (ms): ${System.currentTimeMillis() - start}")
         println("Num of Nodes: ${result.nodes}")
@@ -186,18 +209,40 @@ internal class PerftTest {
         )
         result = PerftTestResult()
         Attacks.initAll()
-        val b = Board(fen)
-        b.printBoard()
-        val movesList = b.generateMoves()
+        Board.parseFEN(fen)
+        Board.printBoard()
+        val movesList = Board.generateMoves()
         for (move in movesList) {
-            val copy = Board(b)
-            if (!b.makeMove(move)) {
+            val tempCastle = Board.castle
+            val tempSide = Board.side
+            val tempEnpassant = Board.enpassant
+            val tempPieceBitboards = arrayOf(
+                Board.pieceBitboards[0],
+                Board.pieceBitboards[1], Board.pieceBitboards[2],
+                Board.pieceBitboards[3],
+                Board.pieceBitboards[4],
+                Board.pieceBitboards[5],
+                Board.pieceBitboards[6],
+                Board.pieceBitboards[7],
+                Board.pieceBitboards[8],
+                Board.pieceBitboards[9],
+                Board.pieceBitboards[10],
+                Board.pieceBitboards[11]
+            )
+
+            val tempOccupanciesBitboards = arrayOf(
+                Board.occupanciesBitboards[0],
+                Board.occupanciesBitboards[1],
+                Board.occupanciesBitboards[2],
+            )
+            val tempHashKey = Board.hashKey
+            if (!Board.makeMove(move)) {
                 continue
             }
             val cmmulative_nodes = result.nodes
-            perftDriver(b, depth = initialDepth - 1)
+            perftDriver(Board, depth = initialDepth - 1)
             val oldNodes = result.nodes - cmmulative_nodes
-            b.copyOtherBoard(copy)
+            Board.copyOtherBoard(tempCastle,tempSide,tempEnpassant,tempPieceBitboards,tempOccupanciesBitboards,tempHashKey)
             println("\t\tmove: ${Moves.moveUCI(move)} nodes: $oldNodes")
 
 
