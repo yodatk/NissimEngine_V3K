@@ -403,7 +403,10 @@ object UCI {
                 }
                 "position" -> {
                     parsePosition(input)
-                    //ZorbistKeys.clearHashTable()
+                    if(!input.contains("moves")){
+                        // reset hash map only if it's a new game \ from a new position
+                        ZorbistKeys.clearHashTable()
+                    }
                 }
                 "ucinewgame" -> {
                     parsePosition("position startpos\n")
