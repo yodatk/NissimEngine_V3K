@@ -403,10 +403,9 @@ object UCI {
                 }
                 "position" -> {
                     parsePosition(input)
-                    if(!input.contains("moves")){
-                        // reset hash map only if it's a new game \ from a new position
-                        ZorbistKeys.clearHashTable()
-                    }
+                    // reset hash map only if it's a new game \ from a new position
+                    ZorbistKeys.clearHashTable()
+
                 }
                 "ucinewgame" -> {
                     parsePosition("position startpos\n")
@@ -415,7 +414,7 @@ object UCI {
                 "go" -> parseGoCommand(input.substringAfter("go "))
                 "quit" -> break
                 "uci" -> printInfo()
-                else -> println("NOT VALID COMMAND")
+                else -> continue //println("NOT VALID COMMAND")
             }
 
         }
