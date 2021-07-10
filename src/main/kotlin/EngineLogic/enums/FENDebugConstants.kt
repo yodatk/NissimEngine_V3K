@@ -1,4 +1,4 @@
-package enums
+package EngineLogic.enums
 
 /**
  * some FEN patterns for debug purposes

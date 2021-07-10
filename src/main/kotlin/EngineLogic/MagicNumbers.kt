@@ -1,5 +1,7 @@
-import RandomNumbers.getRandomULongNumber
-import enums.Square
+package EngineLogic
+
+import EngineLogic.RandomNumbers.getRandomULongNumber
+import EngineLogic.enums.Square
 
 object MagicNumbers {
 

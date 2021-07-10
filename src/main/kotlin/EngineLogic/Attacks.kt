@@ -1,5 +1,7 @@
-import enums.Color
-import enums.Square
+package EngineLogic
+
+import EngineLogic.enums.Color
+import EngineLogic.enums.Square
 
 /**
  * ================================================
@@ -453,7 +455,7 @@ object Attacks {
         var temp = attackMask
         for (count in 0 until numOfBits) {
             val square = BitBoard.getLSB(temp)
-            temp = BitBoard.setBitOff(temp ,Square.fromIntegerToSquare(square)!!)
+            temp = BitBoard.setBitOff(temp, Square.fromIntegerToSquare(square)!!)
             if (index and (1 shl count) != 0) {
                 occupancy = occupancy or (1UL shl square)
             }
@@ -545,7 +547,7 @@ object Attacks {
         initSliderAttacksForPiece(isBishop = false)
         ZorbistKeys.initRandomKeys()
 
-        //ZorbistKeys.initHashTable(64)
+        //EngineLogic.ZorbistKeys.initHashTable(64)
         Evaluation.initEvaluationMasks()
 
 

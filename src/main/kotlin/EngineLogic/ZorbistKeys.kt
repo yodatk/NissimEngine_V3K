@@ -1,4 +1,6 @@
-import enums.Piece
+package EngineLogic
+
+import EngineLogic.enums.Piece
 
 /**
  * Defining zorbist keys for tranportation tables and hashing
@@ -65,7 +67,7 @@ object ZorbistKeys {
      */
     @JvmStatic
     //var hashTable:Array<TT>? = Array(hashEntries) {TT(0UL,0,0,0)}
-    var hashTable : HashMap<ULong,TT> = HashMap()
+    var hashTable : HashMap<ULong, TT> = HashMap()
 
 
     /**

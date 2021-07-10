@@ -1,4 +1,4 @@
-package enums
+package EngineLogic.enums
 
 /**
  * Enum for the pieces. white pieces are going to be capital letters, black letters, original letters

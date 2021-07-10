@@ -1,9 +1,9 @@
-
-import enums.Square
+package EngineLogic
+import EngineLogic.enums.Square
 
 /**
  * ================================================
- *  BitBoard Manipulation
+ *  EngineLogic.BitBoard Manipulation
  *  @author: Tomer Gonen
  * ================================================
  */
@@ -11,7 +11,7 @@ import enums.Square
 object BitBoard {
 
     /***
-     * get the chosen bit of the wanted square from the given BitBoard
+     * get the chosen bit of the wanted square from the given EngineLogic.BitBoard
      * @return ULong of the given bit
      */
     @JvmStatic
@@ -19,7 +19,7 @@ object BitBoard {
 
 
     /***
-     * get the chosen bit of the wanted square from the given BitBoard
+     * get the chosen bit of the wanted square from the given EngineLogic.BitBoard
      * @return ULong of the given bit
      */
     @JvmStatic
@@ -65,7 +65,7 @@ object BitBoard {
                 }
                 //printing '1' or '0' bit
 
-                print(" ${if (getBit(board,Square.fromIntegerToSquare(square)!!) != 0UL) 1 else 0}")
+                print(" ${if (getBit(board, Square.fromIntegerToSquare(square)!!) != 0UL) 1 else 0}")
             }
             println()
 

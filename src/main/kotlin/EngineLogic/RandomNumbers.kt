@@ -1,3 +1,5 @@
+package EngineLogic
+
 object RandomNumbers {
     /**
      * Initial Uint number for random 32 bit numbers

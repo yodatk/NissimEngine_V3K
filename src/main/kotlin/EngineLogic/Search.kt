@@ -1,6 +1,8 @@
-import enums.Color
-import enums.Piece
-import enums.Square
+package EngineLogic
+
+import EngineLogic.enums.Color
+import EngineLogic.enums.Piece
+import EngineLogic.enums.Square
 
 object Search {
 
@@ -395,7 +397,7 @@ object Search {
 
         principalVariationTable = Array<Array<Int>>(66) { Array(66) { 0 } }
 
-        //ZorbistKeys.clearHashTable()
+        //EngineLogic.ZorbistKeys.clearHashTable()
     }
 
     @JvmStatic

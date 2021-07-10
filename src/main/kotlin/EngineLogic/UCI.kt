@@ -1,7 +1,9 @@
-import enums.Color
-import enums.FENDebugConstants
-import enums.Piece
-import enums.Square
+package EngineLogic
+
+import EngineLogic.enums.Color
+import EngineLogic.enums.FENDebugConstants
+import EngineLogic.enums.Piece
+import EngineLogic.enums.Square
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -89,7 +91,7 @@ object UCI {
 
 
     /**
-     * Board Field for parsing given Position
+     * EngineLogic.Board Field for parsing given Position
      */
     @JvmStatic
     var board: Board = Board()
@@ -128,7 +130,7 @@ object UCI {
     /**
      * Parse Given move and put it on board
      * @param stringInput: move as string to encode as int
-     * @param board: Board object to perform the move on
+     * @param board: EngineLogic.Board object to perform the move on
      * @return encoded move as integer
      */
     @JvmStatic
@@ -228,9 +230,9 @@ object UCI {
                     }
                 }
             }
-            this.board = board
-            this.board.printBoard()
-            return this.board
+            UCI.board = board
+            UCI.board.printBoard()
+            return UCI.board
         } else {
             throw UCIException("Invalid position command: '$_command'")
         }
@@ -349,7 +351,7 @@ object UCI {
             depth = Search.MAX_NODE_DEPTH
         }
 
-        println("time:${time} start:${startTime} stop:${stopTime} depth:${depth} timeset:${if (isTimeSet) 1 else 0}")
+        println("time:$time start:$startTime stop:$stopTime depth:${depth} timeset:${if (isTimeSet) 1 else 0}")
         Search.searchPosition(board, depth)
     }
 

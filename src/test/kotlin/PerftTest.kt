@@ -1,6 +1,8 @@
-import enums.FENDebugConstants
+import EngineLogic.Attacks
+import EngineLogic.Board
+import EngineLogic.Moves
+import EngineLogic.enums.FENDebugConstants
 import kotlin.test.Test
-
 
 
 internal class PerftTest {
