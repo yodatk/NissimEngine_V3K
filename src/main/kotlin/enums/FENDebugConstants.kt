@@ -4,7 +4,6 @@ package enums
  * some FEN patterns for debug purposes
  */
 
-@ExperimentalUnsignedTypes
 enum class FENDebugConstants(val fen : String) {
     EMPTY("8/8/8/8/8/8/8/8 w - - "),
     START_POSITION("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 "),

@@ -9,7 +9,7 @@ import java.io.InputStreamReader
 /***
  * Object In Charge on the communication: getting request from client and responds with best moves
  */
-@ExperimentalUnsignedTypes
+
 object UCI {
     /**
      * Custom Exception when UCI input was not valid

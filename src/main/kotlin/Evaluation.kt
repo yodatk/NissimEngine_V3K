@@ -4,7 +4,6 @@ import enums.Piece
 import enums.Square
 
 
-@ExperimentalUnsignedTypes
 object Evaluation {
     enum class PieceType {
         PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING

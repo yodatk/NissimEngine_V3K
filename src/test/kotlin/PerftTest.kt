@@ -2,11 +2,11 @@ import enums.FENDebugConstants
 import kotlin.test.Test
 
 
-@ExperimentalUnsignedTypes
+
 internal class PerftTest {
 
 
-    @ExperimentalUnsignedTypes
+
     data class PerftTestResult(
         var nodes: ULong = 0UL,
         var captures: ULong = 0UL,

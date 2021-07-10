@@ -7,7 +7,7 @@ import enums.Square
  *  @author: Tomer Gonen
  * ================================================
  */
-@ExperimentalUnsignedTypes
+
 object BitBoard {
 
     /***

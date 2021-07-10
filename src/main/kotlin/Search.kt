@@ -2,7 +2,6 @@ import enums.Color
 import enums.Piece
 import enums.Square
 
-@ExperimentalUnsignedTypes
 object Search {
 
 

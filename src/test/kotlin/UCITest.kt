@@ -3,7 +3,7 @@ import enums.Piece
 import enums.Square
 import kotlin.test.*
 
-@ExperimentalUnsignedTypes
+
 internal class UCITest {
 
     val possibleMovesForStartPositionWhite = mapOf(

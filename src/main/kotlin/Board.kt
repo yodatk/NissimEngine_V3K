@@ -2,7 +2,6 @@ import enums.*
 import kotlin.text.StringBuilder
 
 
-@ExperimentalUnsignedTypes
 class Board {
 
 

@@ -3,7 +3,6 @@ import enums.Piece
 /**
  * Defining zorbist keys for tranportation tables and hashing
  */
-@ExperimentalUnsignedTypes
 object ZorbistKeys {
 
     /**
