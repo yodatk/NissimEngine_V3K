@@ -1,12 +1,12 @@
+package EngineLogic
+
 object RandomNumbers {
     /**
      * Initial Uint number for random 32 bit numbers
      */
-    @ExperimentalUnsignedTypes
     @JvmStatic
     var uIntRandomState: UInt = 1804289383U
 
-    @ExperimentalUnsignedTypes
     @JvmStatic
     fun getRandomUIntNumber(): UInt {
         var current: UInt = uIntRandomState
@@ -18,7 +18,6 @@ object RandomNumbers {
 
     }
 
-    @ExperimentalUnsignedTypes
     @JvmStatic
     fun getRandomULongNumber(): ULong {
         val n1: ULong = (getRandomUIntNumber().toULong()) and 65535U

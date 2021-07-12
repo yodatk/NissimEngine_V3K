@@ -1,4 +1,4 @@
-package enums
+package EngineLogic.enums
 
 /**
  * Enum for all the squares in the chess board

@@ -1,10 +1,11 @@
-import enums.Color
-import enums.GamePhase
-import enums.Piece
-import enums.Square
+package EngineLogic
+
+import EngineLogic.enums.Color
+import EngineLogic.enums.GamePhase
+import EngineLogic.enums.Piece
+import EngineLogic.enums.Square
 
 
-@ExperimentalUnsignedTypes
 object Evaluation {
     enum class PieceType {
         PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
@@ -526,7 +527,7 @@ object Evaluation {
 
     /**
      *  Calculate the values of the "officers" pieces to define if the game is in the opening, middle game, or endgame
-     *  @param board: Board to check
+     *  @param board: EngineLogic.Board to check
      *  @return int value represents the score of the current "game phase"
      */
     @JvmStatic

@@ -1,6 +1,8 @@
-import enums.Move
-import enums.Piece
-import enums.Square
+package EngineLogic
+
+import EngineLogic.enums.Move
+import EngineLogic.enums.Piece
+import EngineLogic.enums.Square
 
 object Moves {
 

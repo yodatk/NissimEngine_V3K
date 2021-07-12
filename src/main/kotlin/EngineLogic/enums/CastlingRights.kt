@@ -1,4 +1,4 @@
-package enums
+package EngineLogic.enums
 
 enum class CastlingRights(val value:Int) {
     /**

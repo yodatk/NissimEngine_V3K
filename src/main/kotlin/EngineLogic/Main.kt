@@ -1,4 +1,4 @@
-
+package EngineLogic
 /**
  * ================================================
  *
@@ -15,12 +15,10 @@ Main
 ================================================
  */
 
-@ExperimentalUnsignedTypes
+
 
 fun main() {
     Attacks.initAll()
-
     UCI.uciLoop()
-
 }
 

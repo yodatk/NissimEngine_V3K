@@ -1,4 +1,4 @@
-package enums
+package EngineLogic.enums
 
 enum class Color {
     WHITE, BLACK, BOTH;

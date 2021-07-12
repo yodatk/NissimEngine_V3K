@@ -1,4 +1,4 @@
-package enums
+package EngineLogic.enums
 
 /**
  * Moves are encoded as int in the following manner

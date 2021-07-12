@@ -1,13 +1,14 @@
-import enums.FENDebugConstants
-import kotlin.test.assertEquals
+import EngineLogic.Attacks
+import EngineLogic.Board
+import EngineLogic.Moves
+import EngineLogic.enums.FENDebugConstants
 import kotlin.test.Test
 
 
-@ExperimentalUnsignedTypes
 internal class PerftTest {
 
 
-    @ExperimentalUnsignedTypes
+
     data class PerftTestResult(
         var nodes: ULong = 0UL,
         var captures: ULong = 0UL,
@@ -205,9 +206,17 @@ internal class PerftTest {
 
     }
 
+    fun testPosition(fen: String, msg: String, actualResults: Array<PerftTestResult>) {
+        for (i in 1..actualResults.size) {
+            println("$msg, depth = $i")
+            val result = runPerftTestOnGivenFEN(fen, i)
+            assert(actualResults[i - 1] == result) //(result,resultsForStartPosition[i-1])
+        }
+    }
+
     @Test
-    fun nodesTest(){
-        runPerftTestOnGivenFenWithInitialNodeInfo(FENDebugConstants.TRICKY_POSITION.fen,1)
+    fun nodesTest() {
+        runPerftTestOnGivenFenWithInitialNodeInfo(FENDebugConstants.TRICKY_POSITION.fen, 1)
 
     }
 
@@ -215,31 +224,32 @@ internal class PerftTest {
     @Test
     fun perftTestStartPosition() {
 
-        for (i in 1..6) {
-            println("START POSITION, depth = $i")
-            val result = runPerftTestOnGivenFEN(FENDebugConstants.START_POSITION.fen, i)
-            assertEquals(resultsForStartPosition[i - 1], result) //(result,resultsForStartPosition[i-1])
-        }
+        testPosition(
+            fen = FENDebugConstants.START_POSITION.fen,
+            msg = "START POSITION",
+            actualResults = resultsForStartPosition
+        )
 
     }
 
     @Test
     fun perftTestTrickyPosition() {
 
-        for (i in 1..5) {
-            println("TRICKY POSITION, depth = $i")
-            val result = runPerftTestOnGivenFEN(FENDebugConstants.TRICKY_POSITION.fen, i)
-            assertEquals(resultsForTrickyPosition[i - 1], result)
-        }
+        testPosition(
+            fen = FENDebugConstants.TRICKY_POSITION.fen,
+            msg = "TRICKY_POSITION",
+            actualResults = resultsForTrickyPosition
+        )
     }
 
     @Test
     fun perftTestPosition3() {
-        for (i in 1..7) {
-            println("POSITION 3, depth = $i")
-            val result = runPerftTestOnGivenFEN(FENDebugConstants.POSITION3.fen, i)
-            assertEquals(resultsForPosition3[i - 1], result)
-        }
+
+        testPosition(
+            fen = FENDebugConstants.POSITION3.fen,
+            msg = "POSITION 3",
+            actualResults = resultsForPosition3
+        )
     }
 
     @Test
