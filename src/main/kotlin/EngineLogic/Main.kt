@@ -19,8 +19,6 @@ Main
 
 fun main() {
     Attacks.initAll()
-
     UCI.uciLoop()
-
 }
 
